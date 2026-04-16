@@ -4635,11 +4635,13 @@ function InspectionDetailScreen({
 function QuickVisitScreen({
   user,
   onSave,
-  onBack
+  onBack,
+  sitesState
 }) {
   const cats = CATEGORIES;
+  const siteOpts = sitesState && sitesState.length > 0 ? sitesState : SITES;
   const [form, setForm] = useState({
-    site: SITES[0],
+    site: siteOpts[0] || SITES[0],
     cat: cats[0]
   });
   const critItems = CHECKLISTS[form.cat] ? CHECKLISTS[form.cat].filter(q => q.p === "critique") : [];
@@ -7585,7 +7587,8 @@ function App() {
   }, /*#__PURE__*/React.createElement(QuickVisitScreen, {
     user: user,
     onSave: saveNew,
-    onBack: () => setSub(null)
+    onBack: () => setSub(null),
+    sitesState: sitesState
   })), sub === "comparison" && /*#__PURE__*/React.createElement("div", {
     style: {
       position: "fixed",
