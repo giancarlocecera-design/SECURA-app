@@ -1,1 +1,2 @@
 # SECURA-app
+Application SECURA
