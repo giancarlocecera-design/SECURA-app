@@ -7395,6 +7395,48 @@ function App() {
     } catch (e) {
       console.error(e);
     }
+    // Generate actions from NC items
+    const ncItems = (ins.items || []).filter(function (i) {
+      return !i.ok;
+    });
+    if (ncItems.length > 0) {
+      var pen = appState && appState.penalites ? appState.penalites : PENALITE;
+      var del = appState && appState.delais ? appState.delais : DELAIS;
+      var newActs = ncItems.map(function (nc) {
+        var p = nc.poids || nc.p || "mineur";
+        var prio = p === "critique" ? "CRITIQUE" : p === "eleve" ? "ÉLEVÉE" : "MODÉRÉE";
+        var days = del[p] != null ? del[p] : DELAIS[p] || 120;
+        var d = new Date();
+        if (days > 0) d.setDate(d.getDate() + days);
+        var echeance = d.toISOString().split("T")[0];
+        return {
+          id: Date.now() + Math.random(),
+          label: nc.l,
+          site: ins.site,
+          prio: prio,
+          statut: "En cours",
+          echeance: echeance,
+          retard: false,
+          resp: nc.resp || ""
+        };
+      });
+      setActions(function (prev) {
+        var existingLabels = prev.map(function (a) {
+          return a.label + a.site;
+        });
+        var toAdd = newActs.filter(function (a) {
+          return !existingLabels.includes(a.label + a.site);
+        });
+        return prev.concat(toAdd);
+      });
+      for (var a of newActs) {
+        try {
+          await supa.upsert("actions", a);
+        } catch (e) {
+          console.error(e);
+        }
+      }
+    }
   };
   const updateIns = async ins => {
     setInspections(p => p.map(i => i.id === ins.id ? ins : i));
@@ -7403,6 +7445,41 @@ function App() {
       await supa.upsert("inspections", ins);
     } catch (e) {
       console.error(e);
+    }
+    // Update actions from NC items - add new ones, keep existing
+    const ncItems = (ins.items || []).filter(function (i) {
+      return !i.ok;
+    });
+    if (ncItems.length > 0) {
+      var pen = appState && appState.penalites ? appState.penalites : PENALITE;
+      var del = appState && appState.delais ? appState.delais : DELAIS;
+      setActions(function (prev) {
+        var updated = [...prev];
+        ncItems.forEach(function (nc) {
+          var p = nc.poids || nc.p || "mineur";
+          var prio = p === "critique" ? "CRITIQUE" : p === "eleve" ? "ÉLEVÉE" : "MODÉRÉE";
+          var days = del[p] != null ? del[p] : DELAIS[p] || 120;
+          var d = new Date();
+          if (days > 0) d.setDate(d.getDate() + days);
+          var echeance = d.toISOString().split("T")[0];
+          var exists = updated.find(function (a) {
+            return a.label === nc.l && a.site === ins.site;
+          });
+          if (!exists) {
+            updated.push({
+              id: Date.now() + Math.random(),
+              label: nc.l,
+              site: ins.site,
+              prio: prio,
+              statut: "En cours",
+              echeance: echeance,
+              retard: false,
+              resp: nc.resp || ""
+            });
+          }
+        });
+        return updated;
+      });
     }
   };
   const updateAct = async a => {
