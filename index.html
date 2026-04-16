@@ -2378,7 +2378,8 @@ function DashboardScreen({
   darkMode,
   onToggleDark,
   config,
-  sitesState
+  sitesState,
+  appState
 }) {
   const [chartTab, setChartTab] = useState(CATEGORIES[0]);
   const avgScore = inspections.length ? Math.round(inspections.reduce((s, i) => s + i.score, 0) / inspections.length) : 100;
@@ -2482,7 +2483,7 @@ function DashboardScreen({
       fontSize: 11,
       color: C.muted
     }
-  }, "Chaque NC critique retire 10 pts du score"))), /*#__PURE__*/React.createElement("div", {
+  }, "Chaque NC critique retire ", appState && appState.penalites ? appState.penalites.critique : 10, " pts du score"))), /*#__PURE__*/React.createElement("div", {
     style: {
       margin: "14px 14px 0",
       ...S.card(`${C.red}25`),
@@ -2550,7 +2551,7 @@ function DashboardScreen({
   }, {
     label: "Actions critiques",
     val: critActs,
-    sub: "Chacune = −10pts",
+    sub: "Chacune = −" + (appState && appState.penalites ? appState.penalites.critique : 10) + "pts",
     col: C.orange,
     prog: null
   }, {
@@ -4625,11 +4626,13 @@ function InspectionDetailScreen({
 function QuickVisitScreen({
   user,
   onSave,
-  onBack
+  onBack,
+  sitesState
 }) {
   const cats = CATEGORIES;
+  const siteOpts = sitesState && sitesState.length > 0 ? sitesState : SITES;
   const [form, setForm] = useState({
-    site: SITES[0],
+    site: sitesState && sitesState.length > 0 ? sitesState[0] : SITES[0],
     cat: cats[0]
   });
   const critItems = CHECKLISTS[form.cat] ? CHECKLISTS[form.cat].filter(q => q.p === "critique") : [];
@@ -4770,7 +4773,7 @@ function QuickVisitScreen({
         gap: 6,
         overflowX: "auto"
       }
-    }, SITES.map(s => /*#__PURE__*/React.createElement("button", {
+    }, siteOpts.map(s => /*#__PURE__*/React.createElement("button", {
       key: s,
       onClick: () => setForm({
         ...form,
@@ -4785,9 +4788,10 @@ function QuickVisitScreen({
         background: form.site === s ? C.cyan + "15" : "transparent",
         color: form.site === s ? C.cyan : C.muted,
         fontSize: 11,
-        cursor: "pointer"
+        cursor: "pointer",
+        whiteSpace: "nowrap"
       }
-    }, s.split(" ")[0]))));
+    }, s))));
   }
   return /*#__PURE__*/React.createElement("div", {
     style: {
@@ -7535,7 +7539,8 @@ function App() {
   }, /*#__PURE__*/React.createElement(QuickVisitScreen, {
     user: user,
     onSave: saveNew,
-    onBack: () => setSub(null)
+    onBack: () => setSub(null),
+    sitesState: sitesState
   })), sub === "comparison" && /*#__PURE__*/React.createElement("div", {
     style: {
       position: "fixed",
@@ -7564,7 +7569,8 @@ function App() {
     darkMode: darkMode,
     onToggleDark: () => setDarkMode(d => !d),
     config: config,
-    sitesState: sitesState
+    sitesState: sitesState,
+    appState: appState
   }), screen === "inspections" && /*#__PURE__*/React.createElement(InspectionsScreen, {
     inspections: inspections,
     onOpen: openDetail,
