@@ -2379,7 +2379,9 @@ function DashboardScreen({
   onNav,
   darkMode,
   onToggleDark,
-  config
+  config,
+  sitesState,
+  appState
 }) {
   const [chartTab, setChartTab] = useState(CATEGORIES[0]);
   const avgScore = inspections.length ? Math.round(inspections.reduce((s, i) => s + i.score, 0) / inspections.length) : 100;
@@ -2387,15 +2389,22 @@ function DashboardScreen({
   const critActs = actions.filter(a => a.prio === "CRITIQUE" && a.statut !== "Clôturée").length;
   const validated = inspections.filter(i => i.statut === "Validée").length;
   const penTotal = inspections.reduce((s, i) => s + (100 - i.score), 0);
-  const sitePens = SITES.map(site => {
-    const ins = inspections.filter(i => i.site === site);
-    const sc = ins.length ? Math.round(ins.reduce((s, i) => s + i.score, 0) / ins.length) : 100;
+  const siteList = sitesState && sitesState.length > 0 ? sitesState : SITES;
+  const sitePens = siteList.map(function (site) {
+    var ins = inspections.filter(function (i) {
+      return i.site === site;
+    });
+    var sc = ins.length ? Math.round(ins.reduce(function (s, i) {
+      return s + i.score;
+    }, 0) / ins.length) : 100;
     return {
-      site,
+      site: site,
       score: sc,
       ins: ins.length
     };
-  }).sort((a, b) => a.score - b.score);
+  }).sort(function (a, b) {
+    return a.score - b.score;
+  });
   const catBarData = inspections.filter(i => i.categorie === chartTab);
   const catColor = CAT_META[chartTab] && CAT_META[chartTab].color || C.cyan;
   return /*#__PURE__*/React.createElement("div", {
@@ -7604,7 +7613,9 @@ function App() {
     onNav: nav,
     darkMode: darkMode,
     onToggleDark: () => setDarkMode(d => !d),
-    config: config
+    config: config,
+    sitesState: sitesState,
+    appState: appState
   }), screen === "inspections" && /*#__PURE__*/React.createElement(InspectionsScreen, {
     inspections: inspections,
     onOpen: openDetail,
