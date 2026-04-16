@@ -2695,7 +2695,7 @@ function DashboardScreen({
       alignItems: "flex-end",
       gap: 5,
       height: 130,
-      minWidth: Math.max(SITES.length * 44, 300) + "px"
+      minWidth: Math.max(siteList.length * 50, 300) + "px"
     }
   }, siteList.map((site, i) => {
     const ins = inspections.find(x => x.site === site && x.categorie === chartTab);
@@ -2704,7 +2704,7 @@ function DashboardScreen({
     return /*#__PURE__*/React.createElement("div", {
       key: i,
       style: {
-        width: 40,
+        width: 46,
         flexShrink: 0,
         display: "flex",
         flexDirection: "column",
@@ -2734,16 +2734,15 @@ function DashboardScreen({
       }
     })), /*#__PURE__*/React.createElement("div", {
       style: {
-        fontSize: 8,
+        fontSize: 7,
         color: C.muted,
         textAlign: "center",
         lineHeight: 1.2,
-        whiteSpace: "nowrap",
-        overflow: "hidden",
-        textOverflow: "ellipsis",
-        maxWidth: 40
+        wordBreak: "break-word",
+        maxWidth: 44,
+        minHeight: 22
       }
-    }, site.split(" ")[0]));
+    }, site.length > 10 ? site.slice(0, 10) + "…" : site));
   }))), /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
