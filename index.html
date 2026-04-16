@@ -4281,7 +4281,7 @@ function InspectionDetailScreen({
       ...S.input,
       marginBottom: 10
     }
-  }, SITES.map(s => /*#__PURE__*/React.createElement("option", {
+  }, siteOpts.map(s => /*#__PURE__*/React.createElement("option", {
     key: s,
     value: s
   }, s))), /*#__PURE__*/React.createElement("label", {
@@ -4816,15 +4816,18 @@ function NewInspectionScreen({
   user,
   onSave,
   onBack,
-  resps
+  resps,
+  sitesState,
+  appState
 }) {
   const respList = (resps && resps.length ? resps : RESPONSABLES).map(function (r) {
     return typeof r === "object" ? r.nom : r;
   });
   const [step, setStep] = useState(1);
+  const siteOpts = sitesState && sitesState.length > 0 ? sitesState : SITES;
   const [form, setForm] = useState({
     titre: "",
-    site: SITES[0],
+    site: sitesState && sitesState.length > 0 ? sitesState[0] : SITES[0],
     categorie: CATEGORIES[0],
     notes: ""
   });
@@ -4881,7 +4884,8 @@ function NewInspectionScreen({
   const qCrit = CHECKLISTS[form.categorie] && CHECKLISTS[form.categorie].filter(q => q.p === "critique").length || 0 || 0;
   const qElev = CHECKLISTS[form.categorie] && CHECKLISTS[form.categorie].filter(q => q.p === "eleve").length || 0 || 0;
   const qMin = CHECKLISTS[form.categorie] && CHECKLISTS[form.categorie].filter(q => q.p === "mineur").length || 0 || 0;
-  const maxPen = qCrit * 10 + qElev * 5 + qMin;
+  const dynPen = appState && appState.penalites ? appState.penalites : PENALITE;
+  const maxPen = qCrit * (dynPen.critique || 10) + qElev * (dynPen.eleve || 5) + qMin * (dynPen.mineur || 1);
   const StepDot = ({
     n
   }) => /*#__PURE__*/React.createElement("div", {
@@ -4993,7 +4997,7 @@ function NewInspectionScreen({
       ...form,
       site: e.target.value
     })
-  }, SITES.map(s => /*#__PURE__*/React.createElement("option", {
+  }, siteOpts.map(s => /*#__PURE__*/React.createElement("option", {
     key: s,
     value: s
   }, s))), /*#__PURE__*/React.createElement("label", {
@@ -5040,40 +5044,43 @@ function NewInspectionScreen({
       color: C.muted,
       marginBottom: 6
     }
-  }, "P\xE9nalit\xE9s maximales possibles"), /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "flex",
-      gap: 10,
-      flexWrap: "wrap"
-    }
-  }, /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 11
-    }
-  }, /*#__PURE__*/React.createElement("span", {
-    style: {
-      color: C.red,
-      fontWeight: 800
-    }
-  }, qCrit), "\xD7Crit \u2212", qCrit * 10, "pts"), /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 11
-    }
-  }, /*#__PURE__*/React.createElement("span", {
-    style: {
-      color: C.orange,
-      fontWeight: 800
-    }
-  }, qElev), "\xD7\xC9lev \u2212", qElev * 5, "pts"), /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 11
-    }
-  }, /*#__PURE__*/React.createElement("span", {
-    style: {
-      color: C.amber,
-      fontWeight: 800
-    }
-  }, qMin), "\xD7Min \u2212", qMin, "pts")), /*#__PURE__*/React.createElement("div", {
+  }, "P\xE9nalit\xE9s maximales possibles"), (() => {
+    var pen = appState && appState.penalites ? appState.penalites : PENALITE;
+    return /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: "flex",
+        gap: 10,
+        flexWrap: "wrap"
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 11
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        color: C.red,
+        fontWeight: 800
+      }
+    }, qCrit), "\xD7Crit \u2212", qCrit * (pen.critique || 10), "pts"), /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 11
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        color: C.orange,
+        fontWeight: 800
+      }
+    }, qElev), "\xD7\xC9lev \u2212", qElev * (pen.eleve || 5), "pts"), /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 11
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        color: C.amber,
+        fontWeight: 800
+      }
+    }, qMin), "\xD7Min \u2212", qMin * (pen.mineur || 1), "pts"));
+  })(), /*#__PURE__*/React.createElement("div", {
     style: {
       marginTop: 6,
       fontSize: 11,
@@ -7511,7 +7518,9 @@ function App() {
     user: user,
     onSave: saveNew,
     onBack: () => setSub(null),
-    resps: respsState
+    resps: respsState,
+    sitesState: sitesState,
+    appState: appState
   })), sub === "quick-visit" && /*#__PURE__*/React.createElement("div", {
     style: {
       position: "fixed",
