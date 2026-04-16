@@ -7304,7 +7304,7 @@ function App() {
   });
   const [respsState, setRespsState] = useState([...RESPONSABLES_DEFAULT]);
   const [sitesState, setSitesState] = useState([...SITES_DEFAULT]);
-  const handleAppStateUpdate = async s => {
+  async function handleAppStateUpdate(s) {
     setAppState(s);
     if (s.resps) setRespsState(s.resps);
     if (s.sites) setSitesState(s.sites);
@@ -7319,8 +7319,9 @@ function App() {
     } catch (e) {
       console.error(e);
     }
-  };
-  const saveConfig = async cfg => {
+  }
+  ;
+  async function saveConfig(cfg) {
     setConfig(cfg);
     try {
       await supa.upsert("app_config", {
@@ -7330,7 +7331,8 @@ function App() {
     } catch (e) {
       console.error(e);
     }
-  };
+  }
+  ;
   const bg = darkMode ? C.bg : "#F0F4FA";
   const daltonFilter = (config && config.daltonMode) === "deuteranopie" ? "url(#dalton-deut)" : (config && config.daltonMode) === "protanopie" ? "url(#dalton-prot)" : (config && config.daltonMode) === "tritanopie" ? "url(#dalton-trit)" : "none";
   const appStyle = {
@@ -7361,7 +7363,7 @@ function App() {
     setOpenIns(ins);
     setSub("detail");
   };
-  const saveNew = async ins => {
+  async function saveNew(ins) {
     setInspections(p => [ins, ...p]);
     setScreen("inspections");
     setSub(null);
@@ -7407,8 +7409,9 @@ function App() {
         });
       });
     }
-  };
-  const updateIns = async ins => {
+  }
+  ;
+  async function updateIns(ins) {
     setInspections(p => p.map(i => i.id === ins.id ? ins : i));
     setSub(null);
     try {
@@ -7416,23 +7419,26 @@ function App() {
     } catch (e) {
       console.error(e);
     }
-  };
-  const updateAct = async a => {
+  }
+  ;
+  async function updateAct(a) {
     setActions(p => p.map(x => x.id === a.id ? a : x));
     try {
       await supa.upsert("actions", a);
     } catch (e) {
       console.error(e);
     }
-  };
-  const deleteIns = async id => {
+  }
+  ;
+  async function deleteIns(id) {
     setInspections(p => p.filter(i => i.id !== id));
     try {
       await supa.del("inspections", id);
     } catch (e) {
       console.error(e);
     }
-  };
+  }
+  ;
   const pending = actions.filter(a => a.statut !== "Clôturée").length;
 
   // Show loading while DB loads
