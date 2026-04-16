@@ -1,12 +1,1 @@
-{
-  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }],
-  "headers": [
-    {
-      "source": "/(.*)",
-      "headers": [
-        { "key": "X-Frame-Options", "value": "DENY" },
-        { "key": "Cache-Control", "value": "no-cache" }
-      ]
-    }
-  ]
-}
+{"version":2,"builds":[{"src":"index.html","use":"@vercel/static"}],"routes":[{"src":"/(.*)","dest":"/index.html"}]}
