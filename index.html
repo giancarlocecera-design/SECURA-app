@@ -110,7 +110,9 @@ const S = {
     margin: "0 auto",
     position: "relative",
     overflowX: "hidden",
-    fontSize: 15
+    fontSize: 15,
+    touchAction: "pan-y",
+    WebkitUserSelect: "none"
   },
   card: border => ({
     background: C.card,
@@ -2685,20 +2687,29 @@ function DashboardScreen({
     }, m.icon, " ", c);
   })), /*#__PURE__*/React.createElement("div", {
     style: {
-      display: "flex",
-      alignItems: "flex-end",
-      gap: 5,
-      height: 130,
+      overflowX: "auto",
+      WebkitOverflowScrolling: "touch",
       marginBottom: 4
     }
-  }, SITES.map((site, i) => {
-    const ins = inspections.find(x => x.site === site && x.categorie === chartTab);
-    const v = ins ? ins.score : 0;
-    const col = scoreColor(v);
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "flex-end",
+      gap: 6,
+      height: 130,
+      minWidth: Math.max(siteList.length * 54, 280) + "px"
+    }
+  }, siteList.map(function (site, i) {
+    var ins = inspections.find(function (x) {
+      return x.site === site && x.categorie === chartTab;
+    });
+    var v = ins ? ins.score : 0;
+    var col = scoreColor(v);
     return /*#__PURE__*/React.createElement("div", {
       key: i,
       style: {
-        flex: 1,
+        width: 50,
+        flexShrink: 0,
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
@@ -2712,12 +2723,12 @@ function DashboardScreen({
         fontWeight: 800,
         color: v > 0 ? col : C.muted
       }
-    }, v > 0 ? `${v}` : "-"), /*#__PURE__*/React.createElement("div", {
+    }, v > 0 ? v : "-"), /*#__PURE__*/React.createElement("div", {
       style: {
         width: "100%",
-        height: `${Math.max(v, 6)}%`,
+        height: Math.max(v, 6) + "%",
         borderRadius: "4px 4px 0 0",
-        background: v > 0 ? `linear-gradient(180deg,${col}BB,${col}22)` : `${C.dim}`,
+        background: v > 0 ? "linear-gradient(180deg," + col + "BB," + col + "22)" : C.dim,
         transition: "height .6s"
       }
     }, v > 0 && /*#__PURE__*/React.createElement("div", {
@@ -2727,13 +2738,15 @@ function DashboardScreen({
       }
     })), /*#__PURE__*/React.createElement("div", {
       style: {
-        fontSize: 8,
+        fontSize: 7,
         color: C.muted,
         textAlign: "center",
-        lineHeight: 1.2
+        lineHeight: 1.1,
+        width: 50,
+        wordBreak: "break-word"
       }
-    }, site.split(" ")[0]));
-  })), /*#__PURE__*/React.createElement("div", {
+    }, site));
+  }))), /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
       gap: 12,
@@ -4758,24 +4771,29 @@ function QuickVisitScreen({
         gap: 6,
         overflowX: "auto"
       }
-    }, SITES.map(s => /*#__PURE__*/React.createElement("button", {
-      key: s,
-      onClick: () => setForm({
-        ...form,
-        site: s
-      }),
-      style: {
-        flexShrink: 0,
-        padding: "5px 11px",
-        borderRadius: 99,
-        border: "1px solid",
-        borderColor: form.site === s ? C.cyan : C.border,
-        background: form.site === s ? C.cyan + "15" : "transparent",
-        color: form.site === s ? C.cyan : C.muted,
-        fontSize: 11,
-        cursor: "pointer"
-      }
-    }, s.split(" ")[0]))));
+    }, siteOpts.map(function (s) {
+      return /*#__PURE__*/React.createElement("button", {
+        key: s,
+        onClick: function () {
+          setForm({
+            ...form,
+            site: s
+          });
+        },
+        style: {
+          flexShrink: 0,
+          padding: "5px 12px",
+          borderRadius: 99,
+          border: "1px solid",
+          borderColor: form.site === s ? C.cyan : C.border,
+          background: form.site === s ? C.cyan + "15" : "transparent",
+          color: form.site === s ? C.cyan : C.muted,
+          fontSize: 11,
+          cursor: "pointer",
+          whiteSpace: "nowrap"
+        }
+      }, s);
+    })));
   }
   return /*#__PURE__*/React.createElement("div", {
     style: {
@@ -7366,7 +7384,9 @@ function App() {
     setSub("detail");
   };
   async function saveNew(ins) {
-    setInspections(p => [ins, ...p]);
+    setInspections(function (p) {
+      return [ins].concat(p);
+    });
     setScreen("inspections");
     setSub(null);
     try {
@@ -7412,7 +7432,6 @@ function App() {
       });
     }
   }
-  ;
   async function updateIns(ins) {
     setInspections(p => p.map(i => i.id === ins.id ? ins : i));
     setSub(null);
