@@ -2175,7 +2175,9 @@ function LoginScreen({
   const [err, setErr] = useState("");
   const [load, setLoad] = useState(false);
   // Merge static USERS with dynamic respsState users
-  const allUsers = users && users.length && typeof users[0] === "object" && users[0].email ? users : USERS;
+  const allUsers = (users && users.length && typeof users[0] === "object" && users[0].email ? users : USERS).filter(function (u) {
+    return u && u.nom;
+  });
   const handle = () => {
     setLoad(true);
     setErr("");
@@ -2306,7 +2308,7 @@ function LoginScreen({
       gap: 7
     }
   }, allUsers.map(function (u, i) {
-    var initials = (u.avatar || u.nom.split(" ").map(function (n) {
+    var initials = (u.avatar || (u.nom || "?").split(" ").map(function (n) {
       return n[0];
     }).join("").slice(0, 2)).toUpperCase();
     var roleCol = u.role === "Admin" ? C.red : u.role === "Inspecteur" ? C.cyan : C.muted;
