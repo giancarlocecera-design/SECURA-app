@@ -7400,51 +7400,6 @@ function App() {
   const [syncMsg, setSyncMsg] = useState(null);
   const [isOnline, setIsOnline] = useState(typeof navigator !== "undefined" ? navigator.onLine : true);
 
-  // ── Notifications - check due actions ───────────────────────
-  React.useEffect(function () {
-    if (!config || !config.notificationsEnabled) return undefined;
-    if (!("Notification" in window) || Notification.permission !== "granted") return undefined;
-    var today = new Date();
-    today.setHours(0, 0, 0, 0);
-    actions.filter(function (a) {
-      return a.statut !== "Clôturée" && a.echeance;
-    }).forEach(function (a) {
-      var due = new Date(a.echeance);
-      due.setHours(0, 0, 0, 0);
-      var diff = Math.ceil((due - today) / (1000 * 60 * 60 * 24));
-      var notifKey = "secura_notif_" + a.id + "_" + a.echeance;
-
-      // Only notify once per action per day
-      if (localStorage.getItem(notifKey)) return;
-      var title = "";
-      var body = "";
-      if (diff < 0) {
-        title = "🚨 Action en retard — " + a.site;
-        body = a.label + " (" + Math.abs(diff) + " jour" + (Math.abs(diff) > 1 ? "s" : "") + " de retard)";
-      } else if (diff === 0) {
-        title = "🔴 Action à traiter aujourd'hui — " + a.site;
-        body = a.label;
-      } else if (diff === 1) {
-        title = "⚠️ Action urgente demain — " + a.site;
-        body = a.label;
-      } else if (diff <= 3) {
-        title = "⏰ Échéance dans " + diff + " jours — " + a.site;
-        body = a.label;
-      }
-      if (title) {
-        try {
-          new Notification(title, {
-            body: body,
-            icon: "/icon-192.png",
-            badge: "/icon-192.png"
-          });
-          localStorage.setItem(notifKey, "1");
-        } catch (e) {}
-      }
-    });
-    return undefined;
-  }, [actions, config]);
-
   // ── Online/Offline detection ─────────────────────────────────
   React.useEffect(function () {
     function goOnline() {
@@ -7766,6 +7721,48 @@ function App() {
   }
   ;
   const pending = actions.filter(a => a.statut !== "Clôturée").length;
+
+  // ── Notifications - check due actions ───────────────────────
+  React.useEffect(function () {
+    if (!config || !config.notificationsEnabled) return undefined;
+    if (!("Notification" in window) || Notification.permission !== "granted") return undefined;
+    var today = new Date();
+    today.setHours(0, 0, 0, 0);
+    actions.filter(function (a) {
+      return a.statut !== "Clôturée" && a.echeance;
+    }).forEach(function (a) {
+      var due = new Date(a.echeance);
+      due.setHours(0, 0, 0, 0);
+      var diff = Math.ceil((due - today) / (1000 * 60 * 60 * 24));
+      var notifKey = "secura_notif_" + a.id + "_" + a.echeance;
+      if (localStorage.getItem(notifKey)) return;
+      var title = "",
+        body = "";
+      if (diff < 0) {
+        title = "🚨 Action en retard — " + a.site;
+        body = a.label + " (" + Math.abs(diff) + "j de retard)";
+      } else if (diff === 0) {
+        title = "🔴 À traiter aujourd'hui — " + a.site;
+        body = a.label;
+      } else if (diff === 1) {
+        title = "⚠️ Urgente demain — " + a.site;
+        body = a.label;
+      } else if (diff <= 3) {
+        title = "⏰ Dans " + diff + " jours — " + a.site;
+        body = a.label;
+      }
+      if (title) {
+        try {
+          new Notification(title, {
+            body: body,
+            icon: "/icon-192.png"
+          });
+          localStorage.setItem(notifKey, "1");
+        } catch (e) {}
+      }
+    });
+    return undefined;
+  }, [actions, config]);
 
   // Show loading while DB loads
   if (!dbReady) return /*#__PURE__*/React.createElement("div", {
