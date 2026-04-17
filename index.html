@@ -4291,10 +4291,12 @@ function InspectionDetailScreen({
       ...S.input,
       marginBottom: 10
     }
-  }, SITES.map(s => /*#__PURE__*/React.createElement("option", {
-    key: s,
-    value: s
-  }, s))), /*#__PURE__*/React.createElement("label", {
+  }, siteOpts.map(function (s) {
+    return /*#__PURE__*/React.createElement("option", {
+      key: s,
+      value: s
+    }, s);
+  })), /*#__PURE__*/React.createElement("label", {
     style: S.label
   }, "Date"), /*#__PURE__*/React.createElement("input", {
     type: "date",
@@ -4777,10 +4779,21 @@ function QuickVisitScreen({
     }, "\u274C NC"))), /*#__PURE__*/React.createElement("div", {
       style: {
         margin: "12px 14px 0",
-        padding: "0 14px 8px",
+        ...S.card(),
+        padding: 12
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 10,
+        color: C.muted,
+        letterSpacing: 1,
+        marginBottom: 8
+      }
+    }, "SITE"), /*#__PURE__*/React.createElement("div", {
+      style: {
         display: "flex",
-        gap: 6,
-        overflowX: "auto"
+        flexDirection: "column",
+        gap: 6
       }
     }, siteOpts.map(function (s) {
       return /*#__PURE__*/React.createElement("button", {
@@ -4792,19 +4805,27 @@ function QuickVisitScreen({
           });
         },
         style: {
-          flexShrink: 0,
-          padding: "5px 12px",
-          borderRadius: 99,
+          padding: "10px 14px",
+          borderRadius: 10,
           border: "1px solid",
           borderColor: form.site === s ? C.cyan : C.border,
-          background: form.site === s ? C.cyan + "15" : "transparent",
-          color: form.site === s ? C.cyan : C.muted,
-          fontSize: 11,
+          background: form.site === s ? C.cyan + "18" : "transparent",
+          color: form.site === s ? C.cyan : C.text,
+          fontSize: 13,
+          fontWeight: form.site === s ? 800 : 400,
           cursor: "pointer",
-          whiteSpace: "nowrap"
+          textAlign: "left",
+          display: "flex",
+          alignItems: "center",
+          gap: 8
         }
-      }, s);
-    })));
+      }, form.site === s && /*#__PURE__*/React.createElement("span", {
+        style: {
+          color: C.cyan,
+          fontSize: 12
+        }
+      }, "\u2713"), s);
+    }))));
   }
   return /*#__PURE__*/React.createElement("div", {
     style: {
@@ -4833,15 +4854,17 @@ function NewInspectionScreen({
   user,
   onSave,
   onBack,
-  resps
+  resps,
+  sitesState
 }) {
   const respList = (resps && resps.length ? resps : RESPONSABLES).map(function (r) {
     return typeof r === "object" ? r.nom : r;
   });
+  const siteOpts = sitesState && sitesState.length > 0 ? sitesState : SITES;
   const [step, setStep] = useState(1);
   const [form, setForm] = useState({
     titre: "",
-    site: SITES[0],
+    site: siteOpts[0] || SITES[0],
     categorie: CATEGORIES[0],
     notes: ""
   });
@@ -7523,7 +7546,8 @@ function App() {
     user: user,
     onSave: saveNew,
     onBack: () => setSub(null),
-    resps: respsState
+    resps: respsState,
+    sitesState: sitesState
   })), sub === "quick-visit" && /*#__PURE__*/React.createElement("div", {
     style: {
       position: "fixed",
