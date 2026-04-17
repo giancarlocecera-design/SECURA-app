@@ -4684,60 +4684,7 @@ function QRScanner({
   const [error, setError] = useState(null);
   const [scanning, setScanning] = useState(false);
   React.useEffect(function () {
-    async function startCamera() {
-      try {
-        var stream = await navigator.mediaDevices.getUserMedia({
-          video: {
-            facingMode: "environment"
-          },
-          audio: false
-        });
-        streamRef.current = stream;
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
-          videoRef.current.play();
-          setScanning(true);
-          scanFrame();
-        }
-      } catch (e) {
-        setError("Impossible d'accéder à la caméra. Vérifiez les permissions.");
-      }
-    }
-    function scanFrame() {
-      if (!videoRef.current || !scanning) return;
-      // Use BarcodeDetector API if available (Chrome/Safari 17+)
-      if ("BarcodeDetector" in window) {
-        var detector = new window.BarcodeDetector({
-          formats: ["qr_code"]
-        });
-        function detect() {
-          if (!videoRef.current) return;
-          detector.detect(videoRef.current).then(function (codes) {
-            if (codes && codes.length > 0) {
-              var url = codes[0].rawValue;
-              // Extract site param from URL
-              try {
-                var params = new URLSearchParams(new URL(url).search);
-                var site = params.get("site");
-                if (site) {
-                  stopCamera();
-                  onScan(decodeURIComponent(site));
-                  return;
-                }
-              } catch (e) {}
-              // If not a URL, use raw value as site name
-              stopCamera();
-              onScan(codes[0].rawValue);
-            } else {
-              requestAnimationFrame(detect);
-            }
-          }).catch(function () {
-            requestAnimationFrame(detect);
-          });
-        }
-        detect();
-      }
-    }
+    var stopped = false;
     function stopCamera() {
       if (streamRef.current) {
         streamRef.current.getTracks().forEach(function (t) {
@@ -4746,8 +4693,60 @@ function QRScanner({
         streamRef.current = null;
       }
     }
-    startCamera();
+    function startDetection() {
+      if (stopped || !videoRef.current) return;
+      if (!("BarcodeDetector" in window)) return;
+      var detector = new window.BarcodeDetector({
+        formats: ["qr_code"]
+      });
+      function detect() {
+        if (stopped || !videoRef.current) return;
+        detector.detect(videoRef.current).then(function (codes) {
+          if (stopped) return;
+          if (codes && codes.length > 0) {
+            var raw = codes[0].rawValue;
+            var site = null;
+            try {
+              var p = new URLSearchParams(new URL(raw).search);
+              site = p.get("site");
+            } catch (e) {}
+            stopCamera();
+            stopped = true;
+            onScan(site ? decodeURIComponent(site) : raw);
+          } else {
+            requestAnimationFrame(detect);
+          }
+        }).catch(function () {
+          requestAnimationFrame(detect);
+        });
+      }
+      detect();
+    }
+    navigator.mediaDevices.getUserMedia({
+      video: {
+        facingMode: "environment"
+      },
+      audio: false
+    }).then(function (stream) {
+      if (stopped) {
+        stream.getTracks().forEach(function (t) {
+          t.stop();
+        });
+        return;
+      }
+      streamRef.current = stream;
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        videoRef.current.play().then(function () {
+          setScanning(true);
+          startDetection();
+        });
+      }
+    }).catch(function () {
+      setError("Impossible d'accéder à la caméra. Vérifiez les permissions.");
+    });
     return function () {
+      stopped = true;
       stopCamera();
     };
   }, []);
@@ -7574,17 +7573,6 @@ function App() {
   const [syncMsg, setSyncMsg] = useState(null);
   const [isOnline, setIsOnline] = useState(typeof navigator !== "undefined" ? navigator.onLine : true);
   const [qrSite, setQrSite] = useState(null);
-
-  // ── Service Worker registration ──────────────────────────────
-  React.useEffect(function () {
-    if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.register("/sw.js").then(function (reg) {
-        console.log("SW registered:", reg.scope);
-      }).catch(function (e) {
-        console.log("SW error:", e);
-      });
-    }
-  }, []);
 
   // ── Online/Offline detection ─────────────────────────────────
   React.useEffect(function () {
