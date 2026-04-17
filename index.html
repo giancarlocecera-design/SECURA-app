@@ -4649,26 +4649,32 @@ function QuickVisitScreen({
   const critItems = CHECKLISTS[form.cat] ? CHECKLISTS[form.cat].filter(q => q.p === "critique") : [];
   const [idx, setIdx] = useState(0);
   const [answers, setAnswers] = useState({});
-  const answer = ok => {
-    const newA = {
-      ...answers,
-      [critItems[idx].id]: ok
+  const answer = function (val) {
+    var newA = {
+      ...answers
     };
+    newA[critItems[idx].id] = val;
     setAnswers(newA);
     if (idx < critItems.length - 1) {
       setIdx(idx + 1);
       return;
     }
-    // Save
-    const allItems = CHECKLISTS[form.cat].map(q => ({
-      ...q,
-      poids: q.p,
-      ok: newA[q.id] !== undefined ? newA[q.id] : true,
-      comment: "",
-      photos: []
-    }));
-    const score = calcScore(allItems);
-    const ins = {
+    // Save - na items treated as ok=true with na flag
+    var allItems = CHECKLISTS[form.cat].map(function (q) {
+      var ans = newA[q.id];
+      var isNA = ans === "na";
+      var isOk = isNA ? true : ans !== undefined ? ans : true;
+      return {
+        ...q,
+        poids: q.p,
+        ok: isOk,
+        na: isNA,
+        comment: isNA ? "N/A" : "",
+        photos: []
+      };
+    });
+    var score = calcScore(allItems);
+    var ins = {
       id: Date.now(),
       titre: "Visite rapide — " + form.cat,
       site: form.site,
@@ -4678,8 +4684,10 @@ function QuickVisitScreen({
       statut: "En cours",
       items: allItems,
       notes: "",
-      score,
-      nc: allItems.filter(i => !i.ok).length
+      score: score,
+      nc: allItems.filter(function (i) {
+        return !i.ok && !i.na;
+      }).length
     };
     onSave(ins);
   };
@@ -4760,23 +4768,40 @@ function QuickVisitScreen({
     }, q.l), /*#__PURE__*/React.createElement("div", {
       style: {
         display: "flex",
-        gap: 12
+        gap: 8
       }
     }, /*#__PURE__*/React.createElement("button", {
-      onClick: () => answer(true),
+      onClick: function () {
+        answer(true);
+      },
       style: {
         ...S.btn(C.green),
         flex: 1,
-        fontSize: 18
+        fontSize: 15,
+        padding: "12px 6px"
       }
     }, "\u2705 Conforme"), /*#__PURE__*/React.createElement("button", {
-      onClick: () => answer(false),
+      onClick: function () {
+        answer(false);
+      },
       style: {
         ...S.btn(C.red, true),
         flex: 1,
-        fontSize: 18
+        fontSize: 15,
+        padding: "12px 6px"
       }
-    }, "\u274C NC"))), /*#__PURE__*/React.createElement("div", {
+    }, "\u274C NC"), /*#__PURE__*/React.createElement("button", {
+      onClick: function () {
+        answer("na");
+      },
+      style: {
+        ...S.btn(C.muted, true),
+        flex: 1,
+        fontSize: 15,
+        padding: "12px 6px",
+        opacity: 0.8
+      }
+    }, "\u2796 N/A"))), /*#__PURE__*/React.createElement("div", {
       style: {
         margin: "12px 14px 0",
         ...S.card(),
