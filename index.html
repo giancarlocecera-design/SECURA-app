@@ -6294,13 +6294,13 @@ function SettingsScreen({
   const setPen = (k, v) => update({
     penalites: {
       ...penalites,
-      [k]: parseInt(v) || 0
+      [k]: v === "" ? "" : parseInt(v) || 0
     }
   });
   const setDel = (k, v) => update({
     delais: {
       ...delais,
-      [k]: parseInt(v) || 0
+      [k]: v === "" ? "" : parseInt(v) || 0
     }
   });
   const save = () => {
@@ -6682,11 +6682,12 @@ function SettingsScreen({
       label: l,
       color: col
     }), /*#__PURE__*/React.createElement("input", {
-      type: "number",
-      min: "0",
-      max: "50",
+      type: "text",
+      inputMode: "numeric",
+      pattern: "[0-9]*",
       value: penalites[k],
-      onChange: e => setPen(k, e.target.value),
+      onFocus: e => e.target.select(),
+      onChange: e => setPen(k, e.target.value.replace(/[^0-9]/g, "")),
       style: {
         ...S.input,
         width: 70,
@@ -6728,11 +6729,12 @@ function SettingsScreen({
       label: l,
       color: col
     }), /*#__PURE__*/React.createElement("input", {
-      type: "number",
-      min: "0",
-      max: "365",
+      type: "text",
+      inputMode: "numeric",
+      pattern: "[0-9]*",
       value: delais[k],
-      onChange: e => setDel(k, e.target.value),
+      onFocus: e => e.target.select(),
+      onChange: e => setDel(k, e.target.value.replace(/[^0-9]/g, "")),
       style: {
         ...S.input,
         width: 70,
