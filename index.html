@@ -7637,7 +7637,7 @@ function App() {
               sites: c.sites && c.sites.length ? c.sites : prev.sites,
               penalites: c.penalites || prev.penalites,
               delais: c.delais || prev.delais,
-              customTemplates: c.customTemplates || prev.customTemplates || {}
+              customTemplates: c["custom_templates"] || c.customTemplates || prev.customTemplates || {}
             };
           });
           LS.save("config", cfg[0]);
@@ -7714,7 +7714,7 @@ function App() {
       penalites: merged.penalites || appState.penalites,
       delais: merged.delais || appState.delais
     };
-    if (merged.customTemplates) payload.customTemplates = merged.customTemplates;
+    if (merged.customTemplates) payload["custom_templates"] = merged.customTemplates;
     try {
       await supa.upsert("app_config", payload);
     } catch (e) {
