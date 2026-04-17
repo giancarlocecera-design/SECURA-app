@@ -7184,8 +7184,7 @@ function SettingsScreen({
           ...(appState.customTemplates || {})
         };
         delete newTpls[cat];
-        onAppStateUpdate && onAppStateUpdate({
-          ...appState,
+        update({
           customTemplates: newTpls
         });
       },
@@ -8054,7 +8053,9 @@ function App() {
         customTemplates: {
           ...(appState.customTemplates || {}),
           [cat]: items
-        }
+        },
+        sites: sitesState,
+        resps: respsState
       });
     }
   })), sub === "quick-visit" && /*#__PURE__*/React.createElement("div", {
