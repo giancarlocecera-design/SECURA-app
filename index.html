@@ -7430,14 +7430,30 @@ function App() {
   }
   ;
   async function updateAct(a) {
-    setActions(p => p.map(x => x.id === a.id ? a : x));
-    try {
-      await supa.upsert("actions", a);
-    } catch (e) {
-      console.error(e);
+    if (a.statut === "Clôturée") {
+      setActions(function (p) {
+        return p.filter(function (x) {
+          return x.id !== a.id;
+        });
+      });
+      try {
+        await supa.del("actions", a.id);
+      } catch (e) {
+        console.error(e);
+      }
+    } else {
+      setActions(function (p) {
+        return p.map(function (x) {
+          return x.id === a.id ? a : x;
+        });
+      });
+      try {
+        await supa.upsert("actions", a);
+      } catch (e) {
+        console.error(e);
+      }
     }
   }
-  ;
   async function deleteIns(id) {
     setInspections(p => p.filter(i => i.id !== id));
     try {
