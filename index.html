@@ -7611,8 +7611,12 @@ function App() {
         }
         if (cfg && cfg[0]) {
           var c = cfg[0];
-          if (c.resps && c.resps.length) setRespsState(c.resps);
-          if (c.sites && c.sites.length) setSitesState(c.sites);
+          if (c.resps && c.resps.length) {
+            setRespsState(c.resps);
+          }
+          if (c.sites && c.sites.length) {
+            setSitesState(c.sites);
+          }
           if (c.config && Object.keys(c.config).length) setConfig(c.config);
           if (c.penalites) {
             PENALITE.critique = c.penalites.critique;
@@ -7624,13 +7628,19 @@ function App() {
             DELAIS.eleve = c.delais.eleve;
             DELAIS.mineur = c.delais.mineur;
           }
-          if (c.customTemplates) setAppState(function (prev) {
+          // Load appState with all fields
+          setAppState(function (prev) {
             return {
               ...prev,
-              customTemplates: c.customTemplates
+              resps: c.resps && c.resps.length ? c.resps : prev.resps,
+              sites: c.sites && c.sites.length ? c.sites : prev.sites,
+              penalites: c.penalites || prev.penalites,
+              delais: c.delais || prev.delais,
+              customTemplates: c.customTemplates || prev.customTemplates || {}
             };
           });
           LS.save("config", cfg[0]);
+          LS.save("appState", c);
         }
         setDbReady(true);
       } catch (e) {
@@ -7687,22 +7697,31 @@ function App() {
   const [respsState, setRespsState] = useState([...RESPONSABLES_DEFAULT]);
   const [sitesState, setSitesState] = useState([...SITES_DEFAULT]);
   async function handleAppStateUpdate(s) {
-    setAppState(s);
-    if (s.resps) setRespsState(s.resps);
-    if (s.sites) setSitesState(s.sites);
+    // Always merge with current state to avoid overwriting fields
+    var merged = {
+      ...appState,
+      ...s
+    };
+    setAppState(merged);
+    if (merged.resps) setRespsState(merged.resps);
+    if (merged.sites) setSitesState(merged.sites);
+    // Save everything to Supabase
+    var payload = {
+      id: "default",
+      resps: merged.resps || respsState,
+      sites: merged.sites || sitesState,
+      penalites: merged.penalites || appState.penalites,
+      delais: merged.delais || appState.delais
+    };
+    if (merged.customTemplates) payload.customTemplates = merged.customTemplates;
     try {
-      await supa.upsert("app_config", {
-        id: "default",
-        resps: s.resps || respsState,
-        sites: s.sites || sitesState,
-        penalites: s.penalites || appState.penalites,
-        delais: s.delais || appState.delais
-      });
+      await supa.upsert("app_config", payload);
     } catch (e) {
       console.error(e);
     }
+    // Also save to localStorage
+    LS.save("appState", merged);
   }
-  ;
   async function saveConfig(cfg) {
     setConfig(cfg);
     try {
