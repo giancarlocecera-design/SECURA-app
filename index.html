@@ -7927,15 +7927,15 @@ function App() {
   React.useEffect(function () {
     if (typeof window !== "undefined") {
       var params = new URLSearchParams(window.location.search);
-      var qrSite = params.get("site");
-      if (qrSite) {
-        var decoded = decodeURIComponent(qrSite);
-        setSub("quick-visit");
+      var site = params.get("site");
+      if (site) {
+        var decoded = decodeURIComponent(site);
         setQrSite(decoded);
-        // Clean URL
+        setSub("quick-visit");
         window.history.replaceState({}, "", window.location.pathname);
       }
     }
+    return undefined;
   }, []);
   if (splash) return /*#__PURE__*/React.createElement("div", {
     style: {
