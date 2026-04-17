@@ -7184,7 +7184,7 @@ function SettingsScreen({
           ...(appState.customTemplates || {})
         };
         delete newTpls[cat];
-        handleAppStateUpdate({
+        onAppStateUpdate && onAppStateUpdate({
           ...appState,
           customTemplates: newTpls
         });
