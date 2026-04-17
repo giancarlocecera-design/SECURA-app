@@ -7304,6 +7304,17 @@ function App() {
   const [syncMsg, setSyncMsg] = useState(null);
   const [isOnline, setIsOnline] = useState(typeof navigator !== "undefined" ? navigator.onLine : true);
 
+  // ── Service Worker registration ──────────────────────────────
+  React.useEffect(function () {
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/sw.js").then(function (reg) {
+        console.log("SW registered:", reg.scope);
+      }).catch(function (e) {
+        console.log("SW error:", e);
+      });
+    }
+  }, []);
+
   // ── Online/Offline detection ─────────────────────────────────
   React.useEffect(function () {
     function goOnline() {
