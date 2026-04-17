@@ -5033,10 +5033,12 @@ function NewInspectionScreen({
       ...form,
       site: e.target.value
     })
-  }, SITES.map(s => /*#__PURE__*/React.createElement("option", {
-    key: s,
-    value: s
-  }, s))), /*#__PURE__*/React.createElement("label", {
+  }, siteOpts.map(function (s) {
+    return /*#__PURE__*/React.createElement("option", {
+      key: s,
+      value: s
+    }, s);
+  })), /*#__PURE__*/React.createElement("label", {
     style: S.label
   }, "Cat\xE9gorie"), /*#__PURE__*/React.createElement("div", {
     style: {
