@@ -6432,21 +6432,15 @@ function SettingsScreen({
     }
   });
   const save = () => {
-    // Auto-add pending resp/site if field is not empty
     const pendingResp = (newRespRef.current ? newRespRef.current.value : newResp).trim();
-    // Note: for equipe, pending is handled by addResp button only
     const pendingSite = (newSiteRef.current ? newSiteRef.current.value : newSite).trim();
+    var finalResps = pendingResp ? [...resps, pendingResp] : resps;
+    var finalSites = pendingSite ? [...sites, pendingSite] : sites;
     if (pendingResp) {
-      update({
-        resps: [...resps, pendingResp]
-      });
       setNewResp("");
       if (newRespRef.current) newRespRef.current.value = "";
     }
     if (pendingSite) {
-      update({
-        sites: [...sites, pendingSite]
-      });
       setNewSite("");
       if (newSiteRef.current) newSiteRef.current.value = "";
     }
@@ -6456,6 +6450,13 @@ function SettingsScreen({
     DELAIS.critique = delais.critique;
     DELAIS.eleve = delais.eleve;
     DELAIS.mineur = delais.mineur;
+    // Save everything to Supabase via update()
+    update({
+      sites: finalSites,
+      resps: finalResps,
+      penalites: penalites,
+      delais: delais
+    });
     setSavedMsg(true);
     setTimeout(function () {
       setSavedMsg(false);
