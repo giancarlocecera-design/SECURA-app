@@ -7053,7 +7053,92 @@ function SettingsScreen({
         fontWeight: 900
       }
     }, "\u2713"));
-  }))), savedMsg && /*#__PURE__*/React.createElement("div", {
+  }))), tab === "systeme" && /*#__PURE__*/React.createElement("div", {
+    style: {
+      ...S.card(),
+      marginBottom: 12
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center"
+    }
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 13,
+      fontWeight: 800
+    }
+  }, "\uD83D\uDD14 Notifications push"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: C.muted,
+      marginTop: 2
+    }
+  }, "Alertes \xE9ch\xE9ances actions sur iPhone")), /*#__PURE__*/React.createElement("button", {
+    onClick: function () {
+      var enabled = !(config && config.notificationsEnabled);
+      if (enabled) {
+        if (!("Notification" in window)) {
+          alert("Notifications non supportées sur cet appareil.");
+          return;
+        }
+        Notification.requestPermission().then(function (perm) {
+          if (perm === "granted") {
+            onConfigUpdate && onConfigUpdate({
+              ...config,
+              notificationsEnabled: true
+            });
+            // Show test notification
+            setTimeout(function () {
+              new Notification("🛡️ SECURA", {
+                body: "Notifications activées ! Vous serez alerté des échéances.",
+                icon: "/icon-192.png"
+              });
+            }, 500);
+          } else {
+            alert("Permission refusée. Activez les notifications dans les réglages iPhone → Safari.");
+          }
+        });
+      } else {
+        onConfigUpdate && onConfigUpdate({
+          ...config,
+          notificationsEnabled: false
+        });
+      }
+    },
+    style: {
+      width: 48,
+      height: 28,
+      borderRadius: 99,
+      background: config && config.notificationsEnabled ? ac : C.border,
+      border: "none",
+      cursor: "pointer",
+      transition: "background .2s",
+      position: "relative",
+      flexShrink: 0
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      position: "absolute",
+      top: 3,
+      left: config && config.notificationsEnabled ? 22 : 3,
+      width: 22,
+      height: 22,
+      borderRadius: 99,
+      background: "#fff",
+      transition: "left .2s"
+    }
+  }))), config && config.notificationsEnabled && /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 10,
+      fontSize: 11,
+      color: C.green,
+      padding: "6px 10px",
+      background: C.green + "15",
+      borderRadius: 8
+    }
+  }, "\u2705 Notifications actives \u2014 alertes J-3, J-1 et le jour J")), savedMsg && /*#__PURE__*/React.createElement("div", {
     style: {
       background: C.green + "18",
       border: "1px solid " + C.green + "44",
@@ -7315,6 +7400,51 @@ function App() {
   const [syncMsg, setSyncMsg] = useState(null);
   const [isOnline, setIsOnline] = useState(typeof navigator !== "undefined" ? navigator.onLine : true);
 
+  // ── Notifications - check due actions ───────────────────────
+  React.useEffect(function () {
+    if (!config || !config.notificationsEnabled) return undefined;
+    if (!("Notification" in window) || Notification.permission !== "granted") return undefined;
+    var today = new Date();
+    today.setHours(0, 0, 0, 0);
+    actions.filter(function (a) {
+      return a.statut !== "Clôturée" && a.echeance;
+    }).forEach(function (a) {
+      var due = new Date(a.echeance);
+      due.setHours(0, 0, 0, 0);
+      var diff = Math.ceil((due - today) / (1000 * 60 * 60 * 24));
+      var notifKey = "secura_notif_" + a.id + "_" + a.echeance;
+
+      // Only notify once per action per day
+      if (localStorage.getItem(notifKey)) return;
+      var title = "";
+      var body = "";
+      if (diff < 0) {
+        title = "🚨 Action en retard — " + a.site;
+        body = a.label + " (" + Math.abs(diff) + " jour" + (Math.abs(diff) > 1 ? "s" : "") + " de retard)";
+      } else if (diff === 0) {
+        title = "🔴 Action à traiter aujourd'hui — " + a.site;
+        body = a.label;
+      } else if (diff === 1) {
+        title = "⚠️ Action urgente demain — " + a.site;
+        body = a.label;
+      } else if (diff <= 3) {
+        title = "⏰ Échéance dans " + diff + " jours — " + a.site;
+        body = a.label;
+      }
+      if (title) {
+        try {
+          new Notification(title, {
+            body: body,
+            icon: "/icon-192.png",
+            badge: "/icon-192.png"
+          });
+          localStorage.setItem(notifKey, "1");
+        } catch (e) {}
+      }
+    });
+    return undefined;
+  }, [actions, config]);
+
   // ── Online/Offline detection ─────────────────────────────────
   React.useEffect(function () {
     function goOnline() {
@@ -7430,7 +7560,8 @@ function App() {
     darkMode: true,
     cardRadius: 18,
     compactMode: false,
-    daltonMode: "normal"
+    daltonMode: "normal",
+    notificationsEnabled: false
   });
   const [appState, setAppState] = useState({
     sites: SITES_DEFAULT,
