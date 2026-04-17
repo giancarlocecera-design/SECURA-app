@@ -80,6 +80,44 @@ const supa = {
   }
 };
 
+// ═══════════════════════════════════════════════════════════════
+// LOCAL STORAGE - MODE HORS-LIGNE
+// ═══════════════════════════════════════════════════════════════
+const LS = {
+  save: function (key, data) {
+    try {
+      localStorage.setItem("secura_" + key, JSON.stringify(data));
+    } catch (e) {}
+  },
+  load: function (key) {
+    try {
+      var d = localStorage.getItem("secura_" + key);
+      return d ? JSON.parse(d) : null;
+    } catch (e) {
+      return null;
+    }
+  },
+  addPending: function (type, data) {
+    try {
+      var pending = LS.load("pending") || [];
+      pending.push({
+        type: type,
+        data: data,
+        ts: Date.now()
+      });
+      LS.save("pending", pending);
+    } catch (e) {}
+  },
+  getPending: function () {
+    return LS.load("pending") || [];
+  },
+  clearPending: function () {
+    try {
+      localStorage.removeItem("secura_pending");
+    } catch (e) {}
+  }
+};
+
 // ═══════════════════════════════════════════════════════════════════════
 // DESIGN TOKENS
 // ═══════════════════════════════════════════════════════════════════════
@@ -7264,11 +7302,49 @@ function App() {
   const [splash, setSplash] = useState(true);
   const [dbReady, setDbReady] = useState(false);
   const [syncMsg, setSyncMsg] = useState(null);
+  const [isOnline, setIsOnline] = useState(typeof navigator !== "undefined" ? navigator.onLine : true);
+
+  // ── Online/Offline detection ─────────────────────────────────
+  React.useEffect(function () {
+    function goOnline() {
+      setIsOnline(true);
+      setSyncMsg("🔄 Synchronisation...");
+      // Sync pending items
+      var pending = LS.getPending();
+      if (pending.length > 0) {
+        Promise.all(pending.map(function (p) {
+          if (p.type === "upsert_inspection") return supa.upsert("inspections", p.data).catch(function () {});
+          if (p.type === "upsert_action") return supa.upsert("actions", p.data).catch(function () {});
+          if (p.type === "del_action") return supa.del("actions", p.data.id).catch(function () {});
+          return Promise.resolve();
+        })).then(function () {
+          LS.clearPending();
+          setSyncMsg("✅ Synchronisé !");
+          setTimeout(function () {
+            setSyncMsg(null);
+          }, 3000);
+        });
+      } else {
+        setSyncMsg(null);
+      }
+    }
+    function goOffline() {
+      setIsOnline(false);
+      setSyncMsg("📵 Hors-ligne — données sauvegardées localement");
+    }
+    window.addEventListener("online", goOnline);
+    window.addEventListener("offline", goOffline);
+    return function () {
+      window.removeEventListener("online", goOnline);
+      window.removeEventListener("offline", goOffline);
+    };
+  }, []);
 
   // ── Supabase: load on mount ──────────────────────────────────
   React.useEffect(function () {
     async function loadFromDB() {
       try {
+        // Try Supabase first
         const [ins, acts, cfg] = await Promise.all([supa.get("inspections", {
           order: "updated_at.desc"
         }), supa.get("actions", {
@@ -7279,13 +7355,19 @@ function App() {
             val: "default"
           }
         })]);
-        if (ins && ins.length) setInspections(ins.map(function (i) {
-          return {
-            ...i,
-            items: i.items || []
-          };
-        }));
-        if (acts && acts.length) setActions(acts);
+        if (ins && ins.length) {
+          setInspections(ins.map(function (i) {
+            return {
+              ...i,
+              items: i.items || []
+            };
+          }));
+          LS.save("inspections", ins);
+        }
+        if (acts && acts.length) {
+          setActions(acts);
+          LS.save("actions", acts);
+        }
         if (cfg && cfg[0]) {
           var c = cfg[0];
           if (c.resps && c.resps.length) setRespsState(c.resps);
@@ -7301,11 +7383,30 @@ function App() {
             DELAIS.eleve = c.delais.eleve;
             DELAIS.mineur = c.delais.mineur;
           }
+          LS.save("config", cfg[0]);
         }
         setDbReady(true);
       } catch (e) {
-        console.error("DB load error:", e);
-        setDbReady(true); // fallback to local data
+        console.error("DB load error — loading from localStorage:", e);
+        // Fallback to localStorage
+        var localIns = LS.load("inspections");
+        var localActs = LS.load("actions");
+        var localCfg = LS.load("config");
+        if (localIns && localIns.length) setInspections(localIns.map(function (i) {
+          return {
+            ...i,
+            items: i.items || []
+          };
+        }));
+        if (localActs && localActs.length) setActions(localActs);
+        if (localCfg) {
+          var c = localCfg;
+          if (c.resps && c.resps.length) setRespsState(c.resps);
+          if (c.sites && c.sites.length) setSitesState(c.sites);
+          if (c.config && Object.keys(c.config).length) setConfig(c.config);
+        }
+        setDbReady(true);
+        setSyncMsg("📵 Chargement local — reconnectez-vous pour synchroniser");
       }
     }
     loadFromDB();
@@ -7399,12 +7500,20 @@ function App() {
     setInspections(function (p) {
       return [ins].concat(p);
     });
+    // Always save to localStorage immediately
+    LS.save("inspections", [ins].concat(inspections));
     setScreen("inspections");
     setSub(null);
-    try {
-      await supa.upsert("inspections", ins);
-    } catch (e) {
-      console.error(e);
+    if (isOnline) {
+      try {
+        await supa.upsert("inspections", ins);
+      } catch (e) {
+        console.error(e);
+        LS.addPending("upsert_inspection", ins);
+      }
+    } else {
+      LS.addPending("upsert_inspection", ins);
+      setSyncMsg("📵 Sauvegardé localement — sera synchronisé dès la reconnexion");
     }
     var ncItems = (ins.items || []).filter(function (it) {
       return !it.ok;
@@ -7445,37 +7554,63 @@ function App() {
     }
   }
   async function updateIns(ins) {
-    setInspections(p => p.map(i => i.id === ins.id ? ins : i));
+    var updated = inspections.map(function (i) {
+      return i.id === ins.id ? ins : i;
+    });
+    setInspections(function () {
+      return updated;
+    });
     setSub(null);
-    try {
-      await supa.upsert("inspections", ins);
-    } catch (e) {
-      console.error(e);
+    LS.save("inspections", updated);
+    if (isOnline) {
+      try {
+        await supa.upsert("inspections", ins);
+      } catch (e) {
+        LS.addPending("upsert_inspection", ins);
+      }
+    } else {
+      LS.addPending("upsert_inspection", ins);
     }
   }
   ;
   async function updateAct(a) {
     if (a.statut === "Clôturée") {
-      setActions(function (p) {
-        return p.filter(function (x) {
-          return x.id !== a.id;
-        });
+      var filtered = actions.filter(function (x) {
+        return x.id !== a.id;
       });
-      try {
-        await supa.del("actions", a.id);
-      } catch (e) {
-        console.error(e);
+      setActions(function () {
+        return filtered;
+      });
+      LS.save("actions", filtered);
+      if (isOnline) {
+        try {
+          await supa.del("actions", a.id);
+        } catch (e) {
+          LS.addPending("del_action", {
+            id: a.id
+          });
+        }
+      } else {
+        LS.addPending("del_action", {
+          id: a.id
+        });
       }
     } else {
-      setActions(function (p) {
-        return p.map(function (x) {
-          return x.id === a.id ? a : x;
-        });
+      var updated2 = actions.map(function (x) {
+        return x.id === a.id ? a : x;
       });
-      try {
-        await supa.upsert("actions", a);
-      } catch (e) {
-        console.error(e);
+      setActions(function () {
+        return updated2;
+      });
+      LS.save("actions", updated2);
+      if (isOnline) {
+        try {
+          await supa.upsert("actions", a);
+        } catch (e) {
+          LS.addPending("upsert_action", a);
+        }
+      } else {
+        LS.addPending("upsert_action", a);
       }
     }
   }
@@ -7536,7 +7671,36 @@ function App() {
   }));
   return /*#__PURE__*/React.createElement("div", {
     style: appStyle
-  }, /*#__PURE__*/React.createElement(InjectCSS, null), /*#__PURE__*/React.createElement("svg", {
+  }, /*#__PURE__*/React.createElement(InjectCSS, null), syncMsg && /*#__PURE__*/React.createElement("div", {
+    style: {
+      position: "fixed",
+      top: 0,
+      left: 0,
+      right: 0,
+      zIndex: 9998,
+      background: isOnline ? C.green + "EE" : C.red + "EE",
+      color: "#fff",
+      fontSize: 12,
+      fontWeight: 700,
+      padding: "8px 16px",
+      textAlign: "center",
+      letterSpacing: 0.5
+    }
+  }, syncMsg), !isOnline && !syncMsg && /*#__PURE__*/React.createElement("div", {
+    style: {
+      position: "fixed",
+      top: 0,
+      left: 0,
+      right: 0,
+      zIndex: 9998,
+      background: C.amber + "EE",
+      color: "#000",
+      fontSize: 11,
+      fontWeight: 700,
+      padding: "6px 16px",
+      textAlign: "center"
+    }
+  }, "\uD83D\uDCF5 Hors-ligne \u2014 modifications sauvegard\xE9es localement"), /*#__PURE__*/React.createElement("svg", {
     style: {
       position: "absolute",
       width: 0,
