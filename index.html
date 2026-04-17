@@ -5017,91 +5017,40 @@ function NewInspectionScreen({
     style: S.label
   }, "Cat\xE9gorie"), /*#__PURE__*/React.createElement("div", {
     style: {
-      display: "flex",
-      gap: 7,
-      flexWrap: "wrap",
-      marginBottom: 12
+      display: "grid",
+      gridTemplateColumns: "1fr 1fr",
+      gap: 8,
+      marginBottom: 14
     }
-  }, CATEGORIES.map(c => {
-    const m = CAT_META[c];
+  }, CATEGORIES.map(function (c) {
+    var m = CAT_META[c];
+    var active = form.categorie === c;
     return /*#__PURE__*/React.createElement("button", {
       key: c,
-      onClick: () => setForm({
-        ...form,
-        categorie: c
-      }),
+      onClick: function () {
+        setForm({
+          ...form,
+          categorie: c
+        });
+      },
       style: {
-        flexShrink: 0,
-        padding: "6px 12px",
-        borderRadius: 99,
+        padding: "10px 8px",
+        borderRadius: 12,
         border: "1px solid",
-        borderColor: form.categorie === c ? C.cyan : C.border,
-        background: form.categorie === c ? `${C.cyan}15` : "transparent",
-        color: form.categorie === c ? C.cyan : C.muted,
+        borderColor: active ? C.cyan : C.border,
+        background: active ? C.cyan + "18" : "transparent",
+        color: active ? C.cyan : C.muted,
         fontSize: 12,
-        fontWeight: 700,
-        cursor: "pointer"
+        fontWeight: active ? 800 : 500,
+        cursor: "pointer",
+        textAlign: "center",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 5
       }
-    }, m && m.icon || "", " ", c);
-  })), /*#__PURE__*/React.createElement("div", {
-    style: {
-      padding: "10px 12px",
-      background: C.surface,
-      borderRadius: 10,
-      marginBottom: 12
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 11,
-      fontWeight: 700,
-      color: C.muted,
-      marginBottom: 6
-    }
-  }, "P\xE9nalit\xE9s maximales possibles"), /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "flex",
-      gap: 10,
-      flexWrap: "wrap"
-    }
-  }, /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 11
-    }
-  }, /*#__PURE__*/React.createElement("span", {
-    style: {
-      color: C.red,
-      fontWeight: 800
-    }
-  }, qCrit), "\xD7Crit \u2212", qCrit * 10, "pts"), /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 11
-    }
-  }, /*#__PURE__*/React.createElement("span", {
-    style: {
-      color: C.orange,
-      fontWeight: 800
-    }
-  }, qElev), "\xD7\xC9lev \u2212", qElev * 5, "pts"), /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 11
-    }
-  }, /*#__PURE__*/React.createElement("span", {
-    style: {
-      color: C.amber,
-      fontWeight: 800
-    }
-  }, qMin), "\xD7Min \u2212", qMin, "pts")), /*#__PURE__*/React.createElement("div", {
-    style: {
-      marginTop: 6,
-      fontSize: 11,
-      color: C.muted
-    }
-  }, "Score min. possible : ", /*#__PURE__*/React.createElement("span", {
-    style: {
-      color: C.red,
-      fontWeight: 800
-    }
-  }, Math.max(0, 100 - maxPen), "/100"))), /*#__PURE__*/React.createElement("label", {
+    }, /*#__PURE__*/React.createElement("span", null, m && m.icon || ""), /*#__PURE__*/React.createElement("span", null, c));
+  })), /*#__PURE__*/React.createElement("label", {
     style: S.label
   }, "Notes pr\xE9liminaires"), /*#__PURE__*/React.createElement("textarea", {
     style: {
