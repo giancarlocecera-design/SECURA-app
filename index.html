@@ -308,8 +308,8 @@ function SplashScreen({
 // Score final = max(0, 100 − Σ pénalités NC)
 // ═══════════════════════════════════════════════════════════════════════
 let PENALITE = {
-  critique: 10,
-  eleve: 5,
+  critique: 5,
+  eleve: 3,
   mineur: 1
 };
 let DELAIS = {
@@ -2491,7 +2491,7 @@ function DashboardScreen({
       fontSize: 11,
       color: C.muted
     }
-  }, "Chaque NC critique retire ", appState && appState.penalites ? appState.penalites.critique : 10, " pts du score"))), /*#__PURE__*/React.createElement("div", {
+  }, "Chaque NC critique retire ", appState && appState.penalites ? appState.penalites.critique : 5, " pts du score"))), /*#__PURE__*/React.createElement("div", {
     style: {
       margin: "14px 14px 0",
       ...S.card(`${C.red}25`),
@@ -2559,7 +2559,7 @@ function DashboardScreen({
   }, {
     label: "Actions critiques",
     val: critActs,
-    sub: "Chacune = −" + (appState && appState.penalites ? appState.penalites.critique : 10) + "pts",
+    sub: "Chacune = −" + (appState && appState.penalites ? appState.penalites.critique : 5) + "pts",
     col: C.orange,
     prog: null
   }, {
@@ -6194,8 +6194,8 @@ function SettingsScreen({
   const resps = respsState || RESPONSABLES_DEFAULT;
   const sites = sitesState || SITES_DEFAULT;
   const penalites = appState && appState.penalites || {
-    critique: 10,
-    eleve: 5,
+    critique: 5,
+    eleve: 3,
     mineur: 1
   };
   const delais = appState && appState.delais || {
@@ -7299,8 +7299,8 @@ function App() {
     sites: SITES_DEFAULT,
     resps: RESPONSABLES_DEFAULT,
     penalites: {
-      critique: 10,
-      eleve: 5,
+      critique: 5,
+      eleve: 3,
       mineur: 1
     },
     delais: {
