@@ -4882,14 +4882,12 @@ function QuickVisitScreen({
   user,
   onSave,
   onBack,
-  sitesState,
-  qrSite
+  sitesState
 }) {
   const cats = CATEGORIES;
   const siteOpts = sitesState && sitesState.length > 0 ? sitesState : SITES;
-  var initSite = qrSite && siteOpts.indexOf(qrSite) >= 0 ? qrSite : siteOpts[0] || SITES[0];
   const [form, setForm] = useState({
-    site: initSite,
+    site: siteOpts[0] || SITES[0],
     cat: cats[0]
   });
   const [scanning, setScanning] = useState(false);
@@ -7572,7 +7570,6 @@ function App() {
   const [dbReady, setDbReady] = useState(false);
   const [syncMsg, setSyncMsg] = useState(null);
   const [isOnline, setIsOnline] = useState(typeof navigator !== "undefined" ? navigator.onLine : true);
-  const [qrSite, setQrSite] = useState(null);
 
   // ── Online/Offline detection ─────────────────────────────────
   React.useEffect(function () {
@@ -7922,21 +7919,6 @@ function App() {
       fontWeight: 700
     }
   }, "Connexion Supabase..."));
-
-  // Detect QR code URL param on load
-  React.useEffect(function () {
-    if (typeof window !== "undefined") {
-      var params = new URLSearchParams(window.location.search);
-      var site = params.get("site");
-      if (site) {
-        var decoded = decodeURIComponent(site);
-        setQrSite(decoded);
-        setSub("quick-visit");
-        window.history.replaceState({}, "", window.location.pathname);
-      }
-    }
-    return undefined;
-  }, []);
   if (splash) return /*#__PURE__*/React.createElement("div", {
     style: {
       background: "#07090F",
@@ -8054,12 +8036,8 @@ function App() {
   }, /*#__PURE__*/React.createElement(QuickVisitScreen, {
     user: user,
     onSave: saveNew,
-    onBack: () => {
-      setSub(null);
-      setQrSite(null);
-    },
-    sitesState: sitesState,
-    qrSite: qrSite
+    onBack: () => setSub(null),
+    sitesState: sitesState
   })), sub === "comparison" && /*#__PURE__*/React.createElement("div", {
     style: {
       position: "fixed",
