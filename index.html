@@ -4184,7 +4184,8 @@ function InspectionDetailScreen({
   inspection,
   onBack,
   onUpdate,
-  resps
+  resps,
+  sitesState
 }) {
   const respList = (resps && resps.length ? resps : RESPONSABLES).map(function (r) {
     return typeof r === "object" ? r.nom : r;
@@ -4197,6 +4198,7 @@ function InspectionDetailScreen({
   const [notes, setNotes] = useState(inspection.notes || "");
   const [saved, setSaved] = useState(false);
   const [openSec, setOpenSec] = useState(null);
+  const siteOpts = sitesState && sitesState.length > 0 ? sitesState : SITES;
   const [editMeta, setEditMeta] = useState(false);
   const [metaForm, setMetaForm] = useState({
     titre: inspection.titre,
@@ -8047,7 +8049,8 @@ function App() {
     inspection: openIns,
     onBack: () => setSub(null),
     onUpdate: updateIns,
-    resps: respsState
+    resps: respsState,
+    sitesState: sitesState
   })), sub === "new-inspection" && /*#__PURE__*/React.createElement("div", {
     style: {
       position: "fixed",
