@@ -29,6 +29,24 @@ const {
 // ═══════════════════════════════════════════════════════════════
 const SUPA_URL = "https://pozdjdwjuwfwawjjiceb.supabase.co";
 const SUPA_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBvemRqZHdqdXdmd2F3amppY2ViIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5MzUxMDMsImV4cCI6MjA5MTUxMTEwM30.zLntj6aSDffYbflLUPlgiRa21zLspZleNlGUgtkVPGs";
+function mapInspection(ins) {
+  var m = {
+    id: ins.id,
+    titre: ins.titre,
+    site: ins.site,
+    categorie: ins.categorie,
+    inspecteur: ins.inspecteur,
+    date: ins.date,
+    statut: ins.statut,
+    score: ins.score,
+    nc: ins.nc,
+    notes: ins.notes || "",
+    items: ins.items || []
+  };
+  if (ins.sigInspecteur) m["sig_inspecteur"] = ins.sigInspecteur;
+  if (ins.sigResponsable) m["sig_responsable"] = ins.sigResponsable;
+  return m;
+}
 const supa = {
   async get(table, opts) {
     let url = SUPA_URL + "/rest/v1/" + table + "?select=*";
@@ -7624,7 +7642,9 @@ function App() {
           setInspections(ins.map(function (i) {
             return {
               ...i,
-              items: i.items || []
+              items: i.items || [],
+              sigInspecteur: i.sigInspecteur || i["sig_inspecteur"] || null,
+              sigResponsable: i.sigResponsable || i["sig_responsable"] || null
             };
           }));
           LS.save("inspections", ins);
@@ -7815,7 +7835,7 @@ function App() {
     setSub(null);
     if (isOnline) {
       try {
-        await supa.upsert("inspections", ins);
+        await supa.upsert("inspections", mapInspection(ins));
       } catch (e) {
         console.error(e);
         LS.addPending("upsert_inspection", ins);
@@ -7877,15 +7897,15 @@ function App() {
     if (ins.statut !== "Validée") setSub(null);
     if (isOnline) {
       try {
-        // First try PATCH for statut only
-        var patchData = {
-          statut: ins.statut,
-          score: ins.score,
-          nc: ins.nc,
-          notes: ins.notes || ""
+        var patchBody = {
+          "statut": ins.statut,
+          "score": ins.score,
+          "nc": ins.nc,
+          "notes": ins.notes || ""
         };
-        if (ins.sigInspecteur) patchData.sigInspecteur = ins.sigInspecteur;
-        if (ins.sigResponsable) patchData.sigResponsable = ins.sigResponsable;
+        if (ins.sigInspecteur) patchBody["sig_inspecteur"] = ins.sigInspecteur;
+        if (ins.sigResponsable) patchBody["sig_responsable"] = ins.sigResponsable;
+        if (ins.items) patchBody["items"] = ins.items;
         var r = await fetch(SUPA_URL + "/rest/v1/inspections?id=eq." + String(ins.id), {
           method: "PATCH",
           headers: {
@@ -7894,13 +7914,13 @@ function App() {
             "Content-Type": "application/json",
             "Prefer": "return=minimal"
           },
-          body: JSON.stringify(patchData)
+          body: JSON.stringify(patchBody)
         });
         if (!r.ok) {
-          console.error("PATCH failed:", r.status, "- trying upsert");
-          await supa.upsert("inspections", ins);
+          var errText = await r.text();
+          console.error("PATCH failed:", r.status, errText);
         } else {
-          console.log("PATCH ok for id:", ins.id, "statut:", ins.statut);
+          console.log("PATCH ok:", ins.id, "statut:", ins.statut);
         }
       } catch (e) {
         console.error("updateIns error:", e);
