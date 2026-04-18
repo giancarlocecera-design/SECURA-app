@@ -3955,6 +3955,7 @@ function ItemCard({
   onPhotoAdd,
   onPhotoRemove,
   onRespChange,
+  onPoidsChange,
   showPhoto = true,
   resps
 }) {
@@ -3964,6 +3965,7 @@ function ItemCard({
     return typeof r === "object" ? r.nom : r;
   });
   const [showComment, setShowComment] = useState(!!item.comment);
+  const [showPoids, setShowPoids] = useState(false);
   return /*#__PURE__*/React.createElement("div", {
     style: {
       background: item.custom ? C.cyan + "08" : item.ok ? C.green + "06" : C.red + "06",
@@ -4029,11 +4031,74 @@ function ItemCard({
       alignItems: "center",
       flexWrap: "wrap"
     }
-  }, /*#__PURE__*/React.createElement(Tag, {
-    label: poidsLabel(item.poids),
-    color: poidsColor(item.poids),
-    small: true
-  }), !item.ok && /*#__PURE__*/React.createElement("span", {
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      position: "relative",
+      display: "inline-block"
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: function (e) {
+      e.stopPropagation();
+      setShowPoids(function (v) {
+        return !v;
+      });
+    },
+    style: {
+      fontSize: 9,
+      padding: "2px 7px",
+      borderRadius: 6,
+      background: poidsColor(item.poids) + "18",
+      color: poidsColor(item.poids),
+      fontWeight: 800,
+      border: "1px solid " + poidsColor(item.poids) + "44",
+      cursor: "pointer",
+      display: "flex",
+      alignItems: "center",
+      gap: 3
+    }
+  }, poidsLabel(item.poids), " \u270F\uFE0F"), showPoids && /*#__PURE__*/React.createElement("div", {
+    onClick: function (e) {
+      e.stopPropagation();
+    },
+    style: {
+      position: "absolute",
+      top: "100%",
+      left: 0,
+      zIndex: 100,
+      background: C.surface,
+      border: "1px solid " + C.border,
+      borderRadius: 10,
+      padding: 6,
+      display: "flex",
+      flexDirection: "column",
+      gap: 4,
+      minWidth: 110,
+      boxShadow: "0 4px 16px #00000066",
+      marginTop: 4
+    }
+  }, [["critique", "CRITIQUE", C.red], ["eleve", "ÉLEVÉ", C.orange], ["mineur", "MODÉRÉ", C.amber]].map(function (arr) {
+    var p = arr[0],
+      l = arr[1],
+      col = arr[2];
+    return /*#__PURE__*/React.createElement("button", {
+      key: p,
+      onClick: function () {
+        onPoidsChange && onPoidsChange(p);
+        setShowPoids(false);
+      },
+      style: {
+        padding: "5px 10px",
+        borderRadius: 7,
+        background: item.poids === p ? col + "22" : "transparent",
+        color: col,
+        border: "1px solid " + (item.poids === p ? col + "66" : "transparent"),
+        fontSize: 11,
+        fontWeight: item.poids === p ? 800 : 400,
+        cursor: "pointer",
+        textAlign: "left"
+      }
+    }, item.poids === p ? "✓ " : "", l);
+  }))), !item.ok && /*#__PURE__*/React.createElement("span", {
     style: {
       fontSize: 9,
       color: C.red,
@@ -4640,6 +4705,17 @@ function InspectionDetailScreen({
         ...i,
         resp: v
       } : i)),
+      onPoidsChange: function (p) {
+        setItems(function (prev) {
+          return prev.map(function (i) {
+            return i.id === item.id ? {
+              ...i,
+              poids: p,
+              p: p
+            } : i;
+          });
+        });
+      },
       resps: respList
     })), /*#__PURE__*/React.createElement(AddQuestionBtn, {
       section: sec,
