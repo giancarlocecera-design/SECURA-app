@@ -3655,22 +3655,26 @@ function InspectionsScreen({
       gap: 6,
       overflowX: "auto"
     }
-  }, ["Actifs", "Tout", "Brouillon", "En cours", "À valider", "Validée"].map(s => /*#__PURE__*/React.createElement("button", {
-    key: s,
-    onClick: () => setSf(s),
-    style: {
-      flexShrink: 0,
-      padding: "5px 11px",
-      borderRadius: 99,
-      border: "1px solid",
-      borderColor: sf === s ? C.cyan : C.border,
-      background: sf === s ? `${C.cyan}15` : "transparent",
-      color: sf === s ? C.cyan : C.muted,
-      fontSize: 11,
-      fontWeight: 700,
-      cursor: "pointer"
-    }
-  }, s))), /*#__PURE__*/React.createElement("div", {
+  }, ["Actifs", "Tout", "En cours", "Validée"].map(function (s) {
+    return /*#__PURE__*/React.createElement("button", {
+      key: s,
+      onClick: function () {
+        setSf(s);
+      },
+      style: {
+        flexShrink: 0,
+        padding: "5px 11px",
+        borderRadius: 99,
+        border: "1px solid",
+        borderColor: sf === s ? C.cyan : C.border,
+        background: sf === s ? C.cyan + "15" : "transparent",
+        color: sf === s ? C.cyan : C.muted,
+        fontSize: 11,
+        fontWeight: 700,
+        cursor: "pointer"
+      }
+    }, s);
+  })), /*#__PURE__*/React.createElement("div", {
     style: {
       padding: "0 14px 10px",
       display: "flex",
