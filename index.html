@@ -7617,8 +7617,9 @@ function App() {
           LS.save("inspections", ins);
         }
         if (acts && acts.length) {
+          var deletedIds = LS.load("deletedActionIds") || [];
           var activeActs = acts.filter(function (a) {
-            return a.statut !== "Clôturée";
+            return a.statut !== "Clôturée" && deletedIds.indexOf(String(a.id)) === -1;
           });
           setActions(activeActs);
           LS.save("actions", activeActs);
@@ -7807,6 +7808,7 @@ function App() {
         var days = dynDel[p] != null ? Number(dynDel[p]) : DELAIS[p] || 120;
         var d = new Date();
         if (days > 0) d.setDate(d.getDate() + days);
+        // Use inspectionId+ncId as unique key to prevent regeneration
         return {
           id: Date.now() + Math.floor(Math.random() * 9999),
           label: nc.l,
@@ -7815,15 +7817,18 @@ function App() {
           statut: "En cours",
           echeance: d.toISOString().split("T")[0],
           retard: false,
-          resp: nc.resp || ""
+          resp: nc.resp || "",
+          inspectionId: ins.id,
+          ncId: nc.id
         };
       });
       setActions(function (prev) {
+        // Deduplicate by inspectionId+ncId to avoid regenerating deleted actions
         var existKeys = prev.map(function (a) {
-          return a.label + "__" + a.site;
+          return (a.inspectionId || "") + "__" + (a.ncId || a.label + "__" + a.site);
         });
         var toAdd = newActs.filter(function (a) {
-          return existKeys.indexOf(a.label + "__" + a.site) === -1;
+          return existKeys.indexOf(a.inspectionId + "__" + a.ncId) === -1;
         });
         return prev.concat(toAdd);
       });
@@ -7863,6 +7868,12 @@ function App() {
         return filtered;
       });
       LS.save("actions", filtered);
+      // Track deleted ID to prevent regeneration on reload
+      var deletedIds = LS.load("deletedActionIds") || [];
+      if (deletedIds.indexOf(String(a.id)) === -1) {
+        deletedIds.push(String(a.id));
+      }
+      LS.save("deletedActionIds", deletedIds);
       if (isOnline) {
         try {
           await supa.del("actions", a.id);
