@@ -2209,48 +2209,8 @@ function mkIns(id, titre, site, cat, insp, date, statut, okMap = null) {
     nc: items.filter(i => !i.ok).length
   };
 }
-const initInspections = [mkIns(1, "Audit incendie — Bloc A", "Hôpital central", "Incendie", "Marc Dubois", "2026-04-12", "En cours"), mkIns(2, "Audit hygiène — Cuisine", "Résidence Les Tilleuls", "Hygiène & propreté", "Sophie Martin", "2026-04-13", "À valider"), mkIns(3, "Contrôle électrique — Sous-sol", "Usine Delta", "Électricité", "Louis Bernard", "2026-04-12", "Brouillon"), mkIns(4, "Ergonomie — Open space", "Siège logistique", "Ergonomie", "Marc Dubois", "2026-04-10", "Validée"), mkIns(5, "Risques chimiques — Labo", "Usine Delta", "Risques chimiques", "Louis Bernard", "2026-04-08", "Validée")];
-const initActions = [{
-  id: 1,
-  label: "Libérer chemin d'évacuation",
-  site: "Hôpital central",
-  prio: "CRITIQUE",
-  statut: "En cours",
-  echeance: "2026-04-15",
-  retard: true
-}, {
-  id: 2,
-  label: "Sécuriser tableau électrique B2",
-  site: "Usine Delta",
-  prio: "CRITIQUE",
-  statut: "En cours",
-  echeance: "2026-04-17",
-  retard: false
-}, {
-  id: 3,
-  label: "Remplacer extincteurs expirés",
-  site: "Bureaux sud",
-  prio: "CRITIQUE",
-  statut: "En cours",
-  echeance: "2026-04-20",
-  retard: false
-}, {
-  id: 4,
-  label: "Signalisation sol mouillé",
-  site: "Résidence Les Tilleuls",
-  prio: "ÉLEVÉE",
-  statut: "En cours",
-  echeance: "2026-06-15",
-  retard: false
-}, {
-  id: 5,
-  label: "Mise à jour registre sécurité",
-  site: "Siège logistique",
-  prio: "MODÉRÉE",
-  statut: "En cours",
-  echeance: "2026-08-15",
-  retard: false
-}];
+const initInspections = [];
+const initActions = [];
 
 // ═══════════════════════════════════════════════════════════════════════
 // LOGIN
