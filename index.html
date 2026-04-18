@@ -252,7 +252,7 @@ const ACCENT = {
 const SHIELD_SRC = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMjAgMTIwIj48ZGVmcz48bGluZWFyR3JhZGllbnQgaWQ9InNnIiB4MT0iMCUiIHkxPSIwJSIgeDI9IjEwMCUiIHkyPSIxMDAlIj48c3RvcCBvZmZzZXQ9IjAlIiBzdG9wLWNvbG9yPSIjMDBFNUZGIi8+PHN0b3Agb2Zmc2V0PSIxMDAlIiBzdG9wLWNvbG9yPSIjMDA1NTc3Ii8+PC9saW5lYXJHcmFkaWVudD48L2RlZnM+PHBvbHlnb24gcG9pbnRzPSI2MCw4IDEwNCwzMiAxMDQsODggNjAsMTEyIDE2LDg4IDE2LDMyIiBmaWxsPSJub25lIiBzdHJva2U9IiMwMEU1RkYiIHN0cm9rZS13aWR0aD0iMiIgb3BhY2l0eT0iMC41Ii8+PHBvbHlnb24gcG9pbnRzPSI2MCwxNCA5OCwzNSA5OCw4NSA2MCwxMDYgMjIsODUgMjIsMzUiIGZpbGw9InVybCgjc2cpIiBvcGFjaXR5PSIwLjk1Ii8+PHBhdGggZD0iTTYwIDMwIEw4MiA0MiBMODIgNjQgQzgyIDc2IDcyIDg0IDYwIDkwIEM0OCA4NCAzOCA3NiAzOCA2NCBMMzggNDIgWiIgZmlsbD0iIzAwMTgyOCIvPjxwYXRoIGQ9Ik00NiA2MSBMNTYgNzEgTDc2IDQ5IiBzdHJva2U9IndoaXRlIiBzdHJva2Utd2lkdGg9IjQuNSIgZmlsbD0ibm9uZSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PC9zdmc+";
 
 // CSS Animations — injected once
-const ANIM_CSS = ["@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}", "@keyframes scaleIn{from{opacity:0;transform:scale(.88)}to{opacity:1;transform:none}}", "@keyframes ringExpand{from{opacity:.7;transform:scale(.5)}to{opacity:0;transform:scale(1.8)}}", "@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}", ".card-hover{transition:transform .2s,box-shadow .2s}", ".card-hover:hover{transform:translateY(-2px)}"].join("\n");
+const ANIM_CSS = ["@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}", "@keyframes scaleIn{from{opacity:0;transform:scale(.88)}to{opacity:1;transform:none}}", "@keyframes ringExpand{0%{opacity:0.7;transform:scale(0.5)}100%{opacity:0;transform:scale(1.9)}}", "@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}", "@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}", ".card-hover{transition:transform .2s,box-shadow .2s}", ".card-hover:hover{transform:translateY(-2px)}"].join("\n");
 function InjectCSS() {
   React.useEffect(() => {
     if (!document.getElementById("sa-css")) {
@@ -271,6 +271,15 @@ function SplashScreen({
 }) {
   const [phase, setPhase] = useState(0);
   const [prog, setProg] = useState(0);
+  // Inject animation CSS immediately so rings work before InjectCSS runs
+  React.useEffect(function () {
+    if (!document.getElementById("splash-css")) {
+      var el = document.createElement("style");
+      el.id = "splash-css";
+      el.textContent = ANIM_CSS;
+      document.head.appendChild(el);
+    }
+  }, []);
   React.useEffect(() => {
     const t1 = setTimeout(() => setPhase(1), 600);
     const t2 = setTimeout(() => setPhase(2), 2200);
