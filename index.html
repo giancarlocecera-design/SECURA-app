@@ -4301,6 +4301,17 @@ function InspectionDetailScreen({
     ...i,
     photos: [...(i.photos || []), src]
   } : i));
+  const setPoids = function (id, p) {
+    setItems(function (prev) {
+      return prev.map(function (i) {
+        return i.id === id ? {
+          ...i,
+          poids: p,
+          p: p
+        } : i;
+      });
+    });
+  };
   const removePhoto = (id, idx) => setItems(p => p.map(i => i.id === id ? {
     ...i,
     photos: (i.photos || []).filter((_, j) => j !== idx)
@@ -4684,15 +4695,7 @@ function InspectionDetailScreen({
           });
         },
         onPoidsChange: function (p) {
-          setItems(function (prev) {
-            return prev.map(function (i) {
-              return i.id === itemId ? {
-                ...i,
-                poids: p,
-                p: p
-              } : i;
-            });
-          });
+          setPoids(itemId, p);
         },
         resps: respList
       });
