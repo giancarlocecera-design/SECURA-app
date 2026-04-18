@@ -7616,14 +7616,13 @@ function App() {
           }));
           LS.save("inspections", ins);
         }
-        if (acts && acts.length) {
-          var deletedIds = LS.load("deletedActionIds") || [];
-          var activeActs = acts.filter(function (a) {
-            return a.statut !== "Clôturée" && deletedIds.indexOf(String(a.id)) === -1;
-          });
-          setActions(activeActs);
-          LS.save("actions", activeActs);
-        }
+        // Always use Supabase as source of truth for actions
+        var deletedIds = LS.load("deletedActionIds") || [];
+        var activeActs = (acts || []).filter(function (a) {
+          return a.statut !== "Clôturée" && deletedIds.indexOf(String(a.id)) === -1;
+        });
+        setActions(activeActs);
+        LS.save("actions", activeActs);
         if (cfg && cfg[0]) {
           var c = cfg[0];
           if (c.resps && c.resps.length) {
@@ -7657,6 +7656,8 @@ function App() {
           LS.save("config", cfg[0]);
           LS.save("appState", c);
         }
+        // Clear stale localStorage actions - Supabase is source of truth
+        LS.save("actions", activeActs);
         setDbReady(true);
       } catch (e) {
         console.error("DB load error — loading from localStorage:", e);
@@ -7670,7 +7671,13 @@ function App() {
             items: i.items || []
           };
         }));
-        if (localActs && localActs.length) setActions(localActs);
+        if (localActs && localActs.length) {
+          var deletedIds2 = LS.load("deletedActionIds") || [];
+          var localActive = localActs.filter(function (a) {
+            return a.statut !== "Clôturée" && deletedIds2.indexOf(String(a.id)) === -1;
+          });
+          setActions(localActive);
+        }
         if (localCfg) {
           var c = localCfg;
           if (c.resps && c.resps.length) setRespsState(c.resps);
