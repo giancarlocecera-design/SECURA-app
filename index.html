@@ -5001,7 +5001,8 @@ function NewInspectionScreen({
   resps,
   sitesState,
   customTemplates,
-  onSaveTemplate
+  onSaveTemplate,
+  siteAddresses
 }) {
   const respList = (resps && resps.length ? resps : RESPONSABLES).map(function (r) {
     return typeof r === "object" ? r.nom : r;
@@ -5013,7 +5014,8 @@ function NewInspectionScreen({
     site: siteOpts[0] || SITES[0],
     categorie: CATEGORIES[0],
     notes: "",
-    accompagnateurs: []
+    accompagnateurs: [],
+    adresse: siteAddresses && siteAddresses[siteOpts[0]] || ""
   });
   const [items, setItems] = useState([]);
   const [openSec, setOpenSec] = useState(null);
@@ -5180,16 +5182,36 @@ function NewInspectionScreen({
       marginBottom: 14
     },
     value: form.site,
-    onChange: e => setForm({
-      ...form,
-      site: e.target.value
-    })
+    onChange: function (e) {
+      setForm({
+        ...form,
+        site: e.target.value,
+        adresse: siteAddresses && siteAddresses[e.target.value] || ""
+      });
+    }
   }, siteOpts.map(function (s) {
     return /*#__PURE__*/React.createElement("option", {
       key: s,
       value: s
     }, s);
   })), /*#__PURE__*/React.createElement("label", {
+    style: S.label
+  }, "Adresse"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      ...S.input,
+      marginBottom: 14,
+      background: C.surface,
+      color: C.muted,
+      fontSize: 12,
+      padding: "10px 14px",
+      minHeight: 36
+    }
+  }, siteAddresses && siteAddresses[form.site] || /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: C.border,
+      fontStyle: "italic"
+    }
+  }, "Aucune adresse configur\xE9e pour ce site")), /*#__PURE__*/React.createElement("label", {
     style: S.label
   }, "Cat\xE9gorie"), /*#__PURE__*/React.createElement("div", {
     style: {
@@ -5492,7 +5514,7 @@ function NewInspectionScreen({
       color: C.muted,
       marginBottom: 20
     }
-  }, "R\xE9capitulatif complet"), [["Titre", form.titre], ["Site", form.site], ["Accompagnateurs", form.accompagnateurs && form.accompagnateurs.length > 0 ? form.accompagnateurs.join(", ") : "—"], ["Catégorie", `${CAT_META[form.categorie] && CAT_META[form.categorie].icon || ""} ${form.categorie}`], ["Score final", `${score}/100`], ["Pénalité totale", `−${penTotal}pts`], ["NC Critiques", `${ncItems.filter(i => i.poids === "critique").length} (−${ncItems.filter(i => i.poids === "critique").length * 10}pts)`], ["NC Élevées", `${ncItems.filter(i => i.poids === "eleve").length} (−${ncItems.filter(i => i.poids === "eleve").length * 5}pts)`], ["NC Mineures", `${ncItems.filter(i => i.poids === "mineur").length} (−${ncItems.filter(i => i.poids === "mineur").length}pts)`], ["Photos jointes", totalPhotos], ["Inspecteur", user.nom]].map(([k, v]) => /*#__PURE__*/React.createElement("div", {
+  }, "R\xE9capitulatif complet"), [["Titre", form.titre], ["Site", form.site], ["Adresse", form.adresse || "—"], ["Accompagnateurs", form.accompagnateurs && form.accompagnateurs.length > 0 ? form.accompagnateurs.join(", ") : "—"], ["Catégorie", `${CAT_META[form.categorie] && CAT_META[form.categorie].icon || ""} ${form.categorie}`], ["Score final", `${score}/100`], ["Pénalité totale", `−${penTotal}pts`], ["NC Critiques", `${ncItems.filter(i => i.poids === "critique").length} (−${ncItems.filter(i => i.poids === "critique").length * 10}pts)`], ["NC Élevées", `${ncItems.filter(i => i.poids === "eleve").length} (−${ncItems.filter(i => i.poids === "eleve").length * 5}pts)`], ["NC Mineures", `${ncItems.filter(i => i.poids === "mineur").length} (−${ncItems.filter(i => i.poids === "mineur").length}pts)`], ["Photos jointes", totalPhotos], ["Inspecteur", user.nom]].map(([k, v]) => /*#__PURE__*/React.createElement("div", {
     key: k,
     style: {
       display: "flex",
@@ -6452,6 +6474,8 @@ function SettingsScreen({
       resps,
       penalites,
       delais,
+      customTemplates: appState && appState.customTemplates || {},
+      siteAddresses: appState && appState.siteAddresses || {},
       ...patch
     };
     SITES.length = 0;
@@ -6816,26 +6840,34 @@ function SettingsScreen({
       marginBottom: 10
     }
   }, "Gestion des sites"), sites.map(function (s, i) {
+    var addr = appState && appState.siteAddresses && appState.siteAddresses[s] || "";
     return /*#__PURE__*/React.createElement("div", {
       key: i,
+      style: {
+        padding: "8px 0",
+        borderBottom: "1px solid " + C.border
+      }
+    }, /*#__PURE__*/React.createElement("div", {
       style: {
         display: "flex",
         alignItems: "center",
         gap: 8,
-        padding: "7px 0",
-        borderBottom: "1px solid " + C.border
+        marginBottom: 4
       }
     }, /*#__PURE__*/React.createElement("span", {
       style: {
-        fontSize: 18
+        fontSize: 16
       }
     }, "\uD83D\uDCCD"), /*#__PURE__*/React.createElement("span", {
       style: {
         flex: 1,
-        fontSize: 13
+        fontSize: 13,
+        fontWeight: 700
       }
     }, s), /*#__PURE__*/React.createElement("button", {
-      onClick: () => removeSite(i),
+      onClick: function () {
+        removeSite(i);
+      },
       style: {
         background: "transparent",
         border: "none",
@@ -6844,7 +6876,26 @@ function SettingsScreen({
         fontSize: 16,
         padding: "0 4px"
       }
-    }, "\xD7"));
+    }, "\xD7")), /*#__PURE__*/React.createElement("input", {
+      placeholder: "Adresse du site...",
+      defaultValue: addr,
+      onChange: function (e) {
+        var newAddrs = {
+          ...(appState.siteAddresses || {})
+        };
+        newAddrs[s] = e.target.value;
+        update({
+          siteAddresses: newAddrs
+        });
+      },
+      style: {
+        ...S.input,
+        fontSize: 11,
+        padding: "5px 10px",
+        color: C.muted,
+        marginLeft: 24
+      }
+    }));
   }), /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
@@ -7740,7 +7791,8 @@ function App() {
               sites: c.sites && c.sites.length ? c.sites : prev.sites,
               penalites: c.penalites || prev.penalites,
               delais: c.delais || prev.delais,
-              customTemplates: c["customtemplates"] || c["custom_templates"] || c.customTemplates || LS.load("customTemplates") || prev.customTemplates || {}
+              customTemplates: c["customtemplates"] || c["custom_templates"] || c.customTemplates || LS.load("customTemplates") || prev.customTemplates || {},
+              siteAddresses: c["siteaddresses"] || c.siteAddresses || prev.siteAddresses || {}
             };
           });
           LS.save("config", cfg[0]);
@@ -7802,7 +7854,8 @@ function App() {
       eleve: 60,
       mineur: 120
     },
-    customTemplates: {}
+    customTemplates: {},
+    siteAddresses: {}
   });
   const [respsState, setRespsState] = useState([...RESPONSABLES_DEFAULT]);
   const [sitesState, setSitesState] = useState([...SITES_DEFAULT]);
@@ -7823,6 +7876,7 @@ function App() {
       penalites: merged.penalites || appState.penalites,
       delais: merged.delais || appState.delais
     };
+    if (merged.siteAddresses) payload["siteaddresses"] = merged.siteAddresses;
     if (merged.customTemplates && Object.keys(merged.customTemplates).length > 0) {
       payload["customtemplates"] = merged.customTemplates;
     }
@@ -8268,6 +8322,7 @@ function App() {
     resps: respsState,
     sitesState: sitesState,
     customTemplates: appState.customTemplates || {},
+    siteAddresses: appState.siteAddresses || {},
     onSaveTemplate: function (cat, items) {
       handleAppStateUpdate({
         ...appState,
