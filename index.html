@@ -4641,7 +4641,20 @@ function InspectionDetailScreen({
     onSave: d => setSigInsp(d)
   }), sigInsp && !sigResp && /*#__PURE__*/React.createElement(SignaturePad, {
     label: "SIGNATURE RESPONSABLE SITE",
-    onSave: d => setSigResp(d)
+    onSave: function (d) {
+      setSigResp(d);
+      // Auto-validate when both signatures are done
+      onUpdate({
+        ...inspection,
+        items,
+        notes,
+        score,
+        nc: ncItems.length,
+        statut: "Validée",
+        sigInspecteur: sigInsp,
+        sigResponsable: d
+      });
+    }
   }), sigInsp && sigResp && /*#__PURE__*/React.createElement("div", {
     style: {
       textAlign: "center",
