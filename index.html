@@ -7877,7 +7877,16 @@ function App() {
     if (ins.statut !== "Validée") setSub(null);
     if (isOnline) {
       try {
-        var r = await fetch(SUPA_URL + "/rest/v1/inspections?id=eq." + ins.id, {
+        // First try PATCH for statut only
+        var patchData = {
+          statut: ins.statut,
+          score: ins.score,
+          nc: ins.nc,
+          notes: ins.notes || ""
+        };
+        if (ins.sigInspecteur) patchData.sigInspecteur = ins.sigInspecteur;
+        if (ins.sigResponsable) patchData.sigResponsable = ins.sigResponsable;
+        var r = await fetch(SUPA_URL + "/rest/v1/inspections?id=eq." + String(ins.id), {
           method: "PATCH",
           headers: {
             "apikey": SUPA_KEY,
@@ -7885,19 +7894,13 @@ function App() {
             "Content-Type": "application/json",
             "Prefer": "return=minimal"
           },
-          body: JSON.stringify({
-            statut: ins.statut,
-            score: ins.score,
-            nc: ins.nc,
-            items: ins.items,
-            notes: ins.notes,
-            sigInspecteur: ins.sigInspecteur,
-            sigResponsable: ins.sigResponsable
-          })
+          body: JSON.stringify(patchData)
         });
         if (!r.ok) {
-          // Fallback to upsert
+          console.error("PATCH failed:", r.status, "- trying upsert");
           await supa.upsert("inspections", ins);
+        } else {
+          console.log("PATCH ok for id:", ins.id, "statut:", ins.statut);
         }
       } catch (e) {
         console.error("updateIns error:", e);
