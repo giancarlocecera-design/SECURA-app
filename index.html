@@ -7873,12 +7873,32 @@ function App() {
     setInspections(function () {
       return updated;
     });
-    setSub(null);
     LS.save("inspections", updated);
+    if (ins.statut !== "Validée") setSub(null);
     if (isOnline) {
       try {
-        var ok = await supa.upsert("inspections", ins);
-        if (!ok) console.error("updateIns upsert failed for id:", ins.id, "statut:", ins.statut);
+        var r = await fetch(SUPA_URL + "/rest/v1/inspections?id=eq." + ins.id, {
+          method: "PATCH",
+          headers: {
+            "apikey": SUPA_KEY,
+            "Authorization": "Bearer " + SUPA_KEY,
+            "Content-Type": "application/json",
+            "Prefer": "return=minimal"
+          },
+          body: JSON.stringify({
+            statut: ins.statut,
+            score: ins.score,
+            nc: ins.nc,
+            items: ins.items,
+            notes: ins.notes,
+            sigInspecteur: ins.sigInspecteur,
+            sigResponsable: ins.sigResponsable
+          })
+        });
+        if (!r.ok) {
+          // Fallback to upsert
+          await supa.upsert("inspections", ins);
+        }
       } catch (e) {
         console.error("updateIns error:", e);
         LS.addPending("upsert_inspection", ins);
@@ -7886,6 +7906,7 @@ function App() {
     } else {
       LS.addPending("upsert_inspection", ins);
     }
+    if (ins.statut === "Validée") setSub(null);
   }
   async function updateAct(a) {
     if (a.statut === "Clôturée") {
