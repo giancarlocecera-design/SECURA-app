@@ -3925,7 +3925,6 @@ function ItemCard({
     return typeof r === "object" ? r.nom : r;
   });
   const [showComment, setShowComment] = useState(!!item.comment);
-  const [showPoids, setShowPoids] = useState(false);
   return /*#__PURE__*/React.createElement("div", {
     style: {
       background: item.custom ? C.cyan + "08" : item.ok ? C.green + "06" : C.red + "06",
@@ -3991,74 +3990,11 @@ function ItemCard({
       alignItems: "center",
       flexWrap: "wrap"
     }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      position: "relative",
-      display: "inline-block"
-    }
-  }, /*#__PURE__*/React.createElement("button", {
-    onClick: function (e) {
-      e.stopPropagation();
-      setShowPoids(function (v) {
-        return !v;
-      });
-    },
-    style: {
-      fontSize: 9,
-      padding: "2px 7px",
-      borderRadius: 6,
-      background: poidsColor(item.poids) + "18",
-      color: poidsColor(item.poids),
-      fontWeight: 800,
-      border: "1px solid " + poidsColor(item.poids) + "44",
-      cursor: "pointer",
-      display: "flex",
-      alignItems: "center",
-      gap: 3
-    }
-  }, poidsLabel(item.poids), " \u270F\uFE0F"), showPoids && /*#__PURE__*/React.createElement("div", {
-    onClick: function (e) {
-      e.stopPropagation();
-    },
-    style: {
-      position: "absolute",
-      top: "100%",
-      left: 0,
-      zIndex: 100,
-      background: C.surface,
-      border: "1px solid " + C.border,
-      borderRadius: 10,
-      padding: 6,
-      display: "flex",
-      flexDirection: "column",
-      gap: 4,
-      minWidth: 110,
-      boxShadow: "0 4px 16px #00000066",
-      marginTop: 4
-    }
-  }, [["critique", "CRITIQUE", C.red], ["eleve", "ÉLEVÉ", C.orange], ["mineur", "MODÉRÉ", C.amber]].map(function (arr) {
-    var p = arr[0],
-      l = arr[1],
-      col = arr[2];
-    return /*#__PURE__*/React.createElement("button", {
-      key: p,
-      onClick: function () {
-        onPoidsChange && onPoidsChange(p);
-        setShowPoids(false);
-      },
-      style: {
-        padding: "5px 10px",
-        borderRadius: 7,
-        background: item.poids === p ? col + "22" : "transparent",
-        color: col,
-        border: "1px solid " + (item.poids === p ? col + "66" : "transparent"),
-        fontSize: 11,
-        fontWeight: item.poids === p ? 800 : 400,
-        cursor: "pointer",
-        textAlign: "left"
-      }
-    }, item.poids === p ? "✓ " : "", l);
-  }))), !item.ok && /*#__PURE__*/React.createElement("span", {
+  }, /*#__PURE__*/React.createElement(Tag, {
+    label: poidsLabel(item.poids),
+    color: poidsColor(item.poids),
+    small: true
+  }), !item.ok && /*#__PURE__*/React.createElement("span", {
     style: {
       fontSize: 9,
       color: C.red,
@@ -4693,9 +4629,6 @@ function InspectionDetailScreen({
               } : i;
             });
           });
-        },
-        onPoidsChange: function (p) {
-          setPoids(itemId, p);
         },
         resps: respList
       });
@@ -5583,9 +5516,58 @@ function NewInspectionScreen({
     style: {
       fontSize: 13,
       color: C.muted,
-      marginBottom: 20
+      marginBottom: 12
     }
-  }, "R\xE9capitulatif complet"), [["Titre", form.titre], ["Site", form.site], ["Adresse", form.adresse || "—"], ["Accompagnateurs", form.accompagnateurs && form.accompagnateurs.length > 0 ? form.accompagnateurs.join(", ") : "—"], ["Catégorie", `${CAT_META[form.categorie] && CAT_META[form.categorie].icon || ""} ${form.categorie}`], ["Score final", `${score}/100`], ["Pénalité totale", `−${penTotal}pts`], ["NC Critiques", `${ncItems.filter(i => i.poids === "critique").length} (−${ncItems.filter(i => i.poids === "critique").length * 10}pts)`], ["NC Élevées", `${ncItems.filter(i => i.poids === "eleve").length} (−${ncItems.filter(i => i.poids === "eleve").length * 5}pts)`], ["NC Mineures", `${ncItems.filter(i => i.poids === "mineur").length} (−${ncItems.filter(i => i.poids === "mineur").length}pts)`], ["Photos jointes", totalPhotos], ["Inspecteur", user.nom]].map(([k, v]) => /*#__PURE__*/React.createElement("div", {
+  }, "R\xE9capitulatif complet"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: C.amber + "20",
+      border: "1px solid " + C.amber + "55",
+      borderRadius: 10,
+      padding: "8px 12px",
+      marginBottom: 12,
+      display: "flex",
+      gap: 8,
+      alignItems: "flex-start",
+      textAlign: "left"
+    }
+  }, /*#__PURE__*/React.createElement("span", null, "\uD83D\uDCA1"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: C.amber,
+      lineHeight: 1.5
+    }
+  }, /*#__PURE__*/React.createElement("strong", null, "Criticit\xE9 modifiable apr\xE8s sauvegarde"), /*#__PURE__*/React.createElement("br", null), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontWeight: 400
+    }
+  }, "Cr\xE9ez d'abord l'audit puis rouvrez-le pour modifier la criticit\xE9."))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: C.amber + "20",
+      border: "1px solid " + C.amber + "55",
+      borderRadius: 10,
+      padding: "8px 12px",
+      marginBottom: 12,
+      display: "flex",
+      gap: 8,
+      alignItems: "flex-start",
+      textAlign: "left"
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 14,
+      flexShrink: 0
+    }
+  }, "\uD83D\uDCA1"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: C.amber,
+      lineHeight: 1.5
+    }
+  }, /*#__PURE__*/React.createElement("strong", null, "Criticit\xE9 modifiable apr\xE8s sauvegarde"), /*#__PURE__*/React.createElement("br", null), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontWeight: 400
+    }
+  }, "Cr\xE9ez d'abord l'audit puis rouvrez-le pour modifier la criticit\xE9 de chaque question."))), [["Titre", form.titre], ["Site", form.site], ["Adresse", form.adresse || "—"], ["Accompagnateurs", form.accompagnateurs && form.accompagnateurs.length > 0 ? form.accompagnateurs.join(", ") : "—"], ["Catégorie", `${CAT_META[form.categorie] && CAT_META[form.categorie].icon || ""} ${form.categorie}`], ["Score final", `${score}/100`], ["Pénalité totale", `−${penTotal}pts`], ["NC Critiques", `${ncItems.filter(i => i.poids === "critique").length} (−${ncItems.filter(i => i.poids === "critique").length * 10}pts)`], ["NC Élevées", `${ncItems.filter(i => i.poids === "eleve").length} (−${ncItems.filter(i => i.poids === "eleve").length * 5}pts)`], ["NC Mineures", `${ncItems.filter(i => i.poids === "mineur").length} (−${ncItems.filter(i => i.poids === "mineur").length}pts)`], ["Photos jointes", totalPhotos], ["Inspecteur", user.nom]].map(([k, v]) => /*#__PURE__*/React.createElement("div", {
     key: k,
     style: {
       display: "flex",
