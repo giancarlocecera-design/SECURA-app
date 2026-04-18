@@ -6068,7 +6068,8 @@ function RapportsScreen({
     const penTotal = ncItems.reduce((s, i) => s + (PENALITE[i.poids || i.p] || 0), 0);
     const scCol = scoreColor(ins.score);
     const accompStr = ins.accompagnateurs && ins.accompagnateurs.length > 0 ? ins.accompagnateurs.join(", ") : "—";
-    const metaRows = [["Site", ins.site], ["Catégorie", ins.categorie], ["Inspecteur", ins.inspecteur], ["Accompagnateurs", accompStr], ["Date", fmt(ins.date)], ["Statut", ins.statut], ["Questions", (ins.items || []).length]];
+    const adresseStr = ins.adresse || "—";
+    const metaRows = [["Site", ins.site], ["Adresse", adresseStr], ["Catégorie", ins.categorie], ["Inspecteur", ins.inspecteur], ["Accompagnateurs", accompStr], ["Date", fmt(ins.date)], ["Statut", ins.statut], ["Questions", (ins.items || []).length]];
     const ncRows = ["critique", "eleve", "mineur"].map(p => {
       const n = ncItems.filter(i => (i.poids || i.p) === p).length;
       const col = p === "critique" ? "#FF1744" : p === "eleve" ? "#FF6D00" : "#FFB300";
@@ -6098,8 +6099,9 @@ function RapportsScreen({
       }, 0);
       const scCol = ins.score >= 80 ? "#00C853" : ins.score >= 55 ? "#FFB300" : "#FF1744";
       const accompStr2 = ins.accompagnateurs && ins.accompagnateurs.length > 0 ? ins.accompagnateurs.join(", ") : "—";
-      const metaRows = ["Site", "Catégorie", "Inspecteur", "Accompagnateurs", "Date", "Statut", "Questions"].map(function (k, i) {
-        var vals = [ins.site, ins.categorie, ins.inspecteur, accompStr2, fmt(ins.date), ins.statut, "" + (ins.items || []).length];
+      const adresseStr2 = ins.adresse || "—";
+      const metaRows = ["Site", "Adresse", "Catégorie", "Inspecteur", "Accompagnateurs", "Date", "Statut", "Questions"].map(function (k, i) {
+        var vals = [ins.site, adresseStr2, ins.categorie, ins.inspecteur, accompStr2, fmt(ins.date), ins.statut, "" + (ins.items || []).length];
         return "<div class='mk'><span class='ml'>" + k + "</span><span class='mv'>" + vals[i] + "</span></div>";
       }).join("");
       const ncRows = ncItems.map(function (it) {
