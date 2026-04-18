@@ -29,6 +29,18 @@ const {
 // ═══════════════════════════════════════════════════════════════
 const SUPA_URL = "https://pozdjdwjuwfwawjjiceb.supabase.co";
 const SUPA_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBvemRqZHdqdXdmd2F3amppY2ViIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5MzUxMDMsImV4cCI6MjA5MTUxMTEwM30.zLntj6aSDffYbflLUPlgiRa21zLspZleNlGUgtkVPGs";
+function mapAction(a) {
+  return {
+    id: a.id,
+    label: a.label || "",
+    site: a.site || "",
+    prio: a.prio || "MODÉRÉE",
+    statut: a.statut || "En cours",
+    echeance: a.echeance || null,
+    resp: a.resp || "",
+    retard: a.retard || false
+  };
+}
 function mapInspection(ins) {
   var m = {
     id: ins.id,
@@ -7880,7 +7892,7 @@ function App() {
         return prev.concat(toAdd);
       });
       newActs.forEach(function (a) {
-        supa.upsert("actions", a).catch(function (e) {
+        supa.upsert("actions", mapAction(a)).catch(function (e) {
           console.error(e);
         });
       });
@@ -7969,7 +7981,7 @@ function App() {
       LS.save("actions", updated2);
       if (isOnline) {
         try {
-          await supa.upsert("actions", a);
+          await supa.upsert("actions", mapAction(a));
         } catch (e) {
           LS.addPending("upsert_action", a);
         }
