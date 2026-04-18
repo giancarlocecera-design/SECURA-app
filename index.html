@@ -4694,30 +4694,49 @@ function InspectionDetailScreen({
       style: {
         marginTop: 12
       }
-    }, items.filter(i => i.s === sec).map(item => /*#__PURE__*/React.createElement(ItemCard, {
-      key: item.id,
-      item: item,
-      onToggle: () => toggle(item.id),
-      onComment: v => setComment(item.id, v),
-      onPhotoAdd: src => addPhoto(item.id, src),
-      onPhotoRemove: idx => removePhoto(item.id, idx),
-      onRespChange: v => setItems(p => p.map(i => i.id === item.id ? {
-        ...i,
-        resp: v
-      } : i)),
-      onPoidsChange: function (p) {
-        setItems(function (prev) {
-          return prev.map(function (i) {
-            return i.id === item.id ? {
-              ...i,
-              poids: p,
-              p: p
-            } : i;
+    }, items.filter(function (i) {
+      return i.s === sec;
+    }).map(function (item) {
+      var itemId = item.id;
+      return /*#__PURE__*/React.createElement(ItemCard, {
+        key: itemId,
+        item: item,
+        onToggle: function () {
+          toggle(itemId);
+        },
+        onComment: function (v) {
+          setComment(itemId, v);
+        },
+        onPhotoAdd: function (src) {
+          addPhoto(itemId, src);
+        },
+        onPhotoRemove: function (idx) {
+          removePhoto(itemId, idx);
+        },
+        onRespChange: function (v) {
+          setItems(function (p) {
+            return p.map(function (i) {
+              return i.id === itemId ? {
+                ...i,
+                resp: v
+              } : i;
+            });
           });
-        });
-      },
-      resps: respList
-    })), /*#__PURE__*/React.createElement(AddQuestionBtn, {
+        },
+        onPoidsChange: function (p) {
+          setItems(function (prev) {
+            return prev.map(function (i) {
+              return i.id === itemId ? {
+                ...i,
+                poids: p,
+                p: p
+              } : i;
+            });
+          });
+        },
+        resps: respList
+      });
+    }), /*#__PURE__*/React.createElement(AddQuestionBtn, {
       section: sec,
       onAdd: (label, poids) => {
         const newItem = {
