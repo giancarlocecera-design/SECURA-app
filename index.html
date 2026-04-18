@@ -7616,13 +7616,22 @@ function App() {
           }));
           LS.save("inspections", ins);
         }
-        // Always use Supabase as source of truth for actions
         var deletedIds = LS.load("deletedActionIds") || [];
-        var activeActs = (acts || []).filter(function (a) {
-          return a.statut !== "Clôturée" && deletedIds.indexOf(String(a.id)) === -1;
-        });
-        setActions(activeActs);
-        LS.save("actions", activeActs);
+        if (acts && acts.length) {
+          // Supabase has actions - use them, filter deleted ones
+          var activeActs = acts.filter(function (a) {
+            return a.statut !== "Clôturée" && deletedIds.indexOf(String(a.id)) === -1;
+          });
+          setActions(activeActs);
+          LS.save("actions", activeActs);
+        } else {
+          // Supabase empty - use localStorage but still filter deleted
+          var localActsFallback = LS.load("actions") || [];
+          var activeLocal = localActsFallback.filter(function (a) {
+            return a.statut !== "Clôturée" && deletedIds.indexOf(String(a.id)) === -1;
+          });
+          setActions(activeLocal);
+        }
         if (cfg && cfg[0]) {
           var c = cfg[0];
           if (c.resps && c.resps.length) {
@@ -7656,8 +7665,6 @@ function App() {
           LS.save("config", cfg[0]);
           LS.save("appState", c);
         }
-        // Clear stale localStorage actions - Supabase is source of truth
-        LS.save("actions", activeActs);
         setDbReady(true);
       } catch (e) {
         console.error("DB load error — loading from localStorage:", e);
@@ -7857,15 +7864,16 @@ function App() {
     LS.save("inspections", updated);
     if (isOnline) {
       try {
-        await supa.upsert("inspections", ins);
+        var ok = await supa.upsert("inspections", ins);
+        if (!ok) console.error("updateIns upsert failed for id:", ins.id, "statut:", ins.statut);
       } catch (e) {
+        console.error("updateIns error:", e);
         LS.addPending("upsert_inspection", ins);
       }
     } else {
       LS.addPending("upsert_inspection", ins);
     }
   }
-  ;
   async function updateAct(a) {
     if (a.statut === "Clôturée") {
       var filtered = actions.filter(function (x) {
