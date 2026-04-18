@@ -7910,16 +7910,23 @@ function App() {
       var dynDel = appState && appState.delais ? appState.delais : DELAIS;
       var deletedIds = LS.load("deletedActionIds") || [];
       setActions(function (prev) {
-        var existKeys = prev.map(function (a) {
-          return (a.inspectionId || "") + "__" + (a.ncId || "");
+        // Build multiple dedup keys to catch all duplicates
+        var existByKey = {};
+        prev.forEach(function (a) {
+          // Key 1: inspectionId + ncId
+          existByKey[String(a.inspectionId || "") + "__" + String(a.ncId || "")] = true;
+          // Key 2: label + site (legacy)
+          existByKey[(a.label || "") + "__" + (a.site || "")] = true;
         });
         var toAdd = [];
         ncItems.forEach(function (nc) {
-          var keyNew = String(ins.id) + "__" + String(nc.id);
-          // Skip if action already exists for this exact NC
-          if (existKeys.indexOf(keyNew) >= 0) return;
-          // Skip if explicitly deleted by user
-          if (deletedIds.indexOf(keyNew) >= 0) return;
+          var k1 = String(ins.id) + "__" + String(nc.id);
+          var k2 = (nc.l || "") + "__" + (ins.site || "");
+          // Skip if action already exists (any key match)
+          if (existByKey[k1]) return;
+          if (existByKey[k2]) return;
+          // Skip if explicitly deleted
+          if (deletedIds.indexOf(k1) >= 0) return;
           var p = nc.poids || nc.p || "mineur";
           var prio = p === "critique" ? "CRITIQUE" : p === "eleve" ? "ÉLEVÉE" : "MODÉRÉE";
           var days = dynDel[p] != null ? Number(dynDel[p]) : DELAIS[p] || 120;
