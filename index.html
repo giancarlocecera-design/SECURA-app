@@ -7902,6 +7902,52 @@ function App() {
     });
     LS.save("inspections", updated);
     if (ins.statut !== "Validée") setSub(null);
+    // Generate actions from new NC items (that don't already have an action)
+    var ncItems = (ins.items || []).filter(function (it) {
+      return !it.ok && !it.na;
+    });
+    if (ncItems.length > 0) {
+      var dynDel = appState && appState.delais ? appState.delais : DELAIS;
+      var deletedIds = LS.load("deletedActionIds") || [];
+      setActions(function (prev) {
+        var existKeys = prev.map(function (a) {
+          return (a.inspectionId || "") + "__" + (a.ncId || "");
+        });
+        var toAdd = [];
+        ncItems.forEach(function (nc) {
+          var keyNew = String(ins.id) + "__" + String(nc.id);
+          // Skip if action already exists for this exact NC
+          if (existKeys.indexOf(keyNew) >= 0) return;
+          // Skip if explicitly deleted by user
+          if (deletedIds.indexOf(keyNew) >= 0) return;
+          var p = nc.poids || nc.p || "mineur";
+          var prio = p === "critique" ? "CRITIQUE" : p === "eleve" ? "ÉLEVÉE" : "MODÉRÉE";
+          var days = dynDel[p] != null ? Number(dynDel[p]) : DELAIS[p] || 120;
+          var d = new Date();
+          if (days > 0) d.setDate(d.getDate() + days);
+          var newAct = {
+            id: Date.now() + Math.floor(Math.random() * 9999),
+            label: nc.l,
+            site: ins.site,
+            prio: prio,
+            statut: "En cours",
+            echeance: d.toISOString().split("T")[0],
+            retard: false,
+            resp: nc.resp || "",
+            inspectionId: ins.id,
+            ncId: nc.id
+          };
+          toAdd.push(newAct);
+          supa.upsert("actions", mapAction(newAct)).catch(function (e) {
+            console.error(e);
+          });
+        });
+        if (toAdd.length === 0) return prev;
+        var allActs = prev.concat(toAdd);
+        LS.save("actions", allActs);
+        return allActs;
+      });
+    }
     if (isOnline) {
       try {
         var patchBody = {
