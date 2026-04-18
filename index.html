@@ -7704,7 +7704,7 @@ function App() {
               sites: c.sites && c.sites.length ? c.sites : prev.sites,
               penalites: c.penalites || prev.penalites,
               delais: c.delais || prev.delais,
-              customTemplates: c["custom_templates"] || c.customTemplates || prev.customTemplates || {}
+              customTemplates: c["customtemplates"] || c["custom_templates"] || c.customTemplates || LS.load("customTemplates") || prev.customTemplates || {}
             };
           });
           LS.save("config", cfg[0]);
@@ -7787,13 +7787,17 @@ function App() {
       penalites: merged.penalites || appState.penalites,
       delais: merged.delais || appState.delais
     };
+    if (merged.customTemplates && Object.keys(merged.customTemplates).length > 0) {
+      payload["customtemplates"] = merged.customTemplates;
+    }
     try {
       await supa.upsert("app_config", payload);
     } catch (e) {
-      console.error(e);
+      console.error("appState save error:", e);
     }
-    // Also save to localStorage
+    // Also save to localStorage as backup
     LS.save("appState", merged);
+    LS.save("customTemplates", merged.customTemplates || {});
   }
   async function saveConfig(cfg) {
     setConfig(cfg);
