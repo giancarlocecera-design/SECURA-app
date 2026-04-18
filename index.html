@@ -5012,7 +5012,8 @@ function NewInspectionScreen({
     titre: "",
     site: siteOpts[0] || SITES[0],
     categorie: CATEGORIES[0],
-    notes: ""
+    notes: "",
+    accompagnateurs: []
   });
   const [items, setItems] = useState([]);
   const [openSec, setOpenSec] = useState(null);
@@ -5064,7 +5065,8 @@ function NewInspectionScreen({
       statut: "En cours",
       date: ds,
       inspecteur: user.nom,
-      items
+      items,
+      accompagnateurs: form.accompagnateurs || []
     });
   };
   const qCrit = CHECKLISTS[form.categorie] && CHECKLISTS[form.categorie].filter(q => q.p === "critique").length || 0 || 0;
@@ -5224,6 +5226,48 @@ function NewInspectionScreen({
         gap: 5
       }
     }, /*#__PURE__*/React.createElement("span", null, m && m.icon || ""), /*#__PURE__*/React.createElement("span", null, c));
+  })), /*#__PURE__*/React.createElement("label", {
+    style: S.label
+  }, "Accompagnateurs"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      flexWrap: "wrap",
+      gap: 8,
+      marginBottom: 14
+    }
+  }, ["SEPP", "CPMT", "Délégation syndicale", "Responsable", "Direction"].map(function (a) {
+    var checked = (form.accompagnateurs || []).indexOf(a) >= 0;
+    return /*#__PURE__*/React.createElement("button", {
+      key: a,
+      onClick: function () {
+        var cur = form.accompagnateurs || [];
+        var next = checked ? cur.filter(function (x) {
+          return x !== a;
+        }) : cur.concat([a]);
+        setForm({
+          ...form,
+          accompagnateurs: next
+        });
+      },
+      style: {
+        padding: "7px 14px",
+        borderRadius: 99,
+        border: "1px solid",
+        borderColor: checked ? C.cyan : C.border,
+        background: checked ? C.cyan + "18" : "transparent",
+        color: checked ? C.cyan : C.muted,
+        fontSize: 12,
+        fontWeight: checked ? 800 : 400,
+        cursor: "pointer",
+        display: "flex",
+        alignItems: "center",
+        gap: 6
+      }
+    }, checked && /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 10
+      }
+    }, "\u2713"), a);
   })), /*#__PURE__*/React.createElement("label", {
     style: S.label
   }, "Notes pr\xE9liminaires"), /*#__PURE__*/React.createElement("textarea", {
@@ -5448,7 +5492,7 @@ function NewInspectionScreen({
       color: C.muted,
       marginBottom: 20
     }
-  }, "R\xE9capitulatif complet"), [["Titre", form.titre], ["Site", form.site], ["Catégorie", `${CAT_META[form.categorie] && CAT_META[form.categorie].icon || ""} ${form.categorie}`], ["Score final", `${score}/100`], ["Pénalité totale", `−${penTotal}pts`], ["NC Critiques", `${ncItems.filter(i => i.poids === "critique").length} (−${ncItems.filter(i => i.poids === "critique").length * 10}pts)`], ["NC Élevées", `${ncItems.filter(i => i.poids === "eleve").length} (−${ncItems.filter(i => i.poids === "eleve").length * 5}pts)`], ["NC Mineures", `${ncItems.filter(i => i.poids === "mineur").length} (−${ncItems.filter(i => i.poids === "mineur").length}pts)`], ["Photos jointes", totalPhotos], ["Inspecteur", user.nom]].map(([k, v]) => /*#__PURE__*/React.createElement("div", {
+  }, "R\xE9capitulatif complet"), [["Titre", form.titre], ["Site", form.site], ["Accompagnateurs", form.accompagnateurs && form.accompagnateurs.length > 0 ? form.accompagnateurs.join(", ") : "—"], ["Catégorie", `${CAT_META[form.categorie] && CAT_META[form.categorie].icon || ""} ${form.categorie}`], ["Score final", `${score}/100`], ["Pénalité totale", `−${penTotal}pts`], ["NC Critiques", `${ncItems.filter(i => i.poids === "critique").length} (−${ncItems.filter(i => i.poids === "critique").length * 10}pts)`], ["NC Élevées", `${ncItems.filter(i => i.poids === "eleve").length} (−${ncItems.filter(i => i.poids === "eleve").length * 5}pts)`], ["NC Mineures", `${ncItems.filter(i => i.poids === "mineur").length} (−${ncItems.filter(i => i.poids === "mineur").length}pts)`], ["Photos jointes", totalPhotos], ["Inspecteur", user.nom]].map(([k, v]) => /*#__PURE__*/React.createElement("div", {
     key: k,
     style: {
       display: "flex",
