@@ -4679,22 +4679,14 @@ function InspectionDetailScreen({
     label: "SIGNATURE RESPONSABLE SITE",
     onSave: function (d) {
       setSigResp(d);
-      // Auto-validate when both signatures are done
-      onUpdate({
-        ...inspection,
-        items,
-        notes,
-        score,
-        nc: ncItems.length,
-        statut: "Validée",
-        sigInspecteur: sigInsp,
-        sigResponsable: d
-      });
     }
   }), sigInsp && sigResp && /*#__PURE__*/React.createElement("div", {
     style: {
       textAlign: "center",
-      padding: "16px 0"
+      padding: "16px 0",
+      background: C.green + "10",
+      borderRadius: 12,
+      border: "1px solid " + C.green + "33"
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
@@ -4704,9 +4696,16 @@ function InspectionDetailScreen({
   }, "\u2705"), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 14,
-      fontWeight: 700
+      fontWeight: 800,
+      color: C.green,
+      marginBottom: 4
     }
-  }, "Signatures compl\xE8tes"))), /*#__PURE__*/React.createElement("div", {
+  }, "Signatures compl\xE8tes"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      color: C.muted
+    }
+  }, "Appuyez sur \"\u2713 Valider\" pour finaliser l'audit"))), /*#__PURE__*/React.createElement("div", {
     style: {
       padding: "12px 14px 0",
       display: "grid",
