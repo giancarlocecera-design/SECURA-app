@@ -56,13 +56,17 @@ const supa = {
     return r.ok;
   },
   async del(table, id) {
-    const r = await fetch(SUPA_URL + "/rest/v1/" + table + "?id=eq." + id, {
+    const r = await fetch(SUPA_URL + "/rest/v1/" + table + "?id=eq." + String(id), {
       method: "DELETE",
       headers: {
         "apikey": SUPA_KEY,
-        "Authorization": "Bearer " + SUPA_KEY
+        "Authorization": "Bearer " + SUPA_KEY,
+        "Content-Type": "application/json"
       }
     });
+    if (!r.ok) {
+      console.error("DEL failed", table, id, r.status);
+    }
     return r.ok;
   },
   async patch(table, id, data) {
@@ -5551,22 +5555,26 @@ function ActionsScreen({
       overflowX: "auto",
       WebkitOverflowScrolling: "touch"
     }
-  }, ["Tout", "À faire", "En cours", "Clôturée"].map(s => /*#__PURE__*/React.createElement("button", {
-    key: s,
-    onClick: () => setFilter(s),
-    style: {
-      flexShrink: 0,
-      padding: "5px 11px",
-      borderRadius: 99,
-      border: "1px solid",
-      borderColor: filter === s ? C.cyan : C.border,
-      background: filter === s ? `${C.cyan}15` : "transparent",
-      color: filter === s ? C.cyan : C.muted,
-      fontSize: 11,
-      fontWeight: 700,
-      cursor: "pointer"
-    }
-  }, s))), /*#__PURE__*/React.createElement("div", {
+  }, ["En cours", "À faire", "Tout"].map(function (s) {
+    return /*#__PURE__*/React.createElement("button", {
+      key: s,
+      onClick: function () {
+        setFilter(s);
+      },
+      style: {
+        flexShrink: 0,
+        padding: "5px 11px",
+        borderRadius: 99,
+        border: "1px solid",
+        borderColor: filter === s ? C.cyan : C.border,
+        background: filter === s ? C.cyan + "15" : "transparent",
+        color: filter === s ? C.cyan : C.muted,
+        fontSize: 11,
+        fontWeight: 700,
+        cursor: "pointer"
+      }
+    }, s);
+  })), /*#__PURE__*/React.createElement("div", {
     style: {
       padding: "0 14px"
     }
@@ -7609,8 +7617,11 @@ function App() {
           LS.save("inspections", ins);
         }
         if (acts && acts.length) {
-          setActions(acts);
-          LS.save("actions", acts);
+          var activeActs = acts.filter(function (a) {
+            return a.statut !== "Clôturée";
+          });
+          setActions(activeActs);
+          LS.save("actions", activeActs);
         }
         if (cfg && cfg[0]) {
           var c = cfg[0];
