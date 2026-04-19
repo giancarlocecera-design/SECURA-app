@@ -24,11 +24,8 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
   <script>
-const {
-  useState,
-  useRef,
-  useEffect
-} = React;
+import { useState, useRef } from "react";
+import * as React from "react";
 
 // ═══════════════════════════════════════════════════════════════
 // SUPABASE CLIENT
@@ -2419,6 +2416,89 @@ function LoginScreen({
 // ═══════════════════════════════════════════════════════════════════════
 // DASHBOARD
 // ═══════════════════════════════════════════════════════════════════════
+
+// ═══════════════════════════════════════════════════════════════════════
+// SPARKLINE — Composant graphique d'évolution
+// ═══════════════════════════════════════════════════════════════════════
+function Sparkline({
+  scores,
+  width,
+  height
+}) {
+  width = width || 280;
+  height = height || 50;
+  if (!scores || scores.length < 2) {
+    return /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 11,
+        color: C.muted,
+        textAlign: "center",
+        padding: "14px 0"
+      }
+    }, "Donn\xE9es insuffisantes (min. 2 inspections)");
+  }
+  var min = Math.min.apply(null, scores);
+  var max = Math.max.apply(null, scores);
+  var range = max - min || 1;
+  var pts = scores.map(function (v, i) {
+    var x = i / (scores.length - 1) * width;
+    var y = height - (v - min) / range * (height - 10) - 5;
+    return x + "," + y;
+  });
+  var lastX = parseFloat(pts[pts.length - 1].split(",")[0]);
+  var lastY = parseFloat(pts[pts.length - 1].split(",")[1]);
+  var lastScore = scores[scores.length - 1];
+  var col = scoreColor(lastScore);
+  return /*#__PURE__*/React.createElement("svg", {
+    width: width,
+    height: height + 20,
+    style: {
+      overflow: "visible",
+      display: "block"
+    }
+  }, /*#__PURE__*/React.createElement("polyline", {
+    points: pts.join(" ") + " " + width + "," + (height + 2) + " 0," + (height + 2),
+    fill: col + "18",
+    stroke: "none"
+  }), /*#__PURE__*/React.createElement("polyline", {
+    points: pts.join(" "),
+    fill: "none",
+    stroke: col,
+    strokeWidth: 2.5,
+    strokeLinecap: "round",
+    strokeLinejoin: "round"
+  }), scores.map(function (v, i) {
+    var x = i / (scores.length - 1) * width;
+    var y = height - (v - min) / range * (height - 10) - 5;
+    var dotCol = scoreColor(v);
+    return /*#__PURE__*/React.createElement("circle", {
+      key: i,
+      cx: x,
+      cy: y,
+      r: 3.5,
+      fill: dotCol,
+      stroke: C.bg,
+      strokeWidth: 1.5
+    });
+  }), /*#__PURE__*/React.createElement("text", {
+    x: lastX,
+    y: lastY - 10,
+    textAnchor: lastX > width - 30 ? "end" : "middle",
+    fill: col,
+    fontSize: 10,
+    fontWeight: 900
+  }, lastScore));
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// DASHBOARD — VERSION ENRICHIE
+// 5 nouveaux widgets :
+//   1. Bannière retard (actions dépassant l'échéance)
+//   2. NC par criticité (Critique / Élevé / Mineur)
+//   3. Couverture des sites (% sites audités)
+//   4. Sparkline évolution du score (10 dernières inspections)
+//   5. Top 3 catégories à risque
+// ═══════════════════════════════════════════════════════════════════════
 function DashboardScreen({
   user,
   inspections,
@@ -2430,14 +2510,65 @@ function DashboardScreen({
   sitesState,
   appState
 }) {
-  const [chartTab, setChartTab] = useState(CATEGORIES[0]);
-  const avgScore = inspections.length ? Math.round(inspections.reduce((s, i) => s + i.score, 0) / inspections.length) : 100;
-  const totalNC = inspections.reduce((s, i) => s + i.nc, 0);
-  const critActs = actions.filter(a => a.prio === "CRITIQUE" && a.statut !== "Clôturée").length;
-  const validated = inspections.filter(i => i.statut === "Validée").length;
-  const penTotal = inspections.reduce((s, i) => s + (100 - i.score), 0);
-  const siteList = sitesState && sitesState.length > 0 ? sitesState : SITES;
-  const sitePens = siteList.map(function (site) {
+  var [chartTab, setChartTab] = useState(CATEGORIES[0]);
+
+  // ── Métriques de base ─────────────────────────────────────────────
+  var avgScore = inspections.length ? Math.round(inspections.reduce(function (s, i) {
+    return s + i.score;
+  }, 0) / inspections.length) : 100;
+  var totalNC = inspections.reduce(function (s, i) {
+    return s + i.nc;
+  }, 0);
+  var critActs = actions.filter(function (a) {
+    return a.prio === "CRITIQUE" && a.statut !== "Clôturée";
+  }).length;
+  var validated = inspections.filter(function (i) {
+    return i.statut === "Validée";
+  }).length;
+  var penTotal = inspections.reduce(function (s, i) {
+    return s + (100 - i.score);
+  }, 0);
+  var penPts = appState && appState.penalites ? appState.penalites.critique : 5;
+
+  // ── NC par criticité ──────────────────────────────────────────────
+  var allNC = inspections.flatMap(function (i) {
+    return (i.items || []).filter(function (it) {
+      return !it.ok;
+    });
+  });
+  var ncCritique = allNC.filter(function (it) {
+    return (it.poids || it.p) === "critique";
+  }).length;
+  var ncEleve = allNC.filter(function (it) {
+    return (it.poids || it.p) === "eleve";
+  }).length;
+  var ncMineur = allNC.filter(function (it) {
+    return (it.poids || it.p) === "mineur";
+  }).length;
+
+  // ── Actions en retard ─────────────────────────────────────────────
+  var today = new Date();
+  today.setHours(0, 0, 0, 0);
+  var overdueActs = actions.filter(function (a) {
+    if (a.statut === "Clôturée" || !a.echeance) return false;
+    var due = new Date(a.echeance);
+    due.setHours(0, 0, 0, 0);
+    return due < today;
+  });
+
+  // ── Couverture des sites ──────────────────────────────────────────
+  var siteList = sitesState && sitesState.length > 0 ? sitesState : SITES;
+  var auditedSitesSet = new Set(inspections.map(function (i) {
+    return i.site;
+  }));
+  var nonAuditedSites = siteList.filter(function (s) {
+    return !auditedSitesSet.has(s);
+  });
+  var coverageRate = siteList.length ? Math.round(auditedSitesSet.size / siteList.length * 100) : 0;
+  var coverageCol = coverageRate >= 80 ? C.green : coverageRate >= 50 ? C.amber : C.red;
+
+  // ── Sites critiques ───────────────────────────────────────────────
+  var sitePens = siteList.map(function (site) {
     var ins = inspections.filter(function (i) {
       return i.site === site;
     });
@@ -2452,8 +2583,37 @@ function DashboardScreen({
   }).sort(function (a, b) {
     return a.score - b.score;
   });
-  const catBarData = inspections.filter(i => i.categorie === chartTab);
-  const catColor = CAT_META[chartTab] && CAT_META[chartTab].color || C.cyan;
+
+  // ── Sparkline : 10 dernières inspections ──────────────────────────
+  var recentScores = [...inspections].sort(function (a, b) {
+    return a.date.localeCompare(b.date);
+  }).slice(-10).map(function (i) {
+    return i.score;
+  });
+  var scoreTrend = recentScores.length >= 2 ? recentScores[recentScores.length - 1] - recentScores[0] : null;
+
+  // ── Top 3 catégories à risque ─────────────────────────────────────
+  var catRisk = CATEGORIES.map(function (c) {
+    var ins = inspections.filter(function (i) {
+      return i.categorie === c;
+    });
+    if (!ins.length) return null;
+    var sc = Math.round(ins.reduce(function (s, i) {
+      return s + i.score;
+    }, 0) / ins.length);
+    var ncC = ins.flatMap(function (i) {
+      return (i.items || []).filter(function (it) {
+        return !it.ok && (it.poids || it.p) === "critique";
+      });
+    }).length;
+    return {
+      cat: c,
+      score: sc,
+      ncCritique: ncC
+    };
+  }).filter(Boolean).sort(function (a, b) {
+    return a.score - b.score;
+  }).slice(0, 3);
   return /*#__PURE__*/React.createElement("div", {
     style: {
       paddingBottom: 90
@@ -2512,11 +2672,93 @@ function DashboardScreen({
       fontWeight: 900,
       color: C.cyan
     }
-  }, user.avatar))), critActs > 0 && /*#__PURE__*/React.createElement("div", {
+  }, user.avatar))), overdueActs.length > 0 && /*#__PURE__*/React.createElement("div", {
     style: {
       margin: "14px 14px 0",
-      background: `${C.red}10`,
-      border: `1px solid ${C.red}33`,
+      background: C.red + "12",
+      border: "1px solid " + C.red + "44",
+      borderRadius: 14,
+      padding: "12px 14px"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 8,
+      marginBottom: 8
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 18
+    }
+  }, "\u23F1"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 13,
+      fontWeight: 800,
+      color: C.red
+    }
+  }, overdueActs.length, " action", overdueActs.length > 1 ? "s" : "", " en RETARD"), /*#__PURE__*/React.createElement("button", {
+    onClick: function () {
+      onNav("actions");
+    },
+    style: {
+      marginLeft: "auto",
+      background: "transparent",
+      border: "1px solid " + C.red + "44",
+      borderRadius: 8,
+      padding: "3px 10px",
+      color: C.red,
+      fontSize: 11,
+      fontWeight: 700,
+      cursor: "pointer"
+    }
+  }, "Voir \u2192")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      flexDirection: "column",
+      gap: 5
+    }
+  }, overdueActs.slice(0, 3).map(function (a, i) {
+    var daysLate = Math.ceil((today - new Date(a.echeance)) / 86400000);
+    return /*#__PURE__*/React.createElement("div", {
+      key: i,
+      style: {
+        fontSize: 11,
+        color: C.muted,
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        padding: "4px 8px",
+        background: C.red + "08",
+        borderRadius: 6
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        overflow: "hidden",
+        textOverflow: "ellipsis",
+        whiteSpace: "nowrap",
+        maxWidth: "75%"
+      }
+    }, a.label), /*#__PURE__*/React.createElement("span", {
+      style: {
+        color: C.red,
+        fontWeight: 800,
+        flexShrink: 0,
+        marginLeft: 8
+      }
+    }, "+", daysLate, "j"));
+  }), overdueActs.length > 3 && /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 10,
+      color: C.red,
+      textAlign: "right",
+      padding: "2px 8px"
+    }
+  }, "+", overdueActs.length - 3, " autre", overdueActs.length - 3 > 1 ? "s" : "", "..."))), critActs > 0 && /*#__PURE__*/React.createElement("div", {
+    style: {
+      margin: "14px 14px 0",
+      background: C.red + "10",
+      border: "1px solid " + C.red + "33",
       borderRadius: 14,
       padding: "11px 14px",
       display: "flex",
@@ -2538,53 +2780,61 @@ function DashboardScreen({
       fontSize: 11,
       color: C.muted
     }
-  }, "Chaque NC critique retire ", appState && appState.penalites ? appState.penalites.critique : 5, " pts du score"))), /*#__PURE__*/React.createElement("div", {
+  }, "Chaque NC critique retire ", penPts, " pts du score"))), /*#__PURE__*/React.createElement("div", {
     style: {
-      margin: "14px 14px 0",
-      ...S.card(`${C.red}25`),
-      background: `linear-gradient(140deg,#0F1420,#180A0A)`
+      padding: "14px 14px 0"
     }
   }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 12,
-      fontWeight: 800,
-      color: C.red,
-      letterSpacing: 1,
-      marginBottom: 12
-    }
-  }, "\u26A0 SITES LES PLUS CRITIQUES"), sitePens.slice(0, 5).map((s, i) => /*#__PURE__*/React.createElement("div", {
-    key: i,
-    style: {
-      display: "flex",
-      alignItems: "center",
-      gap: 10,
-      padding: "8px 10px",
-      background: i === 0 ? `${C.red}08` : "transparent",
-      borderRadius: 10,
-      marginBottom: 4,
-      border: i === 0 ? `1px solid ${C.red}22` : "none"
-    }
-  }, /*#__PURE__*/React.createElement(ScoreRing, {
-    score: s.score,
-    size: 42
-  }), /*#__PURE__*/React.createElement("div", {
-    style: {
-      flex: 1
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 13,
-      fontWeight: 700
-    }
-  }, s.site), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 10,
-      color: C.muted
+      color: C.muted,
+      letterSpacing: 1.5,
+      textTransform: "uppercase",
+      marginBottom: 8
     }
-  }, s.ins, " inspection(s) \xB7 p\xE9nalit\xE9 ", 100 - s.score, "pts")), /*#__PURE__*/React.createElement(Tag, {
-    label: s.score >= 80 ? "BON" : s.score >= 55 ? "MODÉRÉ" : "CRITIQUE",
-    color: scoreColor(s.score)
-  })))), /*#__PURE__*/React.createElement("div", {
+  }, "Non-conformit\xE9s actives"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "grid",
+      gridTemplateColumns: "1fr 1fr 1fr",
+      gap: 8
+    }
+  }, [{
+    label: "Critique",
+    val: ncCritique,
+    col: C.red
+  }, {
+    label: "Élevé",
+    val: ncEleve,
+    col: C.orange
+  }, {
+    label: "Mineur",
+    val: ncMineur,
+    col: C.amber
+  }].map(function (x, i) {
+    return /*#__PURE__*/React.createElement("div", {
+      key: i,
+      style: {
+        ...S.card(x.col + "33"),
+        textAlign: "center",
+        padding: "10px 6px"
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 28,
+        fontWeight: 900,
+        color: x.col,
+        lineHeight: 1.1
+      }
+    }, x.val), /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 9,
+        color: x.col,
+        marginTop: 4,
+        fontWeight: 800,
+        letterSpacing: 0.5
+      }
+    }, x.label.toUpperCase()));
+  }))), /*#__PURE__*/React.createElement("div", {
     style: {
       padding: "14px 14px 0",
       display: "grid",
@@ -2593,74 +2843,131 @@ function DashboardScreen({
     }
   }, [{
     label: "Score moyen",
-    val: `${avgScore}/100`,
-    sub: `−${100 - avgScore}pts de pénalité moy.`,
+    val: avgScore + "/100",
+    sub: "−" + (100 - avgScore) + "pts de pénalité moy.",
     col: scoreColor(avgScore),
     prog: avgScore
   }, {
     label: "Total pénalités",
-    val: `−${penTotal}`,
-    sub: `${totalNC} NC au total`,
+    val: "−" + penTotal,
+    sub: totalNC + " NC au total",
     col: C.red,
     prog: null
   }, {
     label: "Actions critiques",
     val: critActs,
-    sub: "Chacune = −" + (appState && appState.penalites ? appState.penalites.critique : 5) + "pts",
+    sub: "Chacune = −" + penPts + "pts",
     col: C.orange,
     prog: null
   }, {
     label: "Inspections",
-    val: `${validated}/${inspections.length}`,
+    val: validated + "/" + inspections.length,
     sub: "validées",
     col: C.cyan,
     prog: inspections.length ? Math.round(validated / inspections.length * 100) : 0
-  }].map((k, i) => /*#__PURE__*/React.createElement("div", {
-    key: i,
+  }].map(function (k, i) {
+    return /*#__PURE__*/React.createElement("div", {
+      key: i,
+      style: {
+        ...S.card(k.col + "22")
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 10,
+        color: C.muted,
+        letterSpacing: 1,
+        textTransform: "uppercase",
+        marginBottom: 6
+      }
+    }, k.label), /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 30,
+        fontWeight: 900,
+        color: k.col,
+        lineHeight: 1
+      }
+    }, k.val), k.prog !== null && /*#__PURE__*/React.createElement("div", {
+      style: {
+        marginTop: 8
+      }
+    }, /*#__PURE__*/React.createElement(Bar, {
+      v: k.prog,
+      col: k.col
+    })), /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 11,
+        color: k.col,
+        marginTop: 6,
+        opacity: .8
+      }
+    }, k.sub));
+  })), /*#__PURE__*/React.createElement("div", {
     style: {
-      ...S.card(`${k.col}22`)
+      margin: "14px 14px 0",
+      ...S.card()
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
-      fontSize: 10,
-      color: C.muted,
-      letterSpacing: 1,
-      textTransform: "uppercase",
-      marginBottom: 6
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: 8
     }
-  }, k.label), /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement("div", {
     style: {
-      fontSize: 30,
+      fontSize: 13,
+      fontWeight: 800
+    }
+  }, "\uD83D\uDDFA Couverture des sites"), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 18,
       fontWeight: 900,
-      color: k.col,
-      lineHeight: 1
+      color: coverageCol
     }
-  }, k.val), k.prog !== null && /*#__PURE__*/React.createElement("div", {
-    style: {
-      marginTop: 8
-    }
-  }, /*#__PURE__*/React.createElement(Bar, {
-    v: k.prog,
-    col: k.col
-  })), /*#__PURE__*/React.createElement("div", {
+  }, coverageRate, "%")), /*#__PURE__*/React.createElement(Bar, {
+    v: coverageRate,
+    col: coverageCol,
+    h: 7
+  }), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 11,
-      color: k.col,
-      marginTop: 6,
-      opacity: .8
+      color: C.muted,
+      marginTop: 8
     }
-  }, k.sub)))), /*#__PURE__*/React.createElement("div", {
+  }, auditedSitesSet.size, " audit\xE9", auditedSitesSet.size > 1 ? "s" : "", " \xB7 ", nonAuditedSites.length, " non audit\xE9", nonAuditedSites.length > 1 ? "s" : ""), nonAuditedSites.length > 0 && /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 8,
+      display: "flex",
+      gap: 5,
+      flexWrap: "wrap"
+    }
+  }, nonAuditedSites.map(function (s, i) {
+    return /*#__PURE__*/React.createElement("span", {
+      key: i,
+      style: {
+        fontSize: 10,
+        padding: "2px 9px",
+        borderRadius: 99,
+        background: C.amber + "15",
+        color: C.amber,
+        fontWeight: 700,
+        border: "1px solid " + C.amber + "33"
+      }
+    }, s);
+  }))), /*#__PURE__*/React.createElement("div", {
     style: {
       margin: "14px 14px 0"
     }
   }, /*#__PURE__*/React.createElement("button", {
-    onClick: () => onNav("new-inspection"),
+    onClick: function () {
+      onNav("new-inspection");
+    },
     style: {
       width: "100%",
       border: "none",
       borderRadius: 18,
       padding: "17px",
-      background: `linear-gradient(135deg,${C.cyan},#007799)`,
+      background: "linear-gradient(135deg," + C.cyan + ",#007799)",
       cursor: "pointer",
       display: "flex",
       alignItems: "center",
@@ -2699,7 +3006,198 @@ function DashboardScreen({
       fontSize: 20,
       color: "rgba(0,0,0,.35)"
     }
-  }, "\u2192"))), /*#__PURE__*/React.createElement("div", {
+  }, "\u2192"))), recentScores.length >= 2 && /*#__PURE__*/React.createElement("div", {
+    style: {
+      margin: "14px 14px 0",
+      ...S.card()
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: 10
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 15,
+      fontWeight: 800
+    }
+  }, "\uD83D\uDCC8 \xC9volution du score"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: C.muted
+    }
+  }, recentScores.length, " derni\xE8res")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: "4px 0 0",
+      overflowX: "hidden"
+    }
+  }, /*#__PURE__*/React.createElement(Sparkline, {
+    scores: recentScores,
+    width: 380,
+    height: 52
+  })), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      fontSize: 10,
+      color: C.muted,
+      marginTop: 2
+    }
+  }, /*#__PURE__*/React.createElement("span", null, "Plus ancien"), /*#__PURE__*/React.createElement("span", null, "Plus r\xE9cent")), scoreTrend !== null && /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 10,
+      display: "flex",
+      gap: 8,
+      alignItems: "center",
+      flexWrap: "wrap"
+    }
+  }, function () {
+    var col = scoreTrend > 0 ? C.green : scoreTrend < 0 ? C.red : C.amber;
+    var icon = scoreTrend > 0 ? "▲" : scoreTrend < 0 ? "▼" : "→";
+    return /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 11,
+        padding: "4px 12px",
+        borderRadius: 99,
+        background: col + "18",
+        color: col,
+        fontWeight: 800,
+        border: "1px solid " + col + "33"
+      }
+    }, icon, " ", scoreTrend > 0 ? "+" : "", scoreTrend, " pts sur la p\xE9riode");
+  }(), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 11,
+      color: C.muted
+    }
+  }, "Min ", Math.min.apply(null, recentScores), " \xB7 Max ", Math.max.apply(null, recentScores)))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      margin: "14px 14px 0",
+      ...S.card(C.red + "25"),
+      background: "linear-gradient(140deg,#0F1420,#180A0A)"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      fontWeight: 800,
+      color: C.red,
+      letterSpacing: 1,
+      marginBottom: 12
+    }
+  }, "\u26A0 SITES LES PLUS CRITIQUES"), sitePens.slice(0, 5).map(function (s, i) {
+    return /*#__PURE__*/React.createElement("div", {
+      key: i,
+      style: {
+        display: "flex",
+        alignItems: "center",
+        gap: 10,
+        padding: "8px 10px",
+        background: i === 0 ? C.red + "08" : "transparent",
+        borderRadius: 10,
+        marginBottom: 4,
+        border: i === 0 ? "1px solid " + C.red + "22" : "none"
+      }
+    }, /*#__PURE__*/React.createElement(ScoreRing, {
+      score: s.score,
+      size: 42
+    }), /*#__PURE__*/React.createElement("div", {
+      style: {
+        flex: 1
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 13,
+        fontWeight: 700
+      }
+    }, s.site), /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 10,
+        color: C.muted
+      }
+    }, s.ins, " inspection(s) \xB7 p\xE9nalit\xE9 ", 100 - s.score, "pts")), /*#__PURE__*/React.createElement(Tag, {
+      label: s.score >= 80 ? "BON" : s.score >= 55 ? "MODÉRÉ" : "CRITIQUE",
+      color: scoreColor(s.score)
+    }));
+  })), catRisk.length > 0 && /*#__PURE__*/React.createElement("div", {
+    style: {
+      margin: "14px 14px 0",
+      ...S.card(C.orange + "22")
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 15,
+      fontWeight: 800,
+      marginBottom: 12
+    }
+  }, "\uD83C\uDFAF Cat\xE9gories les plus \xE0 risque"), catRisk.map(function (x, i) {
+    var m = CAT_META[x.cat] || {
+      icon: "📋",
+      color: C.cyan
+    };
+    return /*#__PURE__*/React.createElement("div", {
+      key: i,
+      style: {
+        display: "flex",
+        alignItems: "center",
+        gap: 10,
+        padding: "9px 10px",
+        borderRadius: 10,
+        marginBottom: 4,
+        border: "1px solid " + (i === 0 ? C.red + "44" : C.border),
+        background: i === 0 ? C.red + "08" : "transparent"
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        width: 38,
+        height: 38,
+        borderRadius: 10,
+        background: m.color + "18",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        fontSize: 18,
+        flexShrink: 0
+      }
+    }, m.icon), /*#__PURE__*/React.createElement("div", {
+      style: {
+        flex: 1,
+        minWidth: 0
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 13,
+        fontWeight: 700
+      }
+    }, x.cat), /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 10,
+        color: C.muted
+      }
+    }, x.ncCritique > 0 ? /*#__PURE__*/React.createElement("span", {
+      style: {
+        color: C.red,
+        fontWeight: 700
+      }
+    }, x.ncCritique, " NC critique", x.ncCritique > 1 ? "s" : "") : "Aucune NC critique")), /*#__PURE__*/React.createElement("div", {
+      style: {
+        textAlign: "right",
+        flexShrink: 0
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 18,
+        fontWeight: 900,
+        color: scoreColor(x.score)
+      }
+    }, x.score), /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 9,
+        color: C.muted
+      }
+    }, "/100")));
+  })), /*#__PURE__*/React.createElement("div", {
     style: {
       margin: "14px 14px 0",
       ...S.card()
@@ -2723,18 +3221,20 @@ function DashboardScreen({
       flexWrap: "wrap",
       marginBottom: 14
     }
-  }, CATEGORIES.map(c => {
-    const m = CAT_META[c];
+  }, CATEGORIES.map(function (c) {
+    var m = CAT_META[c];
     return /*#__PURE__*/React.createElement("button", {
       key: c,
-      onClick: () => setChartTab(c),
+      onClick: function () {
+        setChartTab(c);
+      },
       style: {
         flexShrink: 0,
         padding: "4px 9px",
         borderRadius: 99,
         border: "1px solid",
         borderColor: chartTab === c ? m.color : C.border,
-        background: chartTab === c ? `${m.color}15` : "transparent",
+        background: chartTab === c ? m.color + "15" : "transparent",
         color: chartTab === c ? m.color : C.muted,
         fontSize: 10,
         fontWeight: 700,
@@ -2833,10 +3333,14 @@ function DashboardScreen({
       fontWeight: 800,
       marginBottom: 12
     }
-  }, "Scores moyens par cat\xE9gorie"), CATEGORIES.map(c => {
-    const ins = inspections.filter(i => i.categorie === c);
-    const sc = ins.length ? Math.round(ins.reduce((s, i) => s + i.score, 0) / ins.length) : 100;
-    const m = CAT_META[c];
+  }, "Scores moyens par cat\xE9gorie"), CATEGORIES.map(function (c) {
+    var ins = inspections.filter(function (i) {
+      return i.categorie === c;
+    });
+    var sc = ins.length ? Math.round(ins.reduce(function (s, i) {
+      return s + i.score;
+    }, 0) / ins.length) : 100;
+    var m = CAT_META[c];
     return /*#__PURE__*/React.createElement("div", {
       key: c,
       style: {
@@ -2865,7 +3369,7 @@ function DashboardScreen({
   })), /*#__PURE__*/React.createElement("div", {
     style: {
       margin: "14px 14px 0",
-      ...S.card(`${C.red}22`)
+      ...S.card(C.red + "22")
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
@@ -2880,19 +3384,23 @@ function DashboardScreen({
       fontWeight: 800
     }
   }, "\u26A1 Actions urgentes"), /*#__PURE__*/React.createElement("button", {
-    onClick: () => onNav("actions"),
+    onClick: function () {
+      onNav("actions");
+    },
     style: {
       ...S.btn(C.cyan, true),
       width: "auto",
       padding: "5px 12px",
       fontSize: 11
     }
-  }, "Tout voir")), [...actions].filter(a => a.statut !== "Clôturée").sort((a, b) => {
+  }, "Tout voir")), [...actions].filter(function (a) {
+    return a.statut !== "Clôturée";
+  }).sort(function (a, b) {
     if (a.echeance && b.echeance) return a.echeance.localeCompare(b.echeance);
     return 0;
-  }).slice(0, 4).map((a, i) => {
-    const col = a.prio === "CRITIQUE" ? C.red : a.prio === "ÉLEVÉE" ? C.orange : C.amber;
-    const dl = a.echeance ? Math.ceil((new Date(a.echeance) - new Date()) / 86400000) : null;
+  }).slice(0, 4).map(function (a, i) {
+    var col = a.prio === "CRITIQUE" ? C.red : a.prio === "ÉLEVÉE" ? C.orange : C.amber;
+    var dl = a.echeance ? Math.ceil((new Date(a.echeance) - new Date()) / 86400000) : null;
     return /*#__PURE__*/React.createElement("div", {
       key: i,
       style: {
@@ -2943,7 +3451,7 @@ function DashboardScreen({
       style: {
         fontSize: 13,
         fontWeight: 900,
-        color: col
+        color: dl < 0 ? C.red : col
       }
     }, dl < 0 ? Math.abs(dl) + "j" : dl === 0 ? "Auj" : dl + "j"), /*#__PURE__*/React.createElement("div", {
       style: {
@@ -5063,8 +5571,7 @@ function NewInspectionScreen({
     categorie: CATEGORIES[0],
     notes: "",
     accompagnateurs: [],
-    adresse: siteAddresses && siteAddresses[siteOpts[0]] || "",
-    date: new Date().toISOString().split("T")[0]
+    adresse: siteAddresses && siteAddresses[siteOpts[0]] || ""
   });
   const [items, setItems] = useState([]);
   const [openSec, setOpenSec] = useState(null);
@@ -5114,7 +5621,7 @@ function NewInspectionScreen({
       score,
       nc: ncItems.length,
       statut: "En cours",
-      date: form.date || ds,
+      date: ds,
       inspecteur: user.nom,
       items,
       accompagnateurs: form.accompagnateurs || []
@@ -5222,19 +5729,6 @@ function NewInspectionScreen({
     onChange: e => setForm({
       ...form,
       titre: e.target.value
-    })
-  }), /*#__PURE__*/React.createElement("label", {
-    style: S.label
-  }, "Date"), /*#__PURE__*/React.createElement("input", {
-    type: "date",
-    style: {
-      ...S.input,
-      marginBottom: 14
-    },
-    value: form.date,
-    onChange: e => setForm({
-      ...form,
-      date: e.target.value
     })
   }), /*#__PURE__*/React.createElement("label", {
     style: S.label
@@ -5628,7 +6122,7 @@ function NewInspectionScreen({
       color: C.muted,
       marginBottom: 12
     }
-  }, "R\xE9capitulatif complet"), [["Titre", form.titre], ["Date", form.date || "—"], ["Site", form.site], ["Adresse", form.adresse || "—"], ["Accompagnateurs", form.accompagnateurs && form.accompagnateurs.length > 0 ? form.accompagnateurs.join(", ") : "—"], ["Catégorie", (CAT_META[form.categorie] && CAT_META[form.categorie].icon || "") + " " + form.categorie], ["Score final", score + "/100"], ["Pénalité totale", "-" + penTotal + "pts"], ["NC Critiques", ncItems.filter(function (i) {
+  }, "R\xE9capitulatif complet"), [["Titre", form.titre], ["Site", form.site], ["Adresse", form.adresse || "—"], ["Accompagnateurs", form.accompagnateurs && form.accompagnateurs.length > 0 ? form.accompagnateurs.join(", ") : "—"], ["Catégorie", (CAT_META[form.categorie] && CAT_META[form.categorie].icon || "") + " " + form.categorie], ["Score final", score + "/100"], ["Pénalité totale", "-" + penTotal + "pts"], ["NC Critiques", ncItems.filter(function (i) {
     return i.poids === "critique";
   }).length + " (" + ncItems.filter(function (i) {
     return i.poids === "critique";
@@ -7803,7 +8297,7 @@ function BottomNav({
 // ═══════════════════════════════════════════════════════════════════════
 // APP ROOT
 // ═══════════════════════════════════════════════════════════════════════
-function App() {
+export default function App() {
   const [user, setUser] = useState(null);
   const [screen, setScreen] = useState("dashboard");
   const [sub, setSub] = useState(null);
@@ -8540,7 +9034,6 @@ function App() {
     badge: pending
   }));
 }
-ReactDOM.createRoot(document.getElementById("root")).render(React.createElement(App));
 
   </script>
 </body>
