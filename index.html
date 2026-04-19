@@ -4037,16 +4037,16 @@ function ItemCard({
       cursor: "pointer",
       fontWeight: 700
     }
-  }, "\uD83D\uDCAC ", showComment ? "Cacher" : "Remarque"), onPoidsChange && [["critique", "CRIT", C.red], ["eleve", "ÉLEV", C.orange], ["mineur", "MOD", C.amber]].map(function (arr) {
+  }, "\uD83D\uDCAC ", showComment ? "Cacher" : "Remarque"), [["critique", "CRIT", C.red], ["eleve", "ÉLEV", C.orange], ["mineur", "MOD", C.amber]].map(function (arr) {
     var pv = arr[0],
       pl = arr[1],
       pc = arr[2];
-    var active = item.poids === pv;
+    var active = (item.poids || item.p || "mineur") === pv;
     return /*#__PURE__*/React.createElement("button", {
       key: pv,
       onClick: function (e) {
         e.stopPropagation();
-        onPoidsChange(pv);
+        if (onPoidsChange) onPoidsChange(pv);
       },
       style: {
         fontSize: 10,
