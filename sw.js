@@ -1,28 +1,30 @@
-// SECURA - Service Worker
-const CACHE_NAME = 'secura-v1';
-const ASSETS = [
-  '/',
-  '/index.html',
-  'https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js',
-  'https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js'
+// SECURA - Service Worker v2 - Network First
+const CACHE_NAME = 'secura-v' + Date.now();
+const CACHE_STATIC = 'secura-static-v2';
+
+// Ressources statiques CDN à mettre en cache
+const STATIC_ASSETS = [
+  'https://unpkg.com/react@18/umd/react.production.min.js',
+  'https://unpkg.com/react-dom@18/umd/react-dom.production.min.js',
+  'https://unpkg.com/@babel/standalone/babel.min.js',
 ];
 
-// Installation - mise en cache
+// Installation
 self.addEventListener('install', function(e){
   e.waitUntil(
-    caches.open(CACHE_NAME).then(function(cache){
-      return cache.addAll(ASSETS);
+    caches.open(CACHE_STATIC).then(function(cache){
+      return cache.addAll(STATIC_ASSETS).catch(function(){});
     })
   );
   self.skipWaiting();
 });
 
-// Activation - nettoyage ancien cache
+// Activation - supprime tous les anciens caches
 self.addEventListener('activate', function(e){
   e.waitUntil(
     caches.keys().then(function(keys){
       return Promise.all(
-        keys.filter(function(k){ return k !== CACHE_NAME; })
+        keys.filter(function(k){ return k !== CACHE_STATIC; })
             .map(function(k){ return caches.delete(k); })
       );
     })
@@ -30,24 +32,43 @@ self.addEventListener('activate', function(e){
   self.clients.claim();
 });
 
-// Fetch - cache d'abord, réseau ensuite
+// Fetch
 self.addEventListener('fetch', function(e){
-  // Ne pas intercepter les appels Supabase
-  if(e.request.url.includes('supabase.co')) return;
-  
-  e.respondWith(
-    caches.match(e.request).then(function(cached){
-      if(cached) return cached;
-      return fetch(e.request).then(function(response){
-        if(!response || response.status !== 200) return response;
-        var clone = response.clone();
-        caches.open(CACHE_NAME).then(function(cache){
-          cache.put(e.request, clone);
-        });
-        return response;
-      }).catch(function(){
+  var url = e.request.url;
+
+  // Ne jamais intercepter Supabase ni unpkg
+  if(url.includes('supabase.co') || url.includes('fonts.googleapis') || url.includes('fonts.gstatic')) return;
+
+  // index.html → TOUJOURS réseau d'abord, jamais de cache
+  if(url.includes('index.html') || url.endsWith('/') || (!url.includes('.') && !url.includes('unpkg'))){
+    e.respondWith(
+      fetch(e.request).catch(function(){
         return caches.match('/index.html');
-      });
+      })
+    );
+    return;
+  }
+
+  // Ressources CDN statiques → cache d'abord (elles ne changent pas)
+  if(url.includes('unpkg.com')){
+    e.respondWith(
+      caches.open(CACHE_STATIC).then(function(cache){
+        return cache.match(e.request).then(function(cached){
+          if(cached) return cached;
+          return fetch(e.request).then(function(response){
+            cache.put(e.request, response.clone());
+            return response;
+          });
+        });
+      })
+    );
+    return;
+  }
+
+  // Tout le reste → réseau d'abord
+  e.respondWith(
+    fetch(e.request).catch(function(){
+      return caches.match(e.request);
     })
   );
 });
