@@ -872,7 +872,7 @@ function DashboardScreen({user,inspections,actions,onNav,darkMode,onToggleDark,c
             });
           });
           var topNC=Object.values(ncMap).sort(function(a,b){return b.count-a.count;}).slice(0,5);
-          if(topNC.length===0) return <div style={{textAlign:"center",padding:"20px 0",color:C.muted}}><div style={{fontSize:24,marginBottom:8}}>📋</div><div style={{fontSize:13}}>Aucune NC enregistrée pour l&#39;instant</div></div>;
+          if(topNC.length===0) return <div style={{textAlign:"center",padding:"20px 0",color:C.muted}}><div style={{fontSize:13}}>Aucune NC enregistrée pour l&#39;instant</div></div>;
           var maxCount=topNC[0].count;
           return topNC.map(function(nc,i){
             var col=nc.poids==="critique"?C.red:nc.poids==="eleve"?C.orange:C.amber;
@@ -896,7 +896,6 @@ function DashboardScreen({user,inspections,actions,onNav,darkMode,onToggleDark,c
         })()}
       </div>
 
-
       {/* Répartition NC par criticité */}
       <div style={{margin:"14px 14px 0",...S.card()}}>
         <div style={{fontSize:15,fontWeight:800,marginBottom:4}}>🎯 Répartition NC par criticité</div>
@@ -915,34 +914,21 @@ function DashboardScreen({user,inspections,actions,onNav,darkMode,onToggleDark,c
           });
           var total=crit+elev+min;
           if(total===0) return <div style={{textAlign:"center",padding:"20px 0",color:C.muted}}><div style={{fontSize:13}}>Aucune NC enregistrée</div></div>;
-          var items=[
-            {label:"Critique",count:crit,col:C.red},
-            {label:"Élevé",count:elev,col:C.orange},
-            {label:"Mineur",count:min,col:C.amber}
-          ];
-          var r=54,cx=70,cy=70,stroke=18;
-          var circ=2*Math.PI*r;
-          var offset=0;
+          var items=[{label:"Critique",count:crit,col:C.red},{label:"Élevé",count:elev,col:C.orange},{label:"Mineur",count:min,col:C.amber}];
+          var r=54,cx=70,cy=70,circ=2*Math.PI*r,offset=0;
           var segments=items.map(function(it){
             var pct=total>0?it.count/total:0;
             var dash=pct*circ;
-            var seg={...it,dash:dash,offset:offset,pct:Math.round(pct*100)};
-            offset+=dash;
-            return seg;
+            var seg=Object.assign({},it,{dash:dash,offset:offset,pct:Math.round(pct*100)});
+            offset+=dash; return seg;
           });
           return (
             <div style={{display:"flex",alignItems:"center",gap:16}}>
               <svg width={140} height={140} viewBox="0 0 140 140">
-                <circle cx={cx} cy={cy} r={r} fill="none" stroke={C.dim} strokeWidth={stroke}/>
+                <circle cx={cx} cy={cy} r={r} fill="none" stroke={C.dim} strokeWidth={18}/>
                 {segments.map(function(seg,i){
                   if(seg.count===0) return null;
-                  return (
-                    <circle key={i} cx={cx} cy={cy} r={r} fill="none"
-                      stroke={seg.col} strokeWidth={stroke}
-                      strokeDasharray={seg.dash+" "+circ}
-                      strokeDashoffset={-seg.offset+circ/4}
-                      style={{filter:"drop-shadow(0 0 3px "+seg.col+"66)"}}/>
-                  );
+                  return <circle key={i} cx={cx} cy={cy} r={r} fill="none" stroke={seg.col} strokeWidth={18} strokeDasharray={seg.dash+" "+circ} strokeDashoffset={-seg.offset+circ/4} style={{filter:"drop-shadow(0 0 3px "+seg.col+"66)"}}/>;
                 })}
                 <text x={cx} y={cy-6} textAnchor="middle" fill={C.text} fontSize={22} fontWeight={900}>{total}</text>
                 <text x={cx} y={cy+12} textAnchor="middle" fill={C.muted} fontSize={10}>NC total</text>
@@ -1260,6 +1246,109 @@ function InspectionsScreen({inspections,onOpen,onNav,onDelete}){
   );
 }
 
+
+// ═══════════════════════════════════════════════════════════════════════
+// MESSAGES THREAD — commentaires contextuels par inspection
+// ═══════════════════════════════════════════════════════════════════════
+function MessagesThread({inspectionId, user}){
+  const [messages,setMessages]=useState([]);
+  const [texte,setTexte]=useState("");
+  const [loading,setLoading]=useState(true);
+  const [sending,setSending]=useState(false);
+  const bottomRef=useRef(null);
+
+  function loadMessages(){
+    fetch(SUPA_URL+"/rest/v1/messages?inspection_id=eq."+String(inspectionId)+"&order=created_at.asc&select=*",{
+      headers:{"apikey":SUPA_KEY,"Authorization":"Bearer "+SUPA_KEY}
+    }).then(function(r){return r.json();}).then(function(data){
+      if(Array.isArray(data)) setMessages(data);
+      setLoading(false);
+    }).catch(function(){setLoading(false);});
+  }
+
+  React.useEffect(function(){
+    loadMessages();
+    var interval=setInterval(loadMessages,10000);
+    return function(){clearInterval(interval);};
+  },[inspectionId]);
+
+  React.useEffect(function(){
+    if(bottomRef.current) bottomRef.current.scrollIntoView({behavior:"smooth"});
+  },[messages]);
+
+  function send(){
+    if(!texte.trim()||sending) return;
+    setSending(true);
+    var msg={inspection_id:String(inspectionId),user_nom:user.nom,user_avatar:user.avatar||user.nom.split(" ").map(function(n){return n[0];}).join("").slice(0,2).toUpperCase(),texte:texte.trim()};
+    fetch(SUPA_URL+"/rest/v1/messages",{
+      method:"POST",
+      headers:{"apikey":SUPA_KEY,"Authorization":"Bearer "+SUPA_KEY,"Content-Type":"application/json","Prefer":"return=minimal"},
+      body:JSON.stringify(msg)
+    }).then(function(){
+      setTexte("");
+      setSending(false);
+      loadMessages();
+    }).catch(function(){setSending(false);});
+  }
+
+  function fmtTime(ts){
+    if(!ts) return "";
+    var d=new Date(ts);
+    return d.toLocaleDateString("fr-BE",{day:"2-digit",month:"2-digit"})+" "+d.toLocaleTimeString("fr-BE",{hour:"2-digit",minute:"2-digit"});
+  }
+
+  var isMine=function(m){return m.user_nom===user.nom;};
+
+  return (
+    <div style={{margin:"16px 14px 0"}}>
+      <div style={{fontSize:14,fontWeight:800,marginBottom:10,display:"flex",alignItems:"center",gap:6}}>
+        <span>💬</span> Commentaires
+        {messages.length>0&&<span style={{fontSize:10,color:C.muted,fontWeight:400}}>({messages.length})</span>}
+      </div>
+      <div style={{background:C.surface,borderRadius:16,border:"1px solid "+C.border,overflow:"hidden"}}>
+        <div style={{maxHeight:280,overflowY:"auto",padding:"12px 12px 4px"}}>
+          {loading&&<div style={{textAlign:"center",padding:"20px 0",color:C.muted,fontSize:12}}>Chargement...</div>}
+          {!loading&&messages.length===0&&(
+            <div style={{textAlign:"center",padding:"20px 0",color:C.muted}}>
+              <div style={{fontSize:20,marginBottom:6}}>💬</div>
+              <div style={{fontSize:12}}>Aucun commentaire pour l&#39;instant</div>
+              <div style={{fontSize:11,marginTop:3,opacity:.6}}>Soyez le premier à commenter</div>
+            </div>
+          )}
+          {messages.map(function(m,i){
+            var mine=isMine(m);
+            return (
+              <div key={i} style={{display:"flex",flexDirection:"column",alignItems:mine?"flex-end":"flex-start",marginBottom:10}}>
+                {!mine&&<div style={{fontSize:10,color:C.muted,marginBottom:3,marginLeft:36}}>{m.user_nom}</div>}
+                <div style={{display:"flex",alignItems:"flex-end",gap:6,flexDirection:mine?"row-reverse":"row"}}>
+                  <div style={{width:28,height:28,borderRadius:99,background:mine?C.cyan+"22":C.purple+"22",border:"1px solid "+(mine?C.cyan:C.purple)+"44",display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,fontWeight:800,color:mine?C.cyan:C.purple,flexShrink:0}}>{m.user_avatar}</div>
+                  <div style={{maxWidth:"72%",padding:"9px 13px",borderRadius:mine?"16px 16px 4px 16px":"16px 16px 16px 4px",background:mine?"linear-gradient(135deg,"+C.cyan+"CC,"+C.cyan+"88)":"linear-gradient(135deg,"+C.card+","+C.surface+")",border:mine?"none":"1px solid "+C.border}}>
+                    <div style={{fontSize:13,color:mine?"#000":C.text,lineHeight:1.4}}>{m.texte}</div>
+                  </div>
+                </div>
+                <div style={{fontSize:9,color:C.muted,marginTop:3,marginLeft:mine?0:36,marginRight:mine?36:0}}>{fmtTime(m.created_at)}</div>
+              </div>
+            );
+          })}
+          <div ref={bottomRef}/>
+        </div>
+        <div style={{borderTop:"1px solid "+C.border,padding:"10px 12px",display:"flex",gap:8,alignItems:"center"}}>
+          <input
+            style={{flex:1,background:"transparent",border:"none",outline:"none",color:C.text,fontSize:13,padding:"4px 0"}}
+            placeholder="Écrire un commentaire..."
+            value={texte}
+            onChange={function(e){setTexte(e.target.value);}}
+            onKeyDown={function(e){if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();send();}}}
+          />
+          <button onClick={send} disabled={!texte.trim()||sending} style={{background:texte.trim()?C.cyan:"transparent",border:texte.trim()?"none":"1px solid "+C.border,borderRadius:10,width:36,height:36,display:"flex",alignItems:"center",justifyContent:"center",cursor:texte.trim()?"pointer":"default",fontSize:16,flexShrink:0,opacity:sending?0.5:1}}>
+            {sending?"⏳":"→"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ═══════════════════════════════════════════════════════════════════════
 // INSPECTION DETAIL
 // ═══════════════════════════════════════════════════════════════════════
@@ -1392,7 +1481,7 @@ function AddQuestionBtn({section, onAdd}){
 }
 
 
-function InspectionDetailScreen({inspection,onBack,onUpdate,resps,sitesState}){
+function InspectionDetailScreen({inspection,onBack,onUpdate,resps,sitesState,user}){
   const respList=(resps&&resps.length?resps:RESPONSABLES).map(function(r){return typeof r==="object"?r.nom:r;});
   const [items,setItems]=useState(inspection.items.map(i=>({...i,poids:i.poids||i.p||'mineur',photos:i.photos||[]})));
 
@@ -1554,6 +1643,7 @@ function InspectionDetailScreen({inspection,onBack,onUpdate,resps,sitesState}){
           )}
         </div>
       )}
+      <MessagesThread inspectionId={inspection.id} user={user}/>
       <div style={{padding:"12px 14px 0",display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
         <button onClick={save} style={{...S.btn(saved?C.green:C.cyan)}}>{saved?"✓ Sauvegardé":"Sauvegarder"}</button>
         <button onClick={()=>{
@@ -3098,7 +3188,7 @@ function App(){
       </svg>
       {sub==="detail"&&openIns&&(
         <div style={{position:"fixed",inset:0,background:bg,zIndex:200,overflowY:"auto",maxWidth:430,margin:"0 auto",WebkitOverflowScrolling:"touch"}}>
-          <InspectionDetailScreen inspection={openIns} onBack={()=>setSub(null)} onUpdate={updateIns} resps={respsState} sitesState={sitesState}/>
+          <InspectionDetailScreen inspection={openIns} onBack={()=>setSub(null)} onUpdate={updateIns} resps={respsState} sitesState={sitesState} user={user}/>
         </div>
       )}
       {sub==="new-inspection"&&(
