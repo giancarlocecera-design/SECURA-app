@@ -4045,6 +4045,7 @@ function ItemCard({
     return /*#__PURE__*/React.createElement("button", {
       key: pv,
       onClick: function () {
+        alert("click " + pv);
         if (onPoidsChange) onPoidsChange(pv);
       },
       style: {
