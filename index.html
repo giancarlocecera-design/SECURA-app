@@ -5553,29 +5553,7 @@ function NewInspectionScreen({
       color: C.muted,
       marginBottom: 12
     }
-  }, "R\xE9capitulatif complet"), /*#__PURE__*/React.createElement("div", {
-    style: {
-      background: C.amber + "18",
-      border: "1px solid " + C.amber + "44",
-      borderRadius: 10,
-      padding: "8px 12px",
-      marginBottom: 4,
-      display: "flex",
-      gap: 8,
-      alignItems: "center",
-      textAlign: "left"
-    }
-  }, /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 14
-    }
-  }, "\uD83D\uDCA1"), /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 11,
-      color: C.amber,
-      lineHeight: 1.4
-    }
-  }, "Apr\xE8s cr\xE9ation, rouvrez l'audit pour modifier la criticit\xE9 des questions.")), [["Titre", form.titre], ["Site", form.site], ["Adresse", form.adresse || "—"], ["Accompagnateurs", form.accompagnateurs && form.accompagnateurs.length > 0 ? form.accompagnateurs.join(", ") : "—"], ["Catégorie", (CAT_META[form.categorie] && CAT_META[form.categorie].icon || "") + " " + form.categorie], ["Score final", score + "/100"], ["Pénalité totale", "-" + penTotal + "pts"], ["NC Critiques", ncItems.filter(function (i) {
+  }, "R\xE9capitulatif complet"), [["Titre", form.titre], ["Site", form.site], ["Adresse", form.adresse || "—"], ["Accompagnateurs", form.accompagnateurs && form.accompagnateurs.length > 0 ? form.accompagnateurs.join(", ") : "—"], ["Catégorie", (CAT_META[form.categorie] && CAT_META[form.categorie].icon || "") + " " + form.categorie], ["Score final", score + "/100"], ["Pénalité totale", "-" + penTotal + "pts"], ["NC Critiques", ncItems.filter(function (i) {
     return i.poids === "critique";
   }).length + " (" + ncItems.filter(function (i) {
     return i.poids === "critique";
@@ -8491,4 +8469,4 @@ ReactDOM.createRoot(document.getElementById("root")).render(React.createElement(
 
   </script>
 </body>
-</html> 
+</html>
