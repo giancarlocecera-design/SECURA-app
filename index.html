@@ -4238,6 +4238,17 @@ function InspectionDetailScreen({
     poids: i.poids || i.p || 'mineur',
     photos: i.photos || []
   })));
+  const updatePoids = function (id, p) {
+    setItems(function (prev) {
+      return prev.map(function (i) {
+        return i.id === id ? {
+          ...i,
+          poids: p,
+          p: p
+        } : i;
+      });
+    });
+  };
   const [notes, setNotes] = useState(inspection.notes || "");
   const [saved, setSaved] = useState(false);
   const [openSec, setOpenSec] = useState(null);
@@ -5495,15 +5506,7 @@ function NewInspectionScreen({
           });
         },
         onPoidsChange: function (p) {
-          setItems(function (prev) {
-            return prev.map(function (i) {
-              return i.id === itemId ? {
-                ...i,
-                poids: p,
-                p: p
-              } : i;
-            });
-          });
+          updatePoids(itemId, p);
         },
         resps: respList
       });
