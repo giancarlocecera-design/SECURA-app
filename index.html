@@ -4047,7 +4047,13 @@ function ItemCard({
     return /*#__PURE__*/React.createElement("button", {
       key: pv,
       onClick: function () {
-        alert("BTN:" + pv + "|oc=" + typeof onPoidsChange + "|os=" + typeof onSetPoids);
+        if (onSetPoids) {
+          onSetPoids(pv);
+        } else if (onPoidsChange) {
+          onPoidsChange(pv);
+        } else if (onPoidsChangeDirect) {
+          onPoidsChangeDirect(String(item.id), pv);
+        }
       },
       style: {
         fontSize: 10,
@@ -4652,6 +4658,18 @@ function InspectionDetailScreen({
               return i.id === itemId ? {
                 ...i,
                 resp: v
+              } : i;
+            });
+          });
+        },
+        onSetPoids: function (p) {
+          var capturedId = itemId;
+          setItems(function (prev) {
+            return prev.map(function (i) {
+              return i.id === capturedId ? {
+                ...i,
+                poids: p,
+                p: p
               } : i;
             });
           });
