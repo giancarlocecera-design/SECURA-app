@@ -720,15 +720,15 @@ function DashboardScreen({user,inspections,actions,onNav,darkMode,onToggleDark,c
   function selectCat(c){
     setChartTab(c);
     setTimeout(function(){
-      var el=document.getElementById("chart-scroll");
-      if(!el) return;
-      var list=(sitesState&&sitesState.length>0)?sitesState:SITES;
-      var idx=list.findIndex(function(site){
-        return inspections.some(function(x){return x.site===site&&x.categorie===c;});
-      });
-      if(idx<0) idx=0;
-      el.scrollLeft=Math.max(0, idx*56-10);
-    },30);
+      var container=document.getElementById("chart-scroll");
+      if(!container) return;
+      var firstBar=container.querySelector('[data-hasdata="1"]');
+      if(firstBar){
+        container.scrollLeft=Math.max(0, firstBar.offsetLeft-10);
+      } else {
+        container.scrollLeft=0;
+      }
+    },120);
   }
 
   const avgScore=inspections.length?Math.round(inspections.reduce((s,i)=>s+i.score,0)/inspections.length):100;
@@ -818,7 +818,7 @@ function DashboardScreen({user,inspections,actions,onNav,darkMode,onToggleDark,c
               var ins=inspections.find(function(x){return x.site===site&&x.categorie===chartTab;});
               var v=ins?ins.score:0; var col=scoreColor(v);
               return (
-                <div key={i} style={{width:50,flexShrink:0,display:"flex",flexDirection:"column",alignItems:"center",gap:3,height:"100%",justifyContent:"flex-end"}}>
+                <div key={i} data-hasdata={v>0?"1":"0"} style={{width:50,flexShrink:0,display:"flex",flexDirection:"column",alignItems:"center",gap:3,height:"100%",justifyContent:"flex-end"}}>
                   <div style={{fontSize:9,fontWeight:800,color:v>0?col:C.muted}}>{v>0?v:"-"}</div>
                   <div style={{width:"100%",height:Math.max(v,6)+"%",borderRadius:"4px 4px 0 0",background:v>0?"linear-gradient(180deg,"+col+"BB,"+col+"22)":C.dim,transition:"height .6s"}}>{v>0&&<div style={{height:2,background:col}}/>}</div>
                   <div style={{fontSize:7,color:C.muted,textAlign:"center",lineHeight:1.1,width:50,wordBreak:"break-word"}}>{site}</div>
