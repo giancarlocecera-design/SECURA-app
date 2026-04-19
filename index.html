@@ -4046,7 +4046,7 @@ function ItemCard({
     return /*#__PURE__*/React.createElement("button", {
       key: pv,
       onClick: function () {
-        if (onPoidsChange) onPoidsChange(pv);else if (onPoidsChangeDirect) onPoidsChangeDirect(item.id, pv);
+        if (onPoidsChange) onPoidsChange(pv);else if (onPoidsChangeDirect) onPoidsChangeDirect(String(item.id), pv);
       },
       style: {
         fontSize: 10,
@@ -5497,10 +5497,10 @@ function NewInspectionScreen({
           });
         },
         onPoidsChange: function (p) {
-          var id = itemId;
+          var id = String(itemId);
           setItems(function (prev) {
             return prev.map(function (i) {
-              return i.id === id ? {
+              return String(i.id) === id ? {
                 ...i,
                 poids: p,
                 p: p
@@ -5511,7 +5511,7 @@ function NewInspectionScreen({
         onPoidsChangeDirect: function (id, p) {
           setItems(function (prev) {
             return prev.map(function (i) {
-              return i.id === id ? {
+              return String(i.id) === String(id) ? {
                 ...i,
                 poids: p,
                 p: p
