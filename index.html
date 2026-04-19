@@ -716,6 +716,19 @@ function LoginScreen({onLogin, users}){
 // ═══════════════════════════════════════════════════════════════════════
 function DashboardScreen({user,inspections,actions,onNav,darkMode,onToggleDark,config,sitesState,appState}){
   const [chartTab,setChartTab]=useState(CATEGORIES[0]);
+  const chartScrollRef=useRef(null);
+
+  React.useEffect(function(){
+    if(!chartScrollRef.current) return;
+    var list=(sitesState&&sitesState.length>0)?sitesState:SITES;
+    var idx=list.findIndex(function(site){
+      return inspections.some(function(x){return x.site===site&&x.categorie===chartTab;});
+    });
+    if(idx<0) idx=0;
+    var scrollTo=Math.max(0, idx*56 - 20);
+    chartScrollRef.current.scrollLeft=scrollTo;
+  },[chartTab]);
+
   const avgScore=inspections.length?Math.round(inspections.reduce((s,i)=>s+i.score,0)/inspections.length):100;
   const totalNC=inspections.reduce((s,i)=>s+i.nc,0);
   const critActs=actions.filter(a=>a.prio==="CRITIQUE"&&a.statut!=="Clôturée").length;
@@ -797,7 +810,7 @@ function DashboardScreen({user,inspections,actions,onNav,darkMode,onToggleDark,c
             <button key={c} onClick={()=>setChartTab(c)} style={{flexShrink:0,padding:"4px 9px",borderRadius:99,border:"1px solid",borderColor:chartTab===c?m.color:C.border,background:chartTab===c?`${m.color}15`:"transparent",color:chartTab===c?m.color:C.muted,fontSize:10,fontWeight:700,cursor:"pointer"}}>{m.icon} {c}</button>
           );})}
         </div>
-        <div style={{overflowX:"auto",WebkitOverflowScrolling:"touch",marginBottom:4}}>
+        <div ref={chartScrollRef} style={{overflowX:"auto",WebkitOverflowScrolling:"touch",marginBottom:4}}>
           <div style={{display:"flex",alignItems:"flex-end",gap:6,height:130,minWidth:Math.max(siteList.length*54,280)+"px"}}>
             {siteList.map(function(site,i){
               var ins=inspections.find(function(x){return x.site===site&&x.categorie===chartTab;});
