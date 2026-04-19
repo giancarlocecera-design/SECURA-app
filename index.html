@@ -722,9 +722,9 @@ function DashboardScreen({user,inspections,actions,onNav,darkMode,onToggleDark,c
     var idx=list.findIndex(function(site){
       return inspections.some(function(x){return x.site===site&&x.categorie===c;});
     });
+    ReactDOM.flushSync(function(){ setChartTab(c); });
     var container=document.getElementById("chart-scroll");
     if(container&&idx>0) container.scrollLeft=idx*56-10;
-    setChartTab(c);
   }
 
   const avgScore=inspections.length?Math.round(inspections.reduce((s,i)=>s+i.score,0)/inspections.length):100;
