@@ -2007,7 +2007,9 @@ function ActionsScreen({actions,onUpdate,resps,config,onConfigUpdate}){
     <div style={{paddingBottom:88}}>
       <div style={{padding:"20px 16px 12px",display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
         <div><div style={{fontSize:20,fontWeight:900}}>Actions urgentes</div><div style={{fontSize:12,color:C.muted,marginTop:2}}>{actions.filter(a=>a.statut!=="Clôturée").length} en cours</div></div>
-        <button onClick={function(){setShowRappels(true);}} style={{background:"linear-gradient(135deg,"+C.cyan+","+C.cyan+"BB)",border:"none",borderRadius:12,padding:"9px 14px",color:"#000",fontWeight:800,fontSize:12,cursor:"pointer",flexShrink:0,display:"flex",alignItems:"center",gap:6}}><span>📧</span> Rappels</button>
+        <button onClick={function(){setShowRappels(true);}} style={{background:"linear-gradient(135deg,"+C.cyan+",#007799)",border:"none",borderRadius:14,padding:"10px 16px",color:"#000",fontWeight:900,fontSize:13,cursor:"pointer",flexShrink:0,display:"flex",alignItems:"center",gap:7,boxShadow:"0 0 16px "+C.cyan+"55"}}>
+          <span style={{fontSize:18}}>📧</span><span>Rappels</span>
+        </button>
       </div>
       <div style={{padding:"0 14px 12px",display:"flex",gap:6,overflowX:"auto",WebkitOverflowScrolling:"touch"}}>
         {["En cours","À faire","Tout"].map(function(s){return <button key={s} onClick={function(){setFilter(s);}} style={{flexShrink:0,padding:"5px 11px",borderRadius:99,border:"1px solid",borderColor:filter===s?C.cyan:C.border,background:filter===s?C.cyan+"15":"transparent",color:filter===s?C.cyan:C.muted,fontSize:11,fontWeight:700,cursor:"pointer"}}>{s}</button>;})}
