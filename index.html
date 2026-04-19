@@ -714,8 +714,26 @@ function LoginScreen({onLogin, users}){
 // ═══════════════════════════════════════════════════════════════════════
 // DASHBOARD
 // ═══════════════════════════════════════════════════════════════════════
+var _chartEl = null;
+
 function DashboardScreen({user,inspections,actions,onNav,darkMode,onToggleDark,config,sitesState,appState}){
   const [chartTab,setChartTab]=useState(CATEGORIES[0]);
+
+  function selectCat(c){
+    var list=(sitesState&&sitesState.length>0)?sitesState:SITES;
+    var idx=list.findIndex(function(site){
+      return inspections.some(function(x){return x.site===site&&x.categorie===c;});
+    });
+    setChartTab(c);
+    function doScroll(){
+      if(!_chartEl||idx<=0) return;
+      var t=idx*56-10;
+      _chartEl.scrollLeft=t;
+      try{_chartEl.scrollTo({left:t,behavior:"instant"});}catch(e){}
+    }
+    setTimeout(doScroll,300);
+    setTimeout(doScroll,600);
+  }
   const avgScore=inspections.length?Math.round(inspections.reduce((s,i)=>s+i.score,0)/inspections.length):100;
   const totalNC=inspections.reduce((s,i)=>s+i.nc,0);
   const critActs=actions.filter(a=>a.prio==="CRITIQUE"&&a.statut!=="Clôturée").length;
@@ -794,28 +812,10 @@ function DashboardScreen({user,inspections,actions,onNav,darkMode,onToggleDark,c
         <div style={{fontSize:12,color:C.muted,marginBottom:12}}>Système pénalité : 100 − Σ déductions NC</div>
         <div style={{display:"flex",gap:5,flexWrap:"wrap",marginBottom:14}}>
           {CATEGORIES.map(c=>{const m=CAT_META[c]; return (
-            <button key={c} onClick={()=>setChartTab(c)} style={{flexShrink:0,padding:"4px 9px",borderRadius:99,border:"1px solid",borderColor:chartTab===c?m.color:C.border,background:chartTab===c?`${m.color}15`:"transparent",color:chartTab===c?m.color:C.muted,fontSize:10,fontWeight:700,cursor:"pointer"}}>{m.icon} {c}</button>
+            <button key={c} onClick={()=>selectCat(c)} style={{flexShrink:0,padding:"4px 9px",borderRadius:99,border:"1px solid",borderColor:chartTab===c?m.color:C.border,background:chartTab===c?`${m.color}15`:"transparent",color:chartTab===c?m.color:C.muted,fontSize:10,fontWeight:700,cursor:"pointer"}}>{m.icon} {c}</button>
           );})}
         </div>
-        {(function(){
-          var activeSites=siteList.filter(function(s){return inspections.some(function(x){return x.site===s&&x.categorie===chartTab;});});
-          if(activeSites.length===0) return null;
-          return (
-            <div style={{marginBottom:10,display:"flex",gap:6,flexWrap:"wrap"}}>
-              {activeSites.map(function(s,i){
-                var ins=inspections.find(function(x){return x.site===s&&x.categorie===chartTab;});
-                var col=scoreColor(ins.score);
-                return (
-                  <div key={i} style={{display:"flex",alignItems:"center",gap:8,padding:"7px 12px",borderRadius:10,background:col+"15",border:"1px solid "+col+"44"}}>
-                    <ScoreRing score={ins.score} size={36}/>
-                    <div><div style={{fontSize:12,fontWeight:800,color:C.text}}>{s}</div><div style={{fontSize:10,color:col}}>{ins.score}/100</div></div>
-                  </div>
-                );
-              })}
-            </div>
-          );
-        })()}
-        <div style={{overflowX:"auto",WebkitOverflowScrolling:"touch",marginBottom:4}}>
+        <div ref={function(el){_chartEl=el;}} style={{overflowX:"scroll",marginBottom:4}}>
           <div style={{display:"flex",alignItems:"flex-end",gap:6,height:130,minWidth:Math.max(siteList.length*54,280)+"px"}}>
             {siteList.map(function(site,i){
               var ins=inspections.find(function(x){return x.site===site&&x.categorie===chartTab;});
@@ -853,6 +853,50 @@ function DashboardScreen({user,inspections,actions,onNav,darkMode,onToggleDark,c
           );
         })}
       </div>
+
+
+      {/* Top NC récurrentes */}
+      {(function(){
+        var ncMap={};
+        inspections.forEach(function(ins){
+          (ins.items||[]).forEach(function(it){
+            if(!it.ok){
+              var key=it.id||it.l;
+              if(!ncMap[key]) ncMap[key]={label:it.l||it.id,poids:it.poids||it.p||"mineur",count:0,cats:{}};
+              ncMap[key].count++;
+              if(ins.categorie) ncMap[key].cats[ins.categorie]=true;
+            }
+          });
+        });
+        var topNC=Object.values(ncMap).sort(function(a,b){return b.count-a.count;}).slice(0,5);
+        if(topNC.length===0) return null;
+        var maxCount=topNC[0].count;
+        return (
+          <div style={{margin:"14px 14px 0",...S.card()}}>
+            <div style={{fontSize:15,fontWeight:800,marginBottom:4}}>🔁 Top NC récurrentes</div>
+            <div style={{fontSize:12,color:C.muted,marginBottom:12}}>Non-conformités les plus fréquentes tous sites confondus</div>
+            {topNC.map(function(nc,i){
+              var col=nc.poids==="critique"?C.red:nc.poids==="eleve"?C.orange:C.amber;
+              var pct=Math.round((nc.count/maxCount)*100);
+              return (
+                <div key={i} style={{marginBottom:10}}>
+                  <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:4}}>
+                    <div style={{flex:1,fontSize:12,fontWeight:600,paddingRight:8,lineHeight:1.3}}>{nc.label}</div>
+                    <div style={{display:"flex",alignItems:"center",gap:6,flexShrink:0}}>
+                      <span style={{fontSize:10,padding:"2px 7px",borderRadius:6,background:col+"20",color:col,fontWeight:800}}>{poidsLabel(nc.poids)}</span>
+                      <span style={{fontSize:13,fontWeight:900,color:col}}>{nc.count}x</span>
+                    </div>
+                  </div>
+                  <div style={{background:C.dim,borderRadius:99,height:5,overflow:"hidden"}}>
+                    <div style={{width:pct+"%",height:"100%",background:col,borderRadius:99,transition:"width .6s"}}/>
+                  </div>
+                  <div style={{fontSize:10,color:C.muted,marginTop:3}}>{Object.keys(nc.cats).join(" · ")||""}</div>
+                </div>
+              );
+            })}
+          </div>
+        );
+      })()}
 
       {/* Actions */}
       <div style={{margin:"14px 14px 0",...S.card(`${C.red}22`)}}>
