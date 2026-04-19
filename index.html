@@ -4044,8 +4044,7 @@ function ItemCard({
     var active = (item.poids || item.p || "mineur") === pv;
     return /*#__PURE__*/React.createElement("button", {
       key: pv,
-      onClick: function (e) {
-        e.stopPropagation();
+      onClick: function () {
         if (onPoidsChange) onPoidsChange(pv);
       },
       style: {
