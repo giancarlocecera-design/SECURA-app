@@ -722,13 +722,14 @@ function DashboardScreen({user,inspections,actions,onNav,darkMode,onToggleDark,c
     setTimeout(function(){
       var container=document.getElementById("chart-scroll");
       if(!container) return;
-      var firstBar=container.querySelector('[data-hasdata="1"]');
-      if(firstBar){
-        container.scrollLeft=Math.max(0, firstBar.offsetLeft-10);
-      } else {
-        container.scrollLeft=0;
+      var allBars=container.querySelectorAll("[data-hasdata]");
+      var idx=-1;
+      for(var i=0;i<allBars.length;i++){
+        if(allBars[i].getAttribute("data-hasdata")==="1"){idx=i;break;}
       }
-    },120);
+      if(idx>0) container.scrollLeft=idx*56-10;
+      else container.scrollLeft=0;
+    },200);
   }
 
   const avgScore=inspections.length?Math.round(inspections.reduce((s,i)=>s+i.score,0)/inspections.length):100;
