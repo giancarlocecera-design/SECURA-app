@@ -1842,17 +1842,31 @@ function RappelsScreen({actions,resps,config,onConfigUpdate,onBack}){
   var delai=(config&&config.rappelDelai)||7;
   const [editDelai,setEditDelai]=useState(false);
   const [tempDelai,setTempDelai]=useState(delai);
-  const [sent,setSent]=useState({});
-  const [dismissed,setDismissed]=useState({});
+
+  // Charger les IDs d'actions dont le rappel a été envoyé
+  const [dismissed,setDismissed]=useState(function(){
+    try{var d=localStorage.getItem("secura_rappels_sent");return d?JSON.parse(d):{};}catch(e){return {};}
+  });
+
+  function saveDismissed(newD){
+    setDismissed(newD);
+    try{localStorage.setItem("secura_rappels_sent",JSON.stringify(newD));}catch(e){}
+  }
 
   function getEmail(nom){
     var r=(resps||[]).find(function(r){return typeof r==="object"&&r.nom===nom;});
     return r&&r.email?r.email:"";
   }
 
+  // Nettoyer les entrées dont l'action est clôturée ou n'existe plus
+  var activeIds=actions.filter(function(a){return a.statut!=="Clôturée";}).map(function(a){return String(a.id);});
+  var cleanDismissed={};
+  Object.keys(dismissed).forEach(function(k){if(activeIds.indexOf(k)!==-1) cleanDismissed[k]=true;});
+
   var today=new Date(); today.setHours(0,0,0,0);
   var alertes=actions.filter(function(a){
     if(a.statut==="Clôturée"||!a.resp||!a.echeance) return false;
+    if(cleanDismissed[String(a.id)]) return false;
     return Math.ceil((new Date(a.echeance)-today)/86400000)<=delai;
   });
 
@@ -1861,7 +1875,7 @@ function RappelsScreen({actions,resps,config,onConfigUpdate,onBack}){
     if(!byResp[a.resp]) byResp[a.resp]={resp:a.resp,email:getEmail(a.resp),actions:[]};
     byResp[a.resp].actions.push(a);
   });
-  var groups=Object.values(byResp).filter(function(g){return !dismissed[g.resp];}).sort(function(a,b){return a.resp.localeCompare(b.resp);});
+  var groups=Object.values(byResp).sort(function(a,b){return a.resp.localeCompare(b.resp);});
 
   function buildMailto(group){
     var d=new Date().toLocaleDateString("fr-BE",{day:"2-digit",month:"2-digit",year:"numeric"});
@@ -1895,10 +1909,10 @@ function RappelsScreen({actions,resps,config,onConfigUpdate,onBack}){
   }
 
   function send(group){
-    setDismissed(function(p){var n=Object.assign({},p);n[group.resp]=true;return n;});
-    setTimeout(function(){
-      window.open(buildMailto(group),"_self");
-    },400);
+    var newD=Object.assign({},cleanDismissed);
+    group.actions.forEach(function(a){newD[String(a.id)]=true;});
+    saveDismissed(newD);
+    setTimeout(function(){window.open(buildMailto(group),"_self");},300);
   }
 
   return (
