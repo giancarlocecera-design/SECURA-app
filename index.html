@@ -22,7 +22,7 @@
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   <script type="text/babel" data-presets="react">
-console.log('SECURA chart-scroll v9 iPhone fix');
+console.log('SECURA chart-scroll v10 sort+reset');
 const { useState, useRef } = React;
 
 
@@ -721,20 +721,10 @@ function DashboardScreen({user,inspections,actions,onNav,darkMode,onToggleDark,c
   const [chartTab,setChartTab]=useState(CATEGORIES[0]);
 
   function selectCat(c){
-    var list=(sitesState&&sitesState.length>0)?sitesState:SITES;
-    var idx=list.findIndex(function(site){
-      return inspections.some(function(x){return x.site===site&&x.categorie===c;});
-    });
     setChartTab(c);
-    function doScroll(){
-      if(!_chartEl||idx<=0) return;
-      var t=idx*56-10;
-      _chartEl.scrollLeft=t;
-      try{_chartEl.scrollTo({left:t,behavior:"instant"});}catch(e){}
-    }
-    setTimeout(doScroll, 300);
-    setTimeout(doScroll, 600);
-    setTimeout(doScroll, 1000);
+    setTimeout(function(){
+      if(_chartEl) _chartEl.scrollLeft=0;
+    },50);
   }
   const avgScore=inspections.length?Math.round(inspections.reduce((s,i)=>s+i.score,0)/inspections.length):100;
   const totalNC=inspections.reduce((s,i)=>s+i.nc,0);
@@ -817,13 +807,17 @@ function DashboardScreen({user,inspections,actions,onNav,darkMode,onToggleDark,c
             <button key={c} onClick={()=>selectCat(c)} style={{flexShrink:0,padding:"4px 9px",borderRadius:99,border:"1px solid",borderColor:chartTab===c?m.color:C.border,background:chartTab===c?`${m.color}15`:"transparent",color:chartTab===c?m.color:C.muted,fontSize:10,fontWeight:700,cursor:"pointer"}}>{m.icon} {c}</button>
           );})}
         </div>
-        <div ref={function(el){_chartEl=el;}} style={{overflowX:"scroll",marginBottom:4}}>
+        <div ref={function(el){_chartEl=el;}} style={{overflowX:"auto",WebkitOverflowScrolling:"touch",marginBottom:4}}>
           <div style={{display:"flex",alignItems:"flex-end",gap:6,height:130,minWidth:Math.max(siteList.length*54,280)+"px"}}>
-            {siteList.map(function(site,i){
+            {[...siteList].sort(function(a,b){
+              var aHas=inspections.some(function(x){return x.site===a&&x.categorie===chartTab;})?1:0;
+              var bHas=inspections.some(function(x){return x.site===b&&x.categorie===chartTab;})?1:0;
+              return bHas-aHas;
+            }).map(function(site,i){
               var ins=inspections.find(function(x){return x.site===site&&x.categorie===chartTab;});
               var v=ins?ins.score:0; var col=scoreColor(v);
               return (
-                <div key={i} style={{width:50,flexShrink:0,display:"flex",flexDirection:"column",alignItems:"center",gap:3,height:"100%",justifyContent:"flex-end"}}>
+                <div key={site} style={{width:50,flexShrink:0,display:"flex",flexDirection:"column",alignItems:"center",gap:3,height:"100%",justifyContent:"flex-end"}}>
                   <div style={{fontSize:9,fontWeight:800,color:v>0?col:C.muted}}>{v>0?v:"-"}</div>
                   <div style={{width:"100%",height:Math.max(v,6)+"%",borderRadius:"4px 4px 0 0",background:v>0?"linear-gradient(180deg,"+col+"BB,"+col+"22)":C.dim,transition:"height .6s"}}>{v>0&&<div style={{height:2,background:col}}/>}</div>
                   <div style={{fontSize:7,color:C.muted,textAlign:"center",lineHeight:1.1,width:50,wordBreak:"break-word"}}>{site}</div>
