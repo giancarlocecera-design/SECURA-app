@@ -717,15 +717,7 @@ function LoginScreen({onLogin, users}){
 function DashboardScreen({user,inspections,actions,onNav,darkMode,onToggleDark,config,sitesState,appState}){
   const [chartTab,setChartTab]=useState(CATEGORIES[0]);
 
-  function selectCat(c){
-    var list=(sitesState&&sitesState.length>0)?sitesState:SITES;
-    var idx=list.findIndex(function(site){
-      return inspections.some(function(x){return x.site===site&&x.categorie===c;});
-    });
-    ReactDOM.flushSync(function(){ setChartTab(c); });
-    var container=document.getElementById("chart-scroll");
-    if(container&&idx>0) container.scrollLeft=idx*56-10;
-  }
+  function selectCat(c){ setChartTab(c); }
 
   const avgScore=inspections.length?Math.round(inspections.reduce((s,i)=>s+i.score,0)/inspections.length):100;
   const totalNC=inspections.reduce((s,i)=>s+i.nc,0);
@@ -810,7 +802,11 @@ function DashboardScreen({user,inspections,actions,onNav,darkMode,onToggleDark,c
         </div>
         <div id="chart-scroll" style={{overflowX:"auto",WebkitOverflowScrolling:"touch",marginBottom:4}}>
           <div style={{display:"flex",alignItems:"flex-end",gap:6,height:130,minWidth:Math.max(siteList.length*54,280)+"px"}}>
-            {siteList.map(function(site,i){
+            {[...siteList].sort(function(a,b){
+              var aHas=inspections.some(function(x){return x.site===a&&x.categorie===chartTab;})?1:0;
+              var bHas=inspections.some(function(x){return x.site===b&&x.categorie===chartTab;})?1:0;
+              return bHas-aHas;
+            }).map(function(site,i){
               var ins=inspections.find(function(x){return x.site===site&&x.categorie===chartTab;});
               var v=ins?ins.score:0; var col=scoreColor(v);
               return (
