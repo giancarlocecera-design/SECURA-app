@@ -4052,11 +4052,13 @@ function ItemCard({
         fontSize: 10,
         padding: "3px 7px",
         borderRadius: 7,
-        background: active ? pc + "22" : "transparent",
-        color: active ? pc : C.muted,
-        border: "1px solid " + (active ? pc + "55" : C.border),
-        fontWeight: active ? 800 : 400,
-        cursor: "pointer"
+        background: active ? pc + "33" : "#1E2535",
+        color: active ? pc : "#8892A4",
+        border: "1px solid " + (active ? pc + "66" : "#2E3545"),
+        fontWeight: active ? 800 : 500,
+        cursor: "pointer",
+        minWidth: 36,
+        textAlign: "center"
       }
     }, active ? "✓ " : "", pl);
   })), !item.ok && onRespChange && /*#__PURE__*/React.createElement("div", {
