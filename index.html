@@ -1854,10 +1854,213 @@ function NewInspectionScreen({user,onSave,onBack,resps,sitesState,customTemplate
 // ═══════════════════════════════════════════════════════════════════════
 // ACTIONS
 // ═══════════════════════════════════════════════════════════════════════
-function ActionsScreen({actions,onUpdate,resps}){
+
+// ═══════════════════════════════════════════════════════════════════════
+// RAPPELS SCREEN — envoi email des rappels d'actions par responsable
+// ═══════════════════════════════════════════════════════════════════════
+function RappelsScreen({actions, resps, config, onConfigUpdate, onBack}){
+  var delai=(config&&config.rappelDelai)||7;
+  const [editDelai,setEditDelai]=useState(false);
+  const [tempDelai,setTempDelai]=useState(delai);
+  const [sent,setSent]=useState({});
+
+  // Récupérer email d'un responsable
+  function getEmail(nom){
+    if(!resps||!resps.length) return "";
+    var r=(resps||[]).find(function(r){return typeof r==="object"&&r.nom===nom;});
+    return r?r.email||"":"";
+  }
+
+  // Actions concernées : non clôturées avec responsable et échéance dans <= delai jours
+  var today=new Date(); today.setHours(0,0,0,0);
+  var actionsAlertes=actions.filter(function(a){
+    if(a.statut==="Clôturée"||!a.resp||!a.echeance) return false;
+    var dl=Math.ceil((new Date(a.echeance)-today)/(86400000));
+    return dl<=delai;
+  });
+
+  // Grouper par responsable
+  var byResp={};
+  actionsAlertes.forEach(function(a){
+    if(!byResp[a.resp]) byResp[a.resp]={resp:a.resp,email:getEmail(a.resp),actions:[]};
+    byResp[a.resp].actions.push(a);
+  });
+  var groups=Object.values(byResp).sort(function(a,b){return a.resp.localeCompare(b.resp);});
+
+  function buildMailto(group){
+    var today=new Date().toLocaleDateString("fr-BE",{day:"2-digit",month:"2-digit",year:"numeric"});
+    var subject="SECURA — Rappel actions correctives — "+today;
+    var body="Bonjour "+group.resp.split(" ")[0]+",
+
+";
+    body+="Ce message est un rappel automatique concernant les actions correctives qui vous sont attribuées et dont l'échéance approche.
+
+";
+    body+="━━━━━━━━━━━━━━━━━━━━━━━━
+";
+    body+="VOS ACTIONS EN COURS
+";
+    body+="━━━━━━━━━━━━━━━━━━━━━━━━
+
+";
+    group.actions.forEach(function(a,i){
+      var dl=Math.ceil((new Date(a.echeance)-today)/(86400000));
+      var statut=dl<0?"⚠ EN RETARD DE "+Math.abs(dl)+" JOUR(S)":dl===0?"⚠ ÉCHÉANCE AUJOURD'HUI":"Échéance dans "+dl+" jour(s)";
+      body+=(i+1)+". "+a.label+"
+";
+      body+="   Site : "+a.site+"
+";
+      body+="   Priorité : "+a.prio+"
+";
+      body+="   "+statut+" ("+a.echeance+")
+
+";
+    });
+    body+="━━━━━━━━━━━━━━━━━━━━━━━━
+
+";
+    body+="Merci de bien vouloir traiter ces actions dans les meilleurs délais et de mettre à jour leur statut dans l'application SECURA.
+
+";
+    body+="Cordialement,
+";
+    body+="L'équipe Prévention & Sécurité
+";
+    body+="[Envoyé via SECURA]
+";
+    return "mailto:"+group.email+"?subject="+encodeURIComponent(subject)+"&body="+encodeURIComponent(body);
+  }
+
+  function sendRappel(group){
+    window.location.href=buildMailto(group);
+    setSent(function(prev){var n=Object.assign({},prev);n[group.resp]=true;return n;});
+    setTimeout(function(){setSent(function(prev){var n=Object.assign({},prev);delete n[group.resp];return n;});},4000);
+  }
+
+  return (
+    <div style={{paddingBottom:88}}>
+      {/* Header */}
+      <div style={{padding:"20px 16px 12px",display:"flex",alignItems:"center",gap:10}}>
+        <button onClick={onBack} style={{background:C.surface,border:"1px solid "+C.border,borderRadius:10,padding:"8px 12px",color:C.cyan,cursor:"pointer",fontSize:13,fontWeight:700,flexShrink:0}}>← Retour</button>
+        <div>
+          <div style={{fontSize:18,fontWeight:900}}>📧 Rappels</div>
+          <div style={{fontSize:11,color:C.muted}}>Envoi des rappels aux responsables</div>
+        </div>
+      </div>
+
+      {/* Paramètre délai */}
+      <div style={{margin:"0 14px 14px",...S.card(C.cyan+"22")}}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+          <div>
+            <div style={{fontSize:13,fontWeight:700}}>⏰ Délai de rappel</div>
+            <div style={{fontSize:11,color:C.muted,marginTop:2}}>Actions dont l'échéance est dans ≤ {delai} jour(s)</div>
+          </div>
+          {!editDelai?(
+            <button onClick={function(){setEditDelai(true);setTempDelai(delai);}} style={{...S.btn(C.cyan,true),width:"auto",padding:"6px 14px",fontSize:12}}>
+              {delai}j ✏️
+            </button>
+          ):(
+            <div style={{display:"flex",gap:8,alignItems:"center"}}>
+              <input type="number" min="1" max="90" value={tempDelai}
+                onChange={function(e){setTempDelai(parseInt(e.target.value)||1);}}
+                style={{...S.input,width:60,textAlign:"center",padding:"6px 8px",fontSize:14,fontWeight:800}}/>
+              <button onClick={function(){
+                onConfigUpdate&&onConfigUpdate(Object.assign({},config,{rappelDelai:tempDelai}));
+                setEditDelai(false);
+              }} style={{...S.btn(C.green),width:"auto",padding:"6px 14px",fontSize:12}}>✓</button>
+              <button onClick={function(){setEditDelai(false);}} style={{...S.btn(C.muted,true),width:"auto",padding:"6px 10px",fontSize:12}}>✕</button>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Aucune action */}
+      {groups.length===0&&(
+        <div style={{textAlign:"center",padding:"50px 20px",color:C.muted}}>
+          <div style={{fontSize:36,marginBottom:12}}>✅</div>
+          <div style={{fontSize:14,fontWeight:700,marginBottom:6}}>Aucun rappel nécessaire</div>
+          <div style={{fontSize:12}}>Aucune action n'arrive à échéance dans les {delai} prochains jours.</div>
+        </div>
+      )}
+
+      {/* Groupes par responsable */}
+      <div style={{padding:"0 14px"}}>
+        {groups.map(function(group,gi){
+          var hasEmail=!!group.email;
+          var hasSent=!!sent[group.resp];
+          var retard=group.actions.filter(function(a){return Math.ceil((new Date(a.echeance)-today)/(86400000))<0;}).length;
+          var critique=group.actions.filter(function(a){return a.prio==="CRITIQUE";}).length;
+          var initials=(group.resp||"?").split(" ").map(function(n){return n[0];}).join("").slice(0,2).toUpperCase();
+
+          return (
+            <div key={gi} style={{...S.card(),marginBottom:14}}>
+              {/* En-tête */}
+              <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:12,paddingBottom:12,borderBottom:"1px solid "+C.border}}>
+                <div style={{width:44,height:44,borderRadius:13,background:C.cyan+"18",border:"1px solid "+C.cyan+"33",display:"flex",alignItems:"center",justifyContent:"center",fontSize:14,fontWeight:900,color:C.cyan,flexShrink:0}}>{initials}</div>
+                <div style={{flex:1,minWidth:0}}>
+                  <div style={{fontSize:14,fontWeight:800}}>{group.resp}</div>
+                  <div style={{fontSize:11,color:hasEmail?C.muted:C.red,marginTop:1,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>
+                    {hasEmail?group.email:"⚠ Email manquant — configurer dans Paramètres"}
+                  </div>
+                </div>
+                <div style={{textAlign:"right",flexShrink:0}}>
+                  <div style={{fontSize:20,fontWeight:900,color:C.cyan}}>{group.actions.length}</div>
+                  <div style={{fontSize:9,color:C.muted}}>action(s)</div>
+                </div>
+              </div>
+
+              {/* Alertes */}
+              {(retard>0||critique>0)&&(
+                <div style={{display:"flex",gap:6,marginBottom:10,flexWrap:"wrap"}}>
+                  {retard>0&&<span style={{fontSize:10,padding:"3px 9px",borderRadius:6,background:C.red+"18",color:C.red,fontWeight:700}}>⚠ {retard} en retard</span>}
+                  {critique>0&&<span style={{fontSize:10,padding:"3px 9px",borderRadius:6,background:C.orange+"18",color:C.orange,fontWeight:700}}>🔴 {critique} critique{critique>1?"s":""}</span>}
+                </div>
+              )}
+
+              {/* Liste actions */}
+              {group.actions.map(function(a,ai){
+                var col=a.prio==="CRITIQUE"?C.red:a.prio==="ÉLEVÉE"?C.orange:C.amber;
+                var dl=Math.ceil((new Date(a.echeance)-today)/(86400000));
+                var dlCol=dl<0?C.red:dl<=3?C.orange:C.muted;
+                var dlTxt=dl<0?"⚠ "+Math.abs(dl)+"j retard":dl===0?"Aujourd'hui":"+"+dl+"j";
+                return (
+                  <div key={ai} style={{display:"flex",gap:10,padding:"8px 0",borderBottom:ai<group.actions.length-1?"1px solid "+C.dim:"none",alignItems:"flex-start"}}>
+                    <div style={{width:6,height:6,borderRadius:99,background:col,marginTop:5,flexShrink:0}}/>
+                    <div style={{flex:1,minWidth:0}}>
+                      <div style={{fontSize:12,fontWeight:600,lineHeight:1.3,marginBottom:3}}>{a.label}</div>
+                      <div style={{display:"flex",gap:6,alignItems:"center",flexWrap:"wrap"}}>
+                        <span style={{fontSize:9,padding:"1px 6px",borderRadius:5,background:col+"18",color:col,fontWeight:800}}>{a.prio}</span>
+                        <span style={{fontSize:10,color:C.muted}}>📍 {a.site}</span>
+                        <span style={{fontSize:10,color:dlCol,fontWeight:dl<0?800:400}}>{dlTxt}</span>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+
+              {/* Bouton envoi */}
+              <button onClick={function(){sendRappel(group);}} disabled={!hasEmail}
+                style={{marginTop:14,width:"100%",padding:"13px",borderRadius:12,
+                  background:hasSent?"linear-gradient(135deg,"+C.green+","+C.green+"BB)":hasEmail?"linear-gradient(135deg,"+C.cyan+","+C.cyan+"BB)":C.dim,
+                  border:"none",color:hasEmail?"#000":C.muted,fontWeight:800,fontSize:13,
+                  cursor:hasEmail?"pointer":"default",display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
+                <span>{hasSent?"✅":"📧"}</span>
+                {hasSent?"Email ouvert !":"Envoyer rappel à "+group.resp.split(" ")[0]}
+              </button>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function ActionsScreen({actions,onUpdate,resps,config,onConfigUpdate}){
   const respList=(resps&&resps.length?resps:RESPONSABLES).map(function(r){return typeof r==="object"?r.nom:r;});
   const [filter,setFilter]=useState("Tout");
   const [editRespId,setEditRespId]=useState(null);
+  const [showRappels,setShowRappels]=useState(false);
+  if(showRappels) return <RappelsScreen actions={actions} resps={resps} config={config} onConfigUpdate={onConfigUpdate} onBack={function(){setShowRappels(false);}} />;
   const sorted=[...actions].sort((a,b)=>{
     if(a.echeance&&b.echeance) return a.echeance.localeCompare(b.echeance);
     if(a.echeance) return -1; if(b.echeance) return 1; return 0;
@@ -1872,7 +2075,15 @@ function ActionsScreen({actions,onUpdate,resps}){
   };
   return (
     <div style={{paddingBottom:88}}>
-      <div style={{padding:"20px 16px 12px"}}><div style={{fontSize:20,fontWeight:900}}>Actions urgentes</div><div style={{fontSize:12,color:C.muted,marginTop:2}}>{actions.filter(a=>a.statut!=="Clôturée").length} en cours · triées par échéance</div></div>
+      <div style={{padding:"20px 16px 12px",display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
+        <div>
+          <div style={{fontSize:20,fontWeight:900}}>Actions urgentes</div>
+          <div style={{fontSize:12,color:C.muted,marginTop:2}}>{actions.filter(a=>a.statut!=="Clôturée").length} en cours · triées par échéance</div>
+        </div>
+        <button onClick={function(){setShowRappels(true);}} style={{background:"linear-gradient(135deg,"+C.cyan+","+C.cyan+"BB)",border:"none",borderRadius:12,padding:"9px 14px",color:"#000",fontWeight:800,fontSize:12,cursor:"pointer",flexShrink:0,display:"flex",alignItems:"center",gap:6}}>
+          <span>📧</span> Rappels
+        </button>
+      </div>
       <div style={{padding:"0 14px 12px",display:"flex",gap:6,overflowX:"auto",WebkitOverflowScrolling:"touch"}}>
         {["En cours","À faire","Tout"].map(function(s){return <button key={s} onClick={function(){setFilter(s);}} style={{flexShrink:0,padding:"5px 11px",borderRadius:99,border:"1px solid",borderColor:filter===s?C.cyan:C.border,background:filter===s?C.cyan+"15":"transparent",color:filter===s?C.cyan:C.muted,fontSize:11,fontWeight:700,cursor:"pointer"}}>{s}</button>;})}
       </div>
@@ -2827,6 +3038,7 @@ function App(){
     compactMode:false,
     daltonMode:"normal",
     notificationsEnabled:false,
+    rappelDelai:7,
   });
   const [appState,setAppState]=useState({sites:SITES_DEFAULT,resps:RESPONSABLES_DEFAULT,penalites:{critique:5,eleve:3,mineur:1},delais:{critique:0,eleve:60,mineur:120},customTemplates:{},siteAddresses:{}});
   const [respsState,setRespsState]=useState([...RESPONSABLES_DEFAULT]);
@@ -3105,7 +3317,7 @@ function App(){
       <div style={{overflowY:"auto",height:"100vh",paddingBottom:70}}>
         {screen==="dashboard"   &&<DashboardScreen user={user} inspections={inspections} actions={actions} onNav={nav} darkMode={darkMode} onToggleDark={()=>setDarkMode(d=>!d)} config={config} sitesState={sitesState} appState={appState}/>}
         {screen==="inspections" &&<InspectionsScreen inspections={inspections} onOpen={openDetail} onNav={nav} onDelete={deleteIns}/>}
-        {screen==="actions"     &&<ActionsScreen actions={actions} onUpdate={updateAct} resps={respsState}/>}
+        {screen==="actions"     &&<ActionsScreen actions={actions} onUpdate={updateAct} resps={respsState} config={config} onConfigUpdate={saveConfig}/>}
         {screen==="rapports"    &&<RapportsScreen inspections={inspections} onDelete={deleteIns}/>}
         {screen==="settings"    &&<SettingsScreen user={user} onLogout={()=>{setUser(null);setScreen("dashboard");}} config={config} onConfigUpdate={saveConfig} appState={appState} respsState={respsState} sitesState={sitesState} onAppStateUpdate={handleAppStateUpdate}/>}
       </div>
