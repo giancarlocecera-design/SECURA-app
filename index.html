@@ -2428,18 +2428,6 @@ function DashboardScreen({
   appState
 }) {
   const [chartTab, setChartTab] = useState(CATEGORIES[0]);
-  const chartRef = useRef(null);
-  function selectCat(c) {
-    setChartTab(c);
-    setTimeout(function () {
-      if (chartRef.current) {
-        chartRef.current.scrollIntoView({
-          behavior: "smooth",
-          block: "start"
-        });
-      }
-    }, 60);
-  }
   const avgScore = inspections.length ? Math.round(inspections.reduce((s, i) => s + i.score, 0) / inspections.length) : 100;
   const totalNC = inspections.reduce((s, i) => s + i.nc, 0);
   const critActs = actions.filter(a => a.prio === "CRITIQUE" && a.statut !== "Clôturée").length;
@@ -2709,7 +2697,6 @@ function DashboardScreen({
       color: "rgba(0,0,0,.35)"
     }
   }, "\u2192"))), /*#__PURE__*/React.createElement("div", {
-    ref: chartRef,
     style: {
       margin: "14px 14px 0",
       ...S.card()
@@ -2748,8 +2735,7 @@ function DashboardScreen({
         color: chartTab === c ? m.color : C.muted,
         fontSize: 10,
         fontWeight: 700,
-        cursor: "pointer",
-        transition: "all .2s"
+        cursor: "pointer"
       }
     }, m.icon, " ", c);
   })), /*#__PURE__*/React.createElement("div", {
@@ -2840,93 +2826,39 @@ function DashboardScreen({
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
-      display: "flex",
-      justifyContent: "space-between",
-      alignItems: "center",
+      fontSize: 15,
+      fontWeight: 800,
       marginBottom: 12
     }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 15,
-      fontWeight: 800
-    }
-  }, "Scores moyens par cat\xE9gorie"), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 10,
-      color: C.muted,
-      display: "flex",
-      alignItems: "center",
-      gap: 4
-    }
-  }, /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 11
-    }
-  }, "\u261D\uFE0F"), " Toucher pour filtrer")), CATEGORIES.map(c => {
+  }, "Scores moyens par cat\xE9gorie"), CATEGORIES.map(c => {
     const ins = inspections.filter(i => i.categorie === c);
     const sc = ins.length ? Math.round(ins.reduce((s, i) => s + i.score, 0) / ins.length) : 100;
     const m = CAT_META[c];
-    const active = chartTab === c;
     return /*#__PURE__*/React.createElement("div", {
       key: c,
-      onClick: () => selectCat(c),
       style: {
-        marginBottom: 8,
-        padding: "9px 11px",
-        borderRadius: 12,
-        border: "1px solid",
-        borderColor: active ? m.color + "55" : C.border,
-        background: active ? m.color + "0D" : "transparent",
-        cursor: "pointer",
-        transition: "all .2s"
+        marginBottom: 10
       }
     }, /*#__PURE__*/React.createElement("div", {
       style: {
         display: "flex",
         justifyContent: "space-between",
-        alignItems: "center",
-        marginBottom: 5
+        marginBottom: 3
       }
     }, /*#__PURE__*/React.createElement("span", {
       style: {
-        fontSize: 13,
-        fontWeight: active ? 800 : 500,
-        color: active ? m.color : C.text
+        fontSize: 13
       }
-    }, m.icon, " ", c), /*#__PURE__*/React.createElement("div", {
-      style: {
-        display: "flex",
-        alignItems: "center",
-        gap: 7
-      }
-    }, /*#__PURE__*/React.createElement("span", {
+    }, m.icon, " ", c), /*#__PURE__*/React.createElement("span", {
       style: {
         fontSize: 12,
         fontWeight: 800,
         color: scoreColor(sc)
       }
-    }, sc, "/100"), active && /*#__PURE__*/React.createElement("span", {
-      style: {
-        fontSize: 10,
-        color: m.color,
-        fontWeight: 700,
-        padding: "2px 7px",
-        borderRadius: 99,
-        background: m.color + "15",
-        border: "1px solid " + m.color + "44"
-      }
-    }, "\u2605 actif"))), /*#__PURE__*/React.createElement(Bar, {
+    }, sc, "/100")), /*#__PURE__*/React.createElement(Bar, {
       v: sc,
-      col: active ? m.color : scoreColor(sc),
-      h: active ? 7 : 5
-    }), active && /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontSize: 10,
-        color: m.color,
-        marginTop: 5,
-        opacity: .75
-      }
-    }, "\u2191 graphique filtr\xE9 sur cette cat\xE9gorie"));
+      col: scoreColor(sc)
+    }));
   })), /*#__PURE__*/React.createElement("div", {
     style: {
       margin: "14px 14px 0",
