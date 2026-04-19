@@ -716,24 +716,20 @@ function LoginScreen({onLogin, users}){
 // ═══════════════════════════════════════════════════════════════════════
 function DashboardScreen({user,inspections,actions,onNav,darkMode,onToggleDark,config,sitesState,appState}){
   const [chartTab,setChartTab]=useState(CATEGORIES[0]);
-  const chartScrollRef=useRef(null);
 
-  React.useEffect(function(){
+  function selectCat(c){
+    setChartTab(c);
     setTimeout(function(){
-      if(!chartScrollRef.current) return;
+      var el=document.getElementById("chart-scroll");
+      if(!el) return;
       var list=(sitesState&&sitesState.length>0)?sitesState:SITES;
       var idx=list.findIndex(function(site){
-        return inspections.some(function(x){return x.site===site&&x.categorie===chartTab;});
+        return inspections.some(function(x){return x.site===site&&x.categorie===c;});
       });
       if(idx<0) idx=0;
-      var scrollTo=Math.max(0, idx*56 - 10);
-      try{
-        chartScrollRef.current.scrollTo({left:scrollTo,behavior:"smooth"});
-      }catch(e){
-        chartScrollRef.current.scrollLeft=scrollTo;
-      }
-    },80);
-  },[chartTab,inspections,sitesState]);
+      el.scrollLeft=Math.max(0, idx*56-10);
+    },30);
+  }
 
   const avgScore=inspections.length?Math.round(inspections.reduce((s,i)=>s+i.score,0)/inspections.length):100;
   const totalNC=inspections.reduce((s,i)=>s+i.nc,0);
@@ -813,10 +809,10 @@ function DashboardScreen({user,inspections,actions,onNav,darkMode,onToggleDark,c
         <div style={{fontSize:12,color:C.muted,marginBottom:12}}>Système pénalité : 100 − Σ déductions NC</div>
         <div style={{display:"flex",gap:5,flexWrap:"wrap",marginBottom:14}}>
           {CATEGORIES.map(c=>{const m=CAT_META[c]; return (
-            <button key={c} onClick={()=>setChartTab(c)} style={{flexShrink:0,padding:"4px 9px",borderRadius:99,border:"1px solid",borderColor:chartTab===c?m.color:C.border,background:chartTab===c?`${m.color}15`:"transparent",color:chartTab===c?m.color:C.muted,fontSize:10,fontWeight:700,cursor:"pointer"}}>{m.icon} {c}</button>
+            <button key={c} onClick={()=>selectCat(c)} style={{flexShrink:0,padding:"4px 9px",borderRadius:99,border:"1px solid",borderColor:chartTab===c?m.color:C.border,background:chartTab===c?`${m.color}15`:"transparent",color:chartTab===c?m.color:C.muted,fontSize:10,fontWeight:700,cursor:"pointer"}}>{m.icon} {c}</button>
           );})}
         </div>
-        <div ref={chartScrollRef} style={{overflowX:"auto",WebkitOverflowScrolling:"touch",marginBottom:4}}>
+        <div id="chart-scroll" style={{overflowX:"auto",WebkitOverflowScrolling:"touch",marginBottom:4}}>
           <div style={{display:"flex",alignItems:"flex-end",gap:6,height:130,minWidth:Math.max(siteList.length*54,280)+"px"}}>
             {siteList.map(function(site,i){
               var ins=inspections.find(function(x){return x.site===site&&x.categorie===chartTab;});
