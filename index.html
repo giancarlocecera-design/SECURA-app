@@ -719,15 +719,21 @@ function DashboardScreen({user,inspections,actions,onNav,darkMode,onToggleDark,c
   const chartScrollRef=useRef(null);
 
   React.useEffect(function(){
-    if(!chartScrollRef.current) return;
-    var list=(sitesState&&sitesState.length>0)?sitesState:SITES;
-    var idx=list.findIndex(function(site){
-      return inspections.some(function(x){return x.site===site&&x.categorie===chartTab;});
-    });
-    if(idx<0) idx=0;
-    var scrollTo=Math.max(0, idx*56 - 20);
-    chartScrollRef.current.scrollLeft=scrollTo;
-  },[chartTab]);
+    setTimeout(function(){
+      if(!chartScrollRef.current) return;
+      var list=(sitesState&&sitesState.length>0)?sitesState:SITES;
+      var idx=list.findIndex(function(site){
+        return inspections.some(function(x){return x.site===site&&x.categorie===chartTab;});
+      });
+      if(idx<0) idx=0;
+      var scrollTo=Math.max(0, idx*56 - 10);
+      try{
+        chartScrollRef.current.scrollTo({left:scrollTo,behavior:"smooth"});
+      }catch(e){
+        chartScrollRef.current.scrollLeft=scrollTo;
+      }
+    },80);
+  },[chartTab,inspections,sitesState]);
 
   const avgScore=inspections.length?Math.round(inspections.reduce((s,i)=>s+i.score,0)/inspections.length):100;
   const totalNC=inspections.reduce((s,i)=>s+i.nc,0);
