@@ -800,7 +800,7 @@ function DashboardScreen({user,inspections,actions,onNav,darkMode,onToggleDark,c
             <button key={c} onClick={()=>selectCat(c)} style={{flexShrink:0,padding:"4px 9px",borderRadius:99,border:"1px solid",borderColor:chartTab===c?m.color:C.border,background:chartTab===c?`${m.color}15`:"transparent",color:chartTab===c?m.color:C.muted,fontSize:10,fontWeight:700,cursor:"pointer"}}>{m.icon} {c}</button>
           );})}
         </div>
-        <div id="chart-scroll" style={{overflowX:"auto",WebkitOverflowScrolling:"touch",marginBottom:4}}>
+        <div key={chartTab} id="chart-scroll" style={{overflowX:"auto",WebkitOverflowScrolling:"touch",marginBottom:4}}>
           <div style={{display:"flex",alignItems:"flex-end",gap:6,height:130,minWidth:Math.max(siteList.length*54,280)+"px"}}>
             {[...siteList].sort(function(a,b){
               var aHas=inspections.some(function(x){return x.site===a&&x.categorie===chartTab;})?1:0;
@@ -810,7 +810,7 @@ function DashboardScreen({user,inspections,actions,onNav,darkMode,onToggleDark,c
               var ins=inspections.find(function(x){return x.site===site&&x.categorie===chartTab;});
               var v=ins?ins.score:0; var col=scoreColor(v);
               return (
-                <div key={i} data-hasdata={v>0?"1":"0"} style={{width:50,flexShrink:0,display:"flex",flexDirection:"column",alignItems:"center",gap:3,height:"100%",justifyContent:"flex-end"}}>
+                <div key={site} data-hasdata={v>0?"1":"0"} style={{width:50,flexShrink:0,display:"flex",flexDirection:"column",alignItems:"center",gap:3,height:"100%",justifyContent:"flex-end"}}>
                   <div style={{fontSize:9,fontWeight:800,color:v>0?col:C.muted}}>{v>0?v:"-"}</div>
                   <div style={{width:"100%",height:Math.max(v,6)+"%",borderRadius:"4px 4px 0 0",background:v>0?"linear-gradient(180deg,"+col+"BB,"+col+"22)":C.dim,transition:"height .6s"}}>{v>0&&<div style={{height:2,background:col}}/>}</div>
                   <div style={{fontSize:7,color:C.muted,textAlign:"center",lineHeight:1.1,width:50,wordBreak:"break-word"}}>{site}</div>
