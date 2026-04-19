@@ -895,7 +895,6 @@ function DashboardScreen({user,inspections,actions,onNav,darkMode,onToggleDark,c
           });
         })()}
       </div>
-
       {/* Répartition NC par criticité */}
       <div style={{margin:"14px 14px 0",...S.card()}}>
         <div style={{fontSize:15,fontWeight:800,marginBottom:4}}>🎯 Répartition NC par criticité</div>
@@ -904,56 +903,37 @@ function DashboardScreen({user,inspections,actions,onNav,darkMode,onToggleDark,c
           var crit=0,elev=0,min=0;
           inspections.forEach(function(ins){
             (ins.items||[]).forEach(function(it){
-              if(it&&!it.ok){
-                var p=it.poids||it.p||"mineur";
-                if(p==="critique") crit++;
-                else if(p==="eleve") elev++;
-                else min++;
-              }
+              if(it&&!it.ok){var p=it.poids||it.p||"mineur";if(p==="critique")crit++;else if(p==="eleve")elev++;else min++;}
             });
           });
           var total=crit+elev+min;
           if(total===0) return <div style={{textAlign:"center",padding:"20px 0",color:C.muted}}><div style={{fontSize:13}}>Aucune NC enregistrée</div></div>;
           var its=[{label:"Critique",count:crit,col:C.red},{label:"Élevé",count:elev,col:C.orange},{label:"Mineur",count:min,col:C.amber}];
           var r=54,cx=70,cy=70,circ=2*Math.PI*r,offset=0;
-          var segs=its.map(function(it){
-            var pct=total>0?it.count/total:0;
-            var dash=pct*circ;
-            var seg=Object.assign({},it,{dash:dash,offset:offset,pct:Math.round(pct*100)});
-            offset+=dash; return seg;
-          });
+          var segs=its.map(function(it){var pct=total>0?it.count/total:0;var dash=pct*circ;var seg=Object.assign({},it,{dash:dash,offset:offset,pct:Math.round(pct*100)});offset+=dash;return seg;});
           return (
             <div style={{display:"flex",alignItems:"center",gap:16}}>
               <svg width={140} height={140} viewBox="0 0 140 140">
                 <circle cx={cx} cy={cy} r={r} fill="none" stroke={C.dim} strokeWidth={18}/>
-                {segs.map(function(seg,i){
-                  if(seg.count===0) return null;
-                  return <circle key={i} cx={cx} cy={cy} r={r} fill="none" stroke={seg.col} strokeWidth={18} strokeDasharray={seg.dash+" "+circ} strokeDashoffset={-seg.offset+circ/4} style={{filter:"drop-shadow(0 0 3px "+seg.col+"66)"}}/>;
-                })}
+                {segs.map(function(seg,i){if(seg.count===0)return null;return <circle key={i} cx={cx} cy={cy} r={r} fill="none" stroke={seg.col} strokeWidth={18} strokeDasharray={seg.dash+" "+circ} strokeDashoffset={-seg.offset+circ/4} style={{filter:"drop-shadow(0 0 3px "+seg.col+"66)"}}/>;  })}
                 <text x={cx} y={cy-6} textAnchor="middle" fill={C.text} fontSize={22} fontWeight={900}>{total}</text>
                 <text x={cx} y={cy+12} textAnchor="middle" fill={C.muted} fontSize={10}>NC total</text>
               </svg>
               <div style={{flex:1,display:"flex",flexDirection:"column",gap:10}}>
-                {its.map(function(it,i){
-                  var pct=total>0?Math.round(it.count/total*100):0;
-                  return (
-                    <div key={i}>
-                      <div style={{display:"flex",justifyContent:"space-between",marginBottom:4}}>
-                        <span style={{fontSize:12,fontWeight:700,color:it.col}}>● {it.label}</span>
-                        <span style={{fontSize:12,fontWeight:900,color:it.col}}>{it.count} <span style={{fontSize:10,color:C.muted,fontWeight:400}}>({pct}%)</span></span>
-                      </div>
-                      <div style={{background:C.dim,borderRadius:99,height:5,overflow:"hidden"}}>
-                        <div style={{width:pct+"%",height:"100%",background:it.col,borderRadius:99,transition:"width .6s"}}/>
-                      </div>
+                {its.map(function(it,i){var pct=total>0?Math.round(it.count/total*100):0;return (
+                  <div key={i}>
+                    <div style={{display:"flex",justifyContent:"space-between",marginBottom:4}}>
+                      <span style={{fontSize:12,fontWeight:700,color:it.col}}>● {it.label}</span>
+                      <span style={{fontSize:12,fontWeight:900,color:it.col}}>{it.count} <span style={{fontSize:10,color:C.muted,fontWeight:400}}>({pct}%)</span></span>
                     </div>
-                  );
-                })}
+                    <div style={{background:C.dim,borderRadius:99,height:5,overflow:"hidden"}}><div style={{width:pct+"%",height:"100%",background:it.col,borderRadius:99,transition:"width .6s"}}/></div>
+                  </div>
+                );})}
               </div>
             </div>
           );
         })()}
       </div>
-
       {/* Actions */}
       <div style={{margin:"14px 14px 0",...S.card(`${C.red}22`)}}>
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
@@ -1856,171 +1836,122 @@ function NewInspectionScreen({user,onSave,onBack,resps,sitesState,customTemplate
 // ═══════════════════════════════════════════════════════════════════════
 
 // ═══════════════════════════════════════════════════════════════════════
-// RAPPELS SCREEN — envoi email des rappels d'actions par responsable
+// RAPPELS SCREEN
 // ═══════════════════════════════════════════════════════════════════════
-function RappelsScreen({actions, resps, config, onConfigUpdate, onBack}){
+function RappelsScreen({actions,resps,config,onConfigUpdate,onBack}){
   var delai=(config&&config.rappelDelai)||7;
   const [editDelai,setEditDelai]=useState(false);
   const [tempDelai,setTempDelai]=useState(delai);
   const [sent,setSent]=useState({});
 
-  // Récupérer email d'un responsable
   function getEmail(nom){
-    if(!resps||!resps.length) return "";
     var r=(resps||[]).find(function(r){return typeof r==="object"&&r.nom===nom;});
-    return r?r.email||"":"";
+    return r&&r.email?r.email:"";
   }
 
-  // Actions concernées : non clôturées avec responsable et échéance dans <= delai jours
   var today=new Date(); today.setHours(0,0,0,0);
-  var actionsAlertes=actions.filter(function(a){
+  var alertes=actions.filter(function(a){
     if(a.statut==="Clôturée"||!a.resp||!a.echeance) return false;
-    var dl=Math.ceil((new Date(a.echeance)-today)/(86400000));
-    return dl<=delai;
+    return Math.ceil((new Date(a.echeance)-today)/86400000)<=delai;
   });
 
-  // Grouper par responsable
   var byResp={};
-  actionsAlertes.forEach(function(a){
+  alertes.forEach(function(a){
     if(!byResp[a.resp]) byResp[a.resp]={resp:a.resp,email:getEmail(a.resp),actions:[]};
     byResp[a.resp].actions.push(a);
   });
   var groups=Object.values(byResp).sort(function(a,b){return a.resp.localeCompare(b.resp);});
 
   function buildMailto(group){
-    var today=new Date().toLocaleDateString("fr-BE",{day:"2-digit",month:"2-digit",year:"numeric"});
-    var subject="SECURA — Rappel actions correctives — "+today;
-    var body="Bonjour "+group.resp.split(" ")[0]+",
-
-";
-    body+="Ce message est un rappel automatique concernant les actions correctives qui vous sont attribuées et dont l'échéance approche.
-
-";
-    body+="━━━━━━━━━━━━━━━━━━━━━━━━
-";
-    body+="VOS ACTIONS EN COURS
-";
-    body+="━━━━━━━━━━━━━━━━━━━━━━━━
-
-";
+    var d=new Date().toLocaleDateString("fr-BE",{day:"2-digit",month:"2-digit",year:"numeric"});
+    var subject="SECURA - Rappel actions correctives - "+d;
+    var lines=[];
+    lines.push("Bonjour "+group.resp.split(" ")[0]+",");
+    lines.push("");
+    lines.push("Voici un rappel des actions correctives qui vous sont attribuees et dont l'echeance approche.");
+    lines.push("");
+    lines.push("----------------------------------");
+    lines.push("VOS ACTIONS EN COURS");
+    lines.push("----------------------------------");
+    lines.push("");
     group.actions.forEach(function(a,i){
-      var dl=Math.ceil((new Date(a.echeance)-today)/(86400000));
-      var statut=dl<0?"⚠ EN RETARD DE "+Math.abs(dl)+" JOUR(S)":dl===0?"⚠ ÉCHÉANCE AUJOURD'HUI":"Échéance dans "+dl+" jour(s)";
-      body+=(i+1)+". "+a.label+"
-";
-      body+="   Site : "+a.site+"
-";
-      body+="   Priorité : "+a.prio+"
-";
-      body+="   "+statut+" ("+a.echeance+")
-
-";
+      var dl=Math.ceil((new Date(a.echeance)-today)/86400000);
+      var st=dl<0?"EN RETARD DE "+Math.abs(dl)+" JOUR(S)":dl===0?"ECHEANCE AUJOURD'HUI":"Dans "+dl+" jour(s) ("+a.echeance+")";
+      lines.push((i+1)+". "+a.label);
+      lines.push("   Site : "+a.site);
+      lines.push("   Priorite : "+a.prio);
+      lines.push("   Statut : "+st);
+      lines.push("");
     });
-    body+="━━━━━━━━━━━━━━━━━━━━━━━━
-
-";
-    body+="Merci de bien vouloir traiter ces actions dans les meilleurs délais et de mettre à jour leur statut dans l'application SECURA.
-
-";
-    body+="Cordialement,
-";
-    body+="L'équipe Prévention & Sécurité
-";
-    body+="[Envoyé via SECURA]
-";
+    lines.push("----------------------------------");
+    lines.push("");
+    lines.push("Merci de traiter ces actions dans les delais et de mettre a jour leur statut dans SECURA.");
+    lines.push("");
+    lines.push("Cordialement,");
+    lines.push("L'equipe Prevention & Securite");
+    var body=lines.join("\n");
     return "mailto:"+group.email+"?subject="+encodeURIComponent(subject)+"&body="+encodeURIComponent(body);
   }
 
-  function sendRappel(group){
+  function send(group){
     window.location.href=buildMailto(group);
-    setSent(function(prev){var n=Object.assign({},prev);n[group.resp]=true;return n;});
-    setTimeout(function(){setSent(function(prev){var n=Object.assign({},prev);delete n[group.resp];return n;});},4000);
+    setSent(function(p){var n=Object.assign({},p);n[group.resp]=true;return n;});
+    setTimeout(function(){setSent(function(p){var n=Object.assign({},p);delete n[group.resp];return n;});},4000);
   }
 
   return (
     <div style={{paddingBottom:88}}>
-      {/* Header */}
       <div style={{padding:"20px 16px 12px",display:"flex",alignItems:"center",gap:10}}>
-        <button onClick={onBack} style={{background:C.surface,border:"1px solid "+C.border,borderRadius:10,padding:"8px 12px",color:C.cyan,cursor:"pointer",fontSize:13,fontWeight:700,flexShrink:0}}>← Retour</button>
-        <div>
-          <div style={{fontSize:18,fontWeight:900}}>📧 Rappels</div>
-          <div style={{fontSize:11,color:C.muted}}>Envoi des rappels aux responsables</div>
-        </div>
+        <button onClick={onBack} style={{background:C.surface,border:"1px solid "+C.border,borderRadius:10,padding:"8px 12px",color:C.cyan,cursor:"pointer",fontSize:13,fontWeight:700}}>← Retour</button>
+        <div><div style={{fontSize:18,fontWeight:900}}>📧 Rappels</div><div style={{fontSize:11,color:C.muted}}>Envoi aux responsables par email</div></div>
       </div>
-
-      {/* Paramètre délai */}
       <div style={{margin:"0 14px 14px",...S.card(C.cyan+"22")}}>
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-          <div>
-            <div style={{fontSize:13,fontWeight:700}}>⏰ Délai de rappel</div>
-            <div style={{fontSize:11,color:C.muted,marginTop:2}}>Actions dont l'échéance est dans ≤ {delai} jour(s)</div>
-          </div>
+          <div><div style={{fontSize:13,fontWeight:700}}>⏰ Délai de rappel</div><div style={{fontSize:11,color:C.muted,marginTop:2}}>Actions dont l&#39;échéance est dans ≤ {delai} jour(s)</div></div>
           {!editDelai?(
-            <button onClick={function(){setEditDelai(true);setTempDelai(delai);}} style={{...S.btn(C.cyan,true),width:"auto",padding:"6px 14px",fontSize:12}}>
-              {delai}j ✏️
-            </button>
+            <button onClick={function(){setEditDelai(true);setTempDelai(delai);}} style={{...S.btn(C.cyan,true),width:"auto",padding:"6px 14px",fontSize:12}}>{delai}j ✏️</button>
           ):(
             <div style={{display:"flex",gap:8,alignItems:"center"}}>
-              <input type="number" min="1" max="90" value={tempDelai}
-                onChange={function(e){setTempDelai(parseInt(e.target.value)||1);}}
-                style={{...S.input,width:60,textAlign:"center",padding:"6px 8px",fontSize:14,fontWeight:800}}/>
-              <button onClick={function(){
-                onConfigUpdate&&onConfigUpdate(Object.assign({},config,{rappelDelai:tempDelai}));
-                setEditDelai(false);
-              }} style={{...S.btn(C.green),width:"auto",padding:"6px 14px",fontSize:12}}>✓</button>
+              <input type="number" min="1" max="90" value={tempDelai} onChange={function(e){setTempDelai(parseInt(e.target.value)||1);}} style={{...S.input,width:60,textAlign:"center",padding:"6px 8px",fontSize:14,fontWeight:800}}/>
+              <button onClick={function(){onConfigUpdate&&onConfigUpdate(Object.assign({},config,{rappelDelai:tempDelai}));setEditDelai(false);}} style={{...S.btn(C.green),width:"auto",padding:"6px 14px",fontSize:12}}>✓</button>
               <button onClick={function(){setEditDelai(false);}} style={{...S.btn(C.muted,true),width:"auto",padding:"6px 10px",fontSize:12}}>✕</button>
             </div>
           )}
         </div>
       </div>
-
-      {/* Aucune action */}
       {groups.length===0&&(
         <div style={{textAlign:"center",padding:"50px 20px",color:C.muted}}>
           <div style={{fontSize:36,marginBottom:12}}>✅</div>
           <div style={{fontSize:14,fontWeight:700,marginBottom:6}}>Aucun rappel nécessaire</div>
-          <div style={{fontSize:12}}>Aucune action n'arrive à échéance dans les {delai} prochains jours.</div>
+          <div style={{fontSize:12}}>Aucune action n&#39;arrive à échéance dans les {delai} prochains jours.</div>
         </div>
       )}
-
-      {/* Groupes par responsable */}
       <div style={{padding:"0 14px"}}>
         {groups.map(function(group,gi){
           var hasEmail=!!group.email;
           var hasSent=!!sent[group.resp];
-          var retard=group.actions.filter(function(a){return Math.ceil((new Date(a.echeance)-today)/(86400000))<0;}).length;
+          var retard=group.actions.filter(function(a){return Math.ceil((new Date(a.echeance)-today)/86400000)<0;}).length;
           var critique=group.actions.filter(function(a){return a.prio==="CRITIQUE";}).length;
           var initials=(group.resp||"?").split(" ").map(function(n){return n[0];}).join("").slice(0,2).toUpperCase();
-
           return (
             <div key={gi} style={{...S.card(),marginBottom:14}}>
-              {/* En-tête */}
               <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:12,paddingBottom:12,borderBottom:"1px solid "+C.border}}>
                 <div style={{width:44,height:44,borderRadius:13,background:C.cyan+"18",border:"1px solid "+C.cyan+"33",display:"flex",alignItems:"center",justifyContent:"center",fontSize:14,fontWeight:900,color:C.cyan,flexShrink:0}}>{initials}</div>
                 <div style={{flex:1,minWidth:0}}>
                   <div style={{fontSize:14,fontWeight:800}}>{group.resp}</div>
-                  <div style={{fontSize:11,color:hasEmail?C.muted:C.red,marginTop:1,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>
-                    {hasEmail?group.email:"⚠ Email manquant — configurer dans Paramètres"}
-                  </div>
+                  <div style={{fontSize:11,color:hasEmail?C.muted:C.red,marginTop:1,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{hasEmail?group.email:"⚠ Email manquant — configurer dans Paramètres"}</div>
                 </div>
-                <div style={{textAlign:"right",flexShrink:0}}>
-                  <div style={{fontSize:20,fontWeight:900,color:C.cyan}}>{group.actions.length}</div>
-                  <div style={{fontSize:9,color:C.muted}}>action(s)</div>
-                </div>
+                <div style={{textAlign:"right",flexShrink:0}}><div style={{fontSize:20,fontWeight:900,color:C.cyan}}>{group.actions.length}</div><div style={{fontSize:9,color:C.muted}}>action(s)</div></div>
               </div>
-
-              {/* Alertes */}
               {(retard>0||critique>0)&&(
                 <div style={{display:"flex",gap:6,marginBottom:10,flexWrap:"wrap"}}>
                   {retard>0&&<span style={{fontSize:10,padding:"3px 9px",borderRadius:6,background:C.red+"18",color:C.red,fontWeight:700}}>⚠ {retard} en retard</span>}
                   {critique>0&&<span style={{fontSize:10,padding:"3px 9px",borderRadius:6,background:C.orange+"18",color:C.orange,fontWeight:700}}>🔴 {critique} critique{critique>1?"s":""}</span>}
                 </div>
               )}
-
-              {/* Liste actions */}
               {group.actions.map(function(a,ai){
                 var col=a.prio==="CRITIQUE"?C.red:a.prio==="ÉLEVÉE"?C.orange:C.amber;
-                var dl=Math.ceil((new Date(a.echeance)-today)/(86400000));
+                var dl=Math.ceil((new Date(a.echeance)-today)/86400000);
                 var dlCol=dl<0?C.red:dl<=3?C.orange:C.muted;
                 var dlTxt=dl<0?"⚠ "+Math.abs(dl)+"j retard":dl===0?"Aujourd'hui":"+"+dl+"j";
                 return (
@@ -2037,15 +1968,12 @@ function RappelsScreen({actions, resps, config, onConfigUpdate, onBack}){
                   </div>
                 );
               })}
-
-              {/* Bouton envoi */}
-              <button onClick={function(){sendRappel(group);}} disabled={!hasEmail}
+              <button onClick={function(){send(group);}} disabled={!hasEmail}
                 style={{marginTop:14,width:"100%",padding:"13px",borderRadius:12,
                   background:hasSent?"linear-gradient(135deg,"+C.green+","+C.green+"BB)":hasEmail?"linear-gradient(135deg,"+C.cyan+","+C.cyan+"BB)":C.dim,
                   border:"none",color:hasEmail?"#000":C.muted,fontWeight:800,fontSize:13,
                   cursor:hasEmail?"pointer":"default",display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
-                <span>{hasSent?"✅":"📧"}</span>
-                {hasSent?"Email ouvert !":"Envoyer rappel à "+group.resp.split(" ")[0]}
+                <span>{hasSent?"✅":"📧"}</span>{hasSent?"Email ouvert !":"Envoyer rappel à "+group.resp.split(" ")[0]}
               </button>
             </div>
           );
@@ -2076,13 +2004,8 @@ function ActionsScreen({actions,onUpdate,resps,config,onConfigUpdate}){
   return (
     <div style={{paddingBottom:88}}>
       <div style={{padding:"20px 16px 12px",display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
-        <div>
-          <div style={{fontSize:20,fontWeight:900}}>Actions urgentes</div>
-          <div style={{fontSize:12,color:C.muted,marginTop:2}}>{actions.filter(a=>a.statut!=="Clôturée").length} en cours · triées par échéance</div>
-        </div>
-        <button onClick={function(){setShowRappels(true);}} style={{background:"linear-gradient(135deg,"+C.cyan+","+C.cyan+"BB)",border:"none",borderRadius:12,padding:"9px 14px",color:"#000",fontWeight:800,fontSize:12,cursor:"pointer",flexShrink:0,display:"flex",alignItems:"center",gap:6}}>
-          <span>📧</span> Rappels
-        </button>
+        <div><div style={{fontSize:20,fontWeight:900}}>Actions urgentes</div><div style={{fontSize:12,color:C.muted,marginTop:2}}>{actions.filter(a=>a.statut!=="Clôturée").length} en cours</div></div>
+        <button onClick={function(){setShowRappels(true);}} style={{background:"linear-gradient(135deg,"+C.cyan+","+C.cyan+"BB)",border:"none",borderRadius:12,padding:"9px 14px",color:"#000",fontWeight:800,fontSize:12,cursor:"pointer",flexShrink:0,display:"flex",alignItems:"center",gap:6}}><span>📧</span> Rappels</button>
       </div>
       <div style={{padding:"0 14px 12px",display:"flex",gap:6,overflowX:"auto",WebkitOverflowScrolling:"touch"}}>
         {["En cours","À faire","Tout"].map(function(s){return <button key={s} onClick={function(){setFilter(s);}} style={{flexShrink:0,padding:"5px 11px",borderRadius:99,border:"1px solid",borderColor:filter===s?C.cyan:C.border,background:filter===s?C.cyan+"15":"transparent",color:filter===s?C.cyan:C.muted,fontSize:11,fontWeight:700,cursor:"pointer"}}>{s}</button>;})}
