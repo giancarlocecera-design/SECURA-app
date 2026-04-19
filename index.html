@@ -22,7 +22,7 @@
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   <script type="text/babel" data-presets="react">
-console.log('SECURA chart-scroll v8 iOS fix');
+console.log('SECURA chart-scroll v9 iPhone fix');
 const { useState, useRef } = React;
 
 
@@ -726,12 +726,15 @@ function DashboardScreen({user,inspections,actions,onNav,darkMode,onToggleDark,c
       return inspections.some(function(x){return x.site===site&&x.categorie===c;});
     });
     setChartTab(c);
-    setTimeout(function(){
+    function doScroll(){
       if(!_chartEl||idx<=0) return;
-      var target=idx*56-10;
-      try{ _chartEl.scrollTo({left:target,behavior:"instant"}); }catch(e){}
-      _chartEl.scrollLeft=target;
-    },300);
+      var t=idx*56-10;
+      _chartEl.scrollLeft=t;
+      try{_chartEl.scrollTo({left:t,behavior:"instant"});}catch(e){}
+    }
+    setTimeout(doScroll, 300);
+    setTimeout(doScroll, 600);
+    setTimeout(doScroll, 1000);
   }
   const avgScore=inspections.length?Math.round(inspections.reduce((s,i)=>s+i.score,0)/inspections.length):100;
   const totalNC=inspections.reduce((s,i)=>s+i.nc,0);
@@ -814,7 +817,7 @@ function DashboardScreen({user,inspections,actions,onNav,darkMode,onToggleDark,c
             <button key={c} onClick={()=>selectCat(c)} style={{flexShrink:0,padding:"4px 9px",borderRadius:99,border:"1px solid",borderColor:chartTab===c?m.color:C.border,background:chartTab===c?`${m.color}15`:"transparent",color:chartTab===c?m.color:C.muted,fontSize:10,fontWeight:700,cursor:"pointer"}}>{m.icon} {c}</button>
           );})}
         </div>
-        <div ref={function(el){_chartEl=el;}} style={{overflowX:"auto",marginBottom:4}}>
+        <div ref={function(el){_chartEl=el;}} style={{overflowX:"scroll",marginBottom:4}}>
           <div style={{display:"flex",alignItems:"flex-end",gap:6,height:130,minWidth:Math.max(siteList.length*54,280)+"px"}}>
             {siteList.map(function(site,i){
               var ins=inspections.find(function(x){return x.site===site&&x.categorie===chartTab;});
