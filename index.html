@@ -5509,14 +5509,21 @@ function NewInspectionScreen({
           });
         },
         onPoidsChangeDirect: function (id, p) {
+          var matched = false;
           setItems(function (prev) {
-            return prev.map(function (i) {
-              return String(i.id) === String(id) ? {
-                ...i,
-                poids: p,
-                p: p
-              } : i;
+            var result = prev.map(function (i) {
+              if (String(i.id) === String(id)) {
+                matched = true;
+                return {
+                  ...i,
+                  poids: p,
+                  p: p
+                };
+              }
+              return i;
             });
+            alert("id=" + id + " p=" + p + " matched=" + matched + " items=" + prev.length);
+            return result;
           });
         },
         resps: respList
