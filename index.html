@@ -1843,6 +1843,7 @@ function RappelsScreen({actions,resps,config,onConfigUpdate,onBack}){
   const [editDelai,setEditDelai]=useState(false);
   const [tempDelai,setTempDelai]=useState(delai);
   const [sent,setSent]=useState({});
+  const [dismissed,setDismissed]=useState({});
 
   function getEmail(nom){
     var r=(resps||[]).find(function(r){return typeof r==="object"&&r.nom===nom;});
@@ -1860,7 +1861,7 @@ function RappelsScreen({actions,resps,config,onConfigUpdate,onBack}){
     if(!byResp[a.resp]) byResp[a.resp]={resp:a.resp,email:getEmail(a.resp),actions:[]};
     byResp[a.resp].actions.push(a);
   });
-  var groups=Object.values(byResp).sort(function(a,b){return a.resp.localeCompare(b.resp);});
+  var groups=Object.values(byResp).filter(function(g){return !dismissed[g.resp];}).sort(function(a,b){return a.resp.localeCompare(b.resp);});
 
   function buildMailto(group){
     var d=new Date().toLocaleDateString("fr-BE",{day:"2-digit",month:"2-digit",year:"numeric"});
@@ -1896,7 +1897,9 @@ function RappelsScreen({actions,resps,config,onConfigUpdate,onBack}){
   function send(group){
     window.location.href=buildMailto(group);
     setSent(function(p){var n=Object.assign({},p);n[group.resp]=true;return n;});
-    setTimeout(function(){setSent(function(p){var n=Object.assign({},p);delete n[group.resp];return n;});},4000);
+    setTimeout(function(){
+      setDismissed(function(p){var n=Object.assign({},p);n[group.resp]=true;return n;});
+    },1500);
   }
 
   return (
