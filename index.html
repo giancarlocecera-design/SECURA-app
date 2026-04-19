@@ -718,18 +718,13 @@ function DashboardScreen({user,inspections,actions,onNav,darkMode,onToggleDark,c
   const [chartTab,setChartTab]=useState(CATEGORIES[0]);
 
   function selectCat(c){
+    var list=(sitesState&&sitesState.length>0)?sitesState:SITES;
+    var idx=list.findIndex(function(site){
+      return inspections.some(function(x){return x.site===site&&x.categorie===c;});
+    });
+    var container=document.getElementById("chart-scroll");
+    if(container&&idx>0) container.scrollLeft=idx*56-10;
     setChartTab(c);
-    setTimeout(function(){
-      var container=document.getElementById("chart-scroll");
-      if(!container) return;
-      var allBars=container.querySelectorAll("[data-hasdata]");
-      var idx=-1;
-      for(var i=0;i<allBars.length;i++){
-        if(allBars[i].getAttribute("data-hasdata")==="1"){idx=i;break;}
-      }
-      if(idx>0) container.scrollLeft=idx*56-10;
-      else container.scrollLeft=0;
-    },200);
   }
 
   const avgScore=inspections.length?Math.round(inspections.reduce((s,i)=>s+i.score,0)/inspections.length):100;
