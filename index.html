@@ -856,47 +856,53 @@ function DashboardScreen({user,inspections,actions,onNav,darkMode,onToggleDark,c
 
 
       {/* Top NC récurrentes */}
-      {(function(){
-        var ncMap={};
-        inspections.forEach(function(ins){
-          (ins.items||[]).forEach(function(it){
-            if(!it.ok){
-              var key=it.id||it.l;
-              if(!ncMap[key]) ncMap[key]={label:it.l||it.id,poids:it.poids||it.p||"mineur",count:0,cats:{}};
-              ncMap[key].count++;
-              if(ins.categorie) ncMap[key].cats[ins.categorie]=true;
-            }
+      <div style={{margin:"14px 14px 0",...S.card()}}>
+        <div style={{fontSize:15,fontWeight:800,marginBottom:4}}>🔁 Top NC récurrentes</div>
+        <div style={{fontSize:12,color:C.muted,marginBottom:12}}>Non-conformités les plus fréquentes tous sites confondus</div>
+        {(function(){
+          var ncMap={};
+          inspections.forEach(function(ins){
+            (ins.items||[]).forEach(function(it){
+              if(it&&!it.ok){
+                var key=it.id||it.l;
+                if(!ncMap[key]) ncMap[key]={label:it.l||it.id||"NC inconnue",poids:it.poids||it.p||"mineur",count:0,cats:{}};
+                ncMap[key].count++;
+                if(ins.categorie) ncMap[key].cats[ins.categorie]=true;
+              }
+            });
           });
-        });
-        var topNC=Object.values(ncMap).sort(function(a,b){return b.count-a.count;}).slice(0,5);
-        if(topNC.length===0) return null;
-        var maxCount=topNC[0].count;
-        return (
-          <div style={{margin:"14px 14px 0",...S.card()}}>
-            <div style={{fontSize:15,fontWeight:800,marginBottom:4}}>🔁 Top NC récurrentes</div>
-            <div style={{fontSize:12,color:C.muted,marginBottom:12}}>Non-conformités les plus fréquentes tous sites confondus</div>
-            {topNC.map(function(nc,i){
-              var col=nc.poids==="critique"?C.red:nc.poids==="eleve"?C.orange:C.amber;
-              var pct=Math.round((nc.count/maxCount)*100);
-              return (
-                <div key={i} style={{marginBottom:10}}>
-                  <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:4}}>
-                    <div style={{flex:1,fontSize:12,fontWeight:600,paddingRight:8,lineHeight:1.3}}>{nc.label}</div>
-                    <div style={{display:"flex",alignItems:"center",gap:6,flexShrink:0}}>
-                      <span style={{fontSize:10,padding:"2px 7px",borderRadius:6,background:col+"20",color:col,fontWeight:800}}>{poidsLabel(nc.poids)}</span>
-                      <span style={{fontSize:13,fontWeight:900,color:col}}>{nc.count}x</span>
-                    </div>
+          var topNC=Object.values(ncMap).sort(function(a,b){return b.count-a.count;}).slice(0,5);
+          if(topNC.length===0){
+            return (
+              <div style={{textAlign:"center",padding:"20px 0",color:C.muted}}>
+                <div style={{fontSize:24,marginBottom:8}}>📋</div>
+                <div style={{fontSize:13}}>Aucune NC enregistrée pour l&#39;instant</div>
+                <div style={{fontSize:11,marginTop:4}}>Les NC apparaîtront après vos premières inspections</div>
+              </div>
+            );
+          }
+          var maxCount=topNC[0].count;
+          return topNC.map(function(nc,i){
+            var col=nc.poids==="critique"?C.red:nc.poids==="eleve"?C.orange:C.amber;
+            var pct=Math.round((nc.count/maxCount)*100);
+            return (
+              <div key={i} style={{marginBottom:12,padding:"10px 12px",borderRadius:12,background:col+"08",border:"1px solid "+col+"22"}}>
+                <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:6}}>
+                  <div style={{flex:1,fontSize:12,fontWeight:600,paddingRight:8,lineHeight:1.4,color:C.text}}>{nc.label}</div>
+                  <div style={{display:"flex",flexDirection:"column",alignItems:"flex-end",gap:3,flexShrink:0}}>
+                    <span style={{fontSize:16,fontWeight:900,color:col}}>{nc.count}×</span>
+                    <span style={{fontSize:9,padding:"2px 6px",borderRadius:6,background:col+"20",color:col,fontWeight:800}}>{poidsLabel(nc.poids)}</span>
                   </div>
-                  <div style={{background:C.dim,borderRadius:99,height:5,overflow:"hidden"}}>
-                    <div style={{width:pct+"%",height:"100%",background:col,borderRadius:99,transition:"width .6s"}}/>
-                  </div>
-                  <div style={{fontSize:10,color:C.muted,marginTop:3}}>{Object.keys(nc.cats).join(" · ")||""}</div>
                 </div>
-              );
-            })}
-          </div>
-        );
-      })()}
+                <div style={{background:C.dim,borderRadius:99,height:5,overflow:"hidden",marginBottom:4}}>
+                  <div style={{width:pct+"%",height:"100%",background:col,borderRadius:99,transition:"width .6s",boxShadow:"0 0 4px "+col+"88"}}/>
+                </div>
+                <div style={{fontSize:10,color:C.muted}}>{Object.keys(nc.cats).join(" · ")}</div>
+              </div>
+            );
+          });
+        })()}
+      </div>
 
       {/* Actions */}
       <div style={{margin:"14px 14px 0",...S.card(`${C.red}22`)}}>
