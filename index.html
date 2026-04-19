@@ -4037,7 +4037,29 @@ function ItemCard({
       cursor: "pointer",
       fontWeight: 700
     }
-  }, "\uD83D\uDCAC ", showComment ? "Cacher" : "Remarque")), !item.ok && onRespChange && /*#__PURE__*/React.createElement("div", {
+  }, "\uD83D\uDCAC ", showComment ? "Cacher" : "Remarque"), onPoidsChange && [["critique", "CRIT", C.red], ["eleve", "ÉLEV", C.orange], ["mineur", "MOD", C.amber]].map(function (arr) {
+    var pv = arr[0],
+      pl = arr[1],
+      pc = arr[2];
+    var active = item.poids === pv;
+    return /*#__PURE__*/React.createElement("button", {
+      key: pv,
+      onClick: function (e) {
+        e.stopPropagation();
+        onPoidsChange(pv);
+      },
+      style: {
+        fontSize: 10,
+        padding: "3px 7px",
+        borderRadius: 7,
+        background: active ? pc + "22" : "transparent",
+        color: active ? pc : C.muted,
+        border: "1px solid " + (active ? pc + "55" : C.border),
+        fontWeight: active ? 800 : 400,
+        cursor: "pointer"
+      }
+    }, active ? "✓ " : "", pl);
+  })), !item.ok && onRespChange && /*#__PURE__*/React.createElement("div", {
     style: {
       padding: "0 10px 10px"
     },
@@ -4145,22 +4167,29 @@ function AddQuestionBtn({
       gap: 6,
       marginBottom: 10
     }
-  }, [["critique", "CRITIQUE", C.red], ["eleve", "ÉLEVÉ", C.orange], ["mineur", "MODÉRÉ", C.amber]].map(([k, l, col]) => /*#__PURE__*/React.createElement("button", {
-    key: k,
-    onClick: () => setPoids(k),
-    style: {
-      flex: 1,
-      padding: "5px",
-      borderRadius: 8,
-      border: "1px solid",
-      borderColor: poids === k ? col : C.border,
-      background: poids === k ? col + "18" : "transparent",
-      color: poids === k ? col : C.muted,
-      fontSize: 11,
-      fontWeight: poids === k ? 800 : 400,
-      cursor: "pointer"
-    }
-  }, l))), /*#__PURE__*/React.createElement("div", {
+  }, [["critique", "CRITIQUE", C.red], ["eleve", "ÉLEVÉ", C.orange], ["mineur", "MODÉRÉ", C.amber]].map(function (arr) {
+    var k = arr[0],
+      l = arr[1],
+      col = arr[2];
+    return /*#__PURE__*/React.createElement("button", {
+      key: k,
+      onClick: function () {
+        setPoids(k);
+      },
+      style: {
+        flex: 1,
+        padding: "5px",
+        borderRadius: 8,
+        border: "1px solid",
+        borderColor: poids === k ? col : C.border,
+        background: poids === k ? col + "18" : "transparent",
+        color: poids === k ? col : C.muted,
+        fontSize: 11,
+        fontWeight: poids === k ? 800 : 400,
+        cursor: "pointer"
+      }
+    }, l);
+  })), /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
       gap: 8
@@ -4237,17 +4266,6 @@ function InspectionDetailScreen({
     ...i,
     photos: [...(i.photos || []), src]
   } : i));
-  const setPoids = function (id, p) {
-    setItems(function (prev) {
-      return prev.map(function (i) {
-        return i.id === id ? {
-          ...i,
-          poids: p,
-          p: p
-        } : i;
-      });
-    });
-  };
   const removePhoto = (id, idx) => setItems(p => p.map(i => i.id === id ? {
     ...i,
     photos: (i.photos || []).filter((_, j) => j !== idx)
@@ -4525,26 +4543,31 @@ function InspectionDetailScreen({
       fontWeight: 700,
       width: "100%"
     }
-  }, "P\xC9NALIT\xC9S \xB7 Appuyez sur \u2713/\u2717 pour basculer \xB7 \uD83D\uDCF7 photo par question"), [["critique", "CRITIQUE", 10], ["eleve", "ÉLEVÉ", 5], ["mineur", "MINEUR", 1]].map(([p, l, v]) => /*#__PURE__*/React.createElement("div", {
-    key: p,
-    style: {
-      display: "flex",
-      alignItems: "center",
-      gap: 4
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      width: 8,
-      height: 8,
-      borderRadius: 2,
-      background: poidsColor(p)
-    }
-  }), /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 10,
-      color: C.muted
-    }
-  }, l, " = \u2212", v, "pt")))), sections.map(sec => {
+  }, "P\xC9NALIT\xC9S \xB7 Appuyez sur \u2713/\u2717 pour basculer \xB7 \uD83D\uDCF7 photo par question"), [["critique", "CRITIQUE", 10], ["eleve", "ÉLEVÉ", 5], ["mineur", "MINEUR", 1]].map(function (arr) {
+    var p = arr[0],
+      l = arr[1],
+      v = arr[2];
+    return /*#__PURE__*/React.createElement("div", {
+      key: p,
+      style: {
+        display: "flex",
+        alignItems: "center",
+        gap: 4
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        width: 8,
+        height: 8,
+        borderRadius: 2,
+        background: poidsColor(p)
+      }
+    }), /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 10,
+        color: C.muted
+      }
+    }, l, " = -", v, "pt"));
+  })), sections.map(sec => {
     const ss = secScore(items, sec);
     const snc = secNC(items, sec);
     const sp = secPen(items, sec);
@@ -5455,6 +5478,18 @@ function NewInspectionScreen({
         ...i,
         resp: v
       } : i)),
+      onPoidsChange: function (p) {
+        var id = item.id;
+        setItems(function (prev) {
+          return prev.map(function (i) {
+            return i.id === id ? {
+              ...i,
+              poids: p,
+              p: p
+            } : i;
+          });
+        });
+      },
       resps: respList
     })), /*#__PURE__*/React.createElement(AddQuestionBtn, {
       section: sec,
@@ -5520,131 +5555,118 @@ function NewInspectionScreen({
     }
   }, "R\xE9capitulatif complet"), /*#__PURE__*/React.createElement("div", {
     style: {
-      background: C.amber + "20",
-      border: "1px solid " + C.amber + "55",
+      background: C.amber + "18",
+      border: "1px solid " + C.amber + "44",
       borderRadius: 10,
       padding: "8px 12px",
-      marginBottom: 12,
+      marginBottom: 4,
       display: "flex",
       gap: 8,
-      alignItems: "flex-start",
-      textAlign: "left"
-    }
-  }, /*#__PURE__*/React.createElement("span", null, "\uD83D\uDCA1"), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 11,
-      color: C.amber,
-      lineHeight: 1.5
-    }
-  }, /*#__PURE__*/React.createElement("strong", null, "Criticit\xE9 modifiable apr\xE8s sauvegarde"), /*#__PURE__*/React.createElement("br", null), /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontWeight: 400
-    }
-  }, "Cr\xE9ez d'abord l'audit puis rouvrez-le pour modifier la criticit\xE9."))), /*#__PURE__*/React.createElement("div", {
-    style: {
-      background: C.amber + "20",
-      border: "1px solid " + C.amber + "55",
-      borderRadius: 10,
-      padding: "8px 12px",
-      marginBottom: 12,
-      display: "flex",
-      gap: 8,
-      alignItems: "flex-start",
+      alignItems: "center",
       textAlign: "left"
     }
   }, /*#__PURE__*/React.createElement("span", {
     style: {
-      fontSize: 14,
-      flexShrink: 0
+      fontSize: 14
     }
-  }, "\uD83D\uDCA1"), /*#__PURE__*/React.createElement("div", {
+  }, "\uD83D\uDCA1"), /*#__PURE__*/React.createElement("span", {
     style: {
       fontSize: 11,
       color: C.amber,
-      lineHeight: 1.5
+      lineHeight: 1.4
     }
-  }, /*#__PURE__*/React.createElement("strong", null, "Criticit\xE9 modifiable apr\xE8s sauvegarde"), /*#__PURE__*/React.createElement("br", null), /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontWeight: 400
-    }
-  }, "Cr\xE9ez d'abord l'audit puis rouvrez-le pour modifier la criticit\xE9 de chaque question."))), [["Titre", form.titre], ["Site", form.site], ["Adresse", form.adresse || "—"], ["Accompagnateurs", form.accompagnateurs && form.accompagnateurs.length > 0 ? form.accompagnateurs.join(", ") : "—"], ["Catégorie", `${CAT_META[form.categorie] && CAT_META[form.categorie].icon || ""} ${form.categorie}`], ["Score final", `${score}/100`], ["Pénalité totale", `−${penTotal}pts`], ["NC Critiques", `${ncItems.filter(i => i.poids === "critique").length} (−${ncItems.filter(i => i.poids === "critique").length * 10}pts)`], ["NC Élevées", `${ncItems.filter(i => i.poids === "eleve").length} (−${ncItems.filter(i => i.poids === "eleve").length * 5}pts)`], ["NC Mineures", `${ncItems.filter(i => i.poids === "mineur").length} (−${ncItems.filter(i => i.poids === "mineur").length}pts)`], ["Photos jointes", totalPhotos], ["Inspecteur", user.nom]].map(([k, v]) => /*#__PURE__*/React.createElement("div", {
-    key: k,
-    style: {
-      display: "flex",
-      justifyContent: "space-between",
-      padding: "8px 0",
-      borderBottom: `1px solid ${C.border}`
-    }
-  }, /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 12,
-      color: C.muted
-    }
-  }, k), /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 12,
-      fontWeight: 700
-    }
-  }, v)))), (() => {
-    var customItems = items.filter(function (i) {
-      return i.custom;
-    });
-    var hasCustom = customItems.length > 0;
-    return hasCustom ? /*#__PURE__*/React.createElement("div", {
-      style: {
-        ...S.card(),
-        marginBottom: 12,
-        background: C.cyan + "10",
-        border: "1px solid " + C.cyan + "33"
-      }
-    }, /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontSize: 12,
-        fontWeight: 800,
-        color: C.cyan,
-        marginBottom: 6
-      }
-    }, "\uD83D\uDCA1 ", customItems.length, " question(s) personnalis\xE9e(s) ajout\xE9e(s)"), /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontSize: 11,
-        color: C.muted,
-        marginBottom: 10
-      }
-    }, "Voulez-vous sauvegarder ces questions comme nouveau standard pour la cat\xE9gorie \"", form.categorie, "\" ?"), /*#__PURE__*/React.createElement("div", {
+  }, "Apr\xE8s cr\xE9ation, rouvrez l'audit pour modifier la criticit\xE9 des questions.")), [["Titre", form.titre], ["Site", form.site], ["Adresse", form.adresse || "—"], ["Accompagnateurs", form.accompagnateurs && form.accompagnateurs.length > 0 ? form.accompagnateurs.join(", ") : "—"], ["Catégorie", (CAT_META[form.categorie] && CAT_META[form.categorie].icon || "") + " " + form.categorie], ["Score final", score + "/100"], ["Pénalité totale", "-" + penTotal + "pts"], ["NC Critiques", ncItems.filter(function (i) {
+    return i.poids === "critique";
+  }).length + " (" + ncItems.filter(function (i) {
+    return i.poids === "critique";
+  }).length * 10 + "pts)"], ["NC Élevées", ncItems.filter(function (i) {
+    return i.poids === "eleve";
+  }).length + " (" + ncItems.filter(function (i) {
+    return i.poids === "eleve";
+  }).length * 5 + "pts)"], ["NC Mineures", ncItems.filter(function (i) {
+    return i.poids === "mineur";
+  }).length + " (" + ncItems.filter(function (i) {
+    return i.poids === "mineur";
+  }).length + "pts)"], ["Photos jointes", totalPhotos], ["Inspecteur", user.nom]].map(function (arr) {
+    var k = arr[0];
+    var v = arr[1];
+    return /*#__PURE__*/React.createElement("div", {
+      key: k,
       style: {
         display: "flex",
-        gap: 8
+        justifyContent: "space-between",
+        padding: "8px 0",
+        borderBottom: "1px solid " + C.border
       }
-    }, /*#__PURE__*/React.createElement("button", {
-      onClick: function () {
-        var newTpl = items.map(function (i) {
-          return {
-            id: i.id,
-            s: i.s,
-            l: i.l,
-            p: i.poids || i.p || "mineur",
-            poids: i.poids || i.p || "mineur"
-          };
-        });
-        onSaveTemplate && onSaveTemplate(form.categorie, newTpl);
-        save();
-      },
+    }, /*#__PURE__*/React.createElement("span", {
       style: {
-        ...S.btn(C.cyan),
-        flex: 2,
         fontSize: 12,
-        padding: "8px"
+        color: C.muted
       }
-    }, "\uD83D\uDCBE Sauvegarder comme standard"), /*#__PURE__*/React.createElement("button", {
-      onClick: save,
+    }, k), /*#__PURE__*/React.createElement("span", {
       style: {
-        ...S.btn(C.muted, true),
-        flex: 1,
         fontSize: 12,
-        padding: "8px"
+        fontWeight: 700
       }
-    }, "Non merci"))) : null;
-  })(), /*#__PURE__*/React.createElement("div", {
+    }, v));
+  })), items.filter(function (i) {
+    return i.custom;
+  }).length > 0 && /*#__PURE__*/React.createElement("div", {
+    style: {
+      ...S.card(),
+      marginBottom: 12,
+      background: C.cyan + "10",
+      border: "1px solid " + C.cyan + "33"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      fontWeight: 800,
+      color: C.cyan,
+      marginBottom: 6
+    }
+  }, "\uD83D\uDCA1 ", items.filter(function (i) {
+    return i.custom;
+  }).length, " question(s) personnalis\xE9e(s) ajout\xE9e(s)"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: C.muted,
+      marginBottom: 10
+    }
+  }, "Voulez-vous sauvegarder ces questions comme nouveau standard pour la cat\xE9gorie \"", form.categorie, "\" ?"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 8
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: function () {
+      var newTpl = items.map(function (i) {
+        return {
+          id: i.id,
+          s: i.s,
+          l: i.l,
+          p: i.poids || i.p || "mineur",
+          poids: i.poids || i.p || "mineur"
+        };
+      });
+      onSaveTemplate && onSaveTemplate(form.categorie, newTpl);
+      save();
+    },
+    style: {
+      ...S.btn(C.cyan),
+      flex: 2,
+      fontSize: 12,
+      padding: "8px"
+    }
+  }, "\uD83D\uDCBE Sauvegarder comme standard"), /*#__PURE__*/React.createElement("button", {
+    onClick: save,
+    style: {
+      ...S.btn(C.muted, true),
+      flex: 1,
+      fontSize: 12,
+      padding: "8px"
+    }
+  }, "Non merci"))), /*#__PURE__*/React.createElement("div", {
     style: {
       display: "grid",
       gridTemplateColumns: "1fr 1fr",
