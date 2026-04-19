@@ -2644,175 +2644,179 @@ function SettingsScreen({user,onLogout,appState,onAppStateUpdate,respsState,site
 // ═══════════════════════════════════════════════════════════════════════
 
 // ═══════════════════════════════════════════════════════════════════════
-// MESSAGES SCREEN — conversations liées aux actions correctives
+// MESSAGES SCREEN — centre d'envoi email par site & responsable
 // ═══════════════════════════════════════════════════════════════════════
-function MessagesScreen({user, actions}){
-  const [selected,setSelected]=useState(null);
+function MessagesScreen({user, actions, resps, sitesState}){
+  const siteList=(sitesState&&sitesState.length>0)?sitesState:SITES;
+  const [selectedSite,setSelectedSite]=useState("Tout");
+  const [sent,setSent]=useState({});
 
-  // Filtrer les actions non clôturées avec un responsable
-  var activeActions=actions.filter(function(a){return a.statut!=="Clôturée"&&a.resp;});
-
-  if(selected){
-    return <ActionThread action={selected} user={user} onBack={function(){setSelected(null);}} />;
+  // Récupérer email d'un responsable
+  function getEmail(nom){
+    if(!resps||!resps.length) return null;
+    var r=resps.find(function(r){return r.nom===nom;});
+    return r?r.email:null;
   }
+
+  // Actions filtrées par site et non clôturées
+  var filteredActions=actions.filter(function(a){
+    return a.statut!=="Clôturée"&&a.resp&&(selectedSite==="Tout"||a.site===selectedSite);
+  });
+
+  // Grouper par responsable
+  var byResp={};
+  filteredActions.forEach(function(a){
+    if(!byResp[a.resp]) byResp[a.resp]={resp:a.resp,email:getEmail(a.resp),actions:[]};
+    byResp[a.resp].actions.push(a);
+  });
+  var groups=Object.values(byResp).sort(function(a,b){return a.resp.localeCompare(b.resp);});
+
+  function buildEmail(group){
+    var today=new Date().toLocaleDateString("fr-BE");
+    var site=selectedSite==="Tout"?group.actions[0].site:selectedSite;
+    var subject="SECURA — Actions correctives en cours — "+site+" — "+today;
+    var body="Bonjour "+group.resp.split(" ")[0]+",
+
+";
+    body+="Vous trouverez ci-dessous les actions correctives en cours vous concernant sur le site "+site+".
+
+";
+    body+="━━━━━━━━━━━━━━━━━━━━━━━━
+";
+    group.actions.forEach(function(a,i){
+      var dl=a.echeance?Math.ceil((new Date(a.echeance)-new Date())/(86400000)):null;
+      var dlTxt=dl===null?"Pas d'échéance":dl<0?"⚠ RETARD de "+Math.abs(dl)+" jour(s)":dl===0?"⚠ À traiter AUJOURD'HUI":"Échéance dans "+dl+" jour(s) ("+a.echeance+")";
+      body+=(i+1)+". "+a.label+"
+";
+      body+="   Priorité : "+a.prio+"
+";
+      body+="   Statut : "+a.statut+"
+";
+      body+="   "+dlTxt+"
+
+";
+    });
+    body+="━━━━━━━━━━━━━━━━━━━━━━━━
+
+";
+    body+="Merci de traiter ces actions dans les délais impartis.
+
+";
+    body+="Cordialement,
+"+user.nom+"
+";
+    body+="[Envoyé via SECURA — Audits & Prévention]
+";
+    return {subject:encodeURIComponent(subject),body:encodeURIComponent(body),email:group.email||""};
+  }
+
+  function sendEmail(group){
+    var e=buildEmail(group);
+    var mailto="mailto:"+e.email+"?subject="+e.subject+"&body="+e.body;
+    window.location.href=mailto;
+    setSent(function(prev){var n={};Object.assign(n,prev);n[group.resp]=true;return n;});
+    setTimeout(function(){setSent(function(prev){var n={};Object.assign(n,prev);delete n[group.resp];return n;});},4000);
+  }
+
+  // Sites qui ont des actions
+  var sitesWithActions=["Tout"].concat(siteList.filter(function(s){
+    return actions.some(function(a){return a.site===s&&a.statut!=="Clôturée"&&a.resp;});
+  }));
 
   return (
     <div style={{paddingBottom:88}}>
       <div style={{padding:"20px 16px 12px"}}>
-        <div style={{fontSize:20,fontWeight:900}}>💬 Messages</div>
-        <div style={{fontSize:12,color:C.muted,marginTop:2}}>Échanges par action corrective</div>
+        <div style={{fontSize:20,fontWeight:900}}>📧 Messages</div>
+        <div style={{fontSize:12,color:C.muted,marginTop:2}}>Envoi des actions correctives par email</div>
       </div>
-      {activeActions.length===0&&(
+
+      {/* Filtre par site */}
+      <div style={{padding:"0 14px 14px",display:"flex",gap:6,overflowX:"auto",WebkitOverflowScrolling:"touch"}}>
+        {sitesWithActions.map(function(s){
+          return (
+            <button key={s} onClick={function(){setSelectedSite(s);}}
+              style={{flexShrink:0,padding:"6px 14px",borderRadius:99,border:"1px solid",
+                borderColor:selectedSite===s?C.cyan:C.border,
+                background:selectedSite===s?C.cyan+"15":"transparent",
+                color:selectedSite===s?C.cyan:C.muted,
+                fontSize:12,fontWeight:700,cursor:"pointer"}}>
+              {s==="Tout"?"🏢 Tous les sites":s}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Aucune action */}
+      {groups.length===0&&(
         <div style={{textAlign:"center",padding:"60px 20px",color:C.muted}}>
-          <div style={{fontSize:36,marginBottom:12}}>💬</div>
+          <div style={{fontSize:36,marginBottom:12}}>✅</div>
           <div style={{fontSize:14,fontWeight:600,marginBottom:6}}>Aucune action en cours</div>
-          <div style={{fontSize:12}}>Les conversations apparaîtront ici quand des actions correctives seront créées.</div>
+          <div style={{fontSize:12}}>Aucune action corrective à envoyer pour ce site.</div>
         </div>
       )}
+
+      {/* Groupes par responsable */}
       <div style={{padding:"0 14px"}}>
-        {activeActions.map(function(a,i){
-          var col=a.prio==="CRITIQUE"?C.red:a.prio==="ÉLEVÉE"?C.orange:C.amber;
-          var dl=a.echeance?Math.ceil((new Date(a.echeance)-new Date())/(86400000)):null;
-          var initials=(a.resp||"?").split(" ").map(function(n){return n[0];}).join("").slice(0,2).toUpperCase();
+        {groups.map(function(group,gi){
+          var hasSent=sent[group.resp];
+          var hasEmail=!!group.email;
+          var critCount=group.actions.filter(function(a){return a.prio==="CRITIQUE";}).length;
+          var overdueCount=group.actions.filter(function(a){
+            return a.echeance&&Math.ceil((new Date(a.echeance)-new Date())/(86400000))<0;
+          }).length;
+          var initials=(group.resp||"?").split(" ").map(function(n){return n[0];}).join("").slice(0,2).toUpperCase();
+
           return (
-            <div key={a.id} onClick={function(){setSelected(a);}} style={{...S.card(),marginBottom:10,cursor:"pointer",display:"flex",alignItems:"center",gap:12}}>
-              <div style={{width:46,height:46,borderRadius:14,background:col+"18",border:"1px solid "+col+"44",display:"flex",alignItems:"center",justifyContent:"center",fontSize:14,fontWeight:900,color:col,flexShrink:0}}>{initials}</div>
-              <div style={{flex:1,minWidth:0}}>
-                <div style={{fontSize:13,fontWeight:700,marginBottom:2,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{a.label}</div>
-                <div style={{fontSize:11,color:C.muted,marginBottom:4}}>📍 {a.site} · 👤 {a.resp}</div>
-                <div style={{display:"flex",gap:6,alignItems:"center"}}>
-                  <span style={{fontSize:9,padding:"2px 7px",borderRadius:6,background:col+"18",color:col,fontWeight:800}}>{a.prio}</span>
-                  {dl!==null&&<span style={{fontSize:9,color:dl<0?C.red:dl<=3?C.orange:C.muted}}>{dl<0?"⚠ "+Math.abs(dl)+"j retard":dl===0?"Aujourd'hui":dl+"j restants"}</span>}
+            <div key={gi} style={{...S.card(),marginBottom:14}}>
+              {/* En-tête responsable */}
+              <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:12,paddingBottom:12,borderBottom:"1px solid "+C.border}}>
+                <div style={{width:46,height:46,borderRadius:14,background:C.cyan+"18",border:"1px solid "+C.cyan+"33",display:"flex",alignItems:"center",justifyContent:"center",fontSize:15,fontWeight:900,color:C.cyan,flexShrink:0}}>{initials}</div>
+                <div style={{flex:1}}>
+                  <div style={{fontSize:14,fontWeight:800}}>{group.resp}</div>
+                  <div style={{fontSize:11,color:hasEmail?C.muted:C.red,marginTop:1}}>{hasEmail?group.email:"⚠ Pas d'email configuré"}</div>
+                </div>
+                <div style={{textAlign:"right"}}>
+                  <div style={{fontSize:18,fontWeight:900,color:C.cyan}}>{group.actions.length}</div>
+                  <div style={{fontSize:9,color:C.muted}}>action(s)</div>
                 </div>
               </div>
-              <div style={{color:C.muted,fontSize:16,flexShrink:0}}>›</div>
+
+              {/* Liste des actions */}
+              {group.actions.map(function(a,ai){
+                var col=a.prio==="CRITIQUE"?C.red:a.prio==="ÉLEVÉE"?C.orange:C.amber;
+                var dl=a.echeance?Math.ceil((new Date(a.echeance)-new Date())/(86400000)):null;
+                return (
+                  <div key={ai} style={{display:"flex",alignItems:"flex-start",gap:10,padding:"8px 0",borderBottom:ai<group.actions.length-1?"1px solid "+C.dim:"none"}}>
+                    <div style={{width:6,height:6,borderRadius:99,background:col,marginTop:5,flexShrink:0}}/>
+                    <div style={{flex:1,minWidth:0}}>
+                      <div style={{fontSize:12,fontWeight:600,lineHeight:1.3,marginBottom:3}}>{a.label}</div>
+                      <div style={{display:"flex",gap:6,flexWrap:"wrap",alignItems:"center"}}>
+                        <span style={{fontSize:9,padding:"2px 6px",borderRadius:5,background:col+"18",color:col,fontWeight:800}}>{a.prio}</span>
+                        <span style={{fontSize:10,color:C.muted}}>📍 {a.site}</span>
+                        {dl!==null&&<span style={{fontSize:10,color:dl<0?C.red:dl<=3?C.orange:C.muted,fontWeight:dl<0?800:400}}>{dl<0?"⚠ "+Math.abs(dl)+"j retard":dl===0?"Aujourd'hui":dl+"j"}</span>}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+
+              {/* Badges alertes */}
+              {(critCount>0||overdueCount>0)&&(
+                <div style={{display:"flex",gap:6,marginTop:10,marginBottom:4}}>
+                  {critCount>0&&<span style={{fontSize:10,padding:"3px 8px",borderRadius:6,background:C.red+"18",color:C.red,fontWeight:700}}>🔴 {critCount} critique{critCount>1?"s":""}</span>}
+                  {overdueCount>0&&<span style={{fontSize:10,padding:"3px 8px",borderRadius:6,background:C.orange+"18",color:C.orange,fontWeight:700}}>⚠ {overdueCount} en retard</span>}
+                </div>
+              )}
+
+              {/* Bouton envoi */}
+              <button onClick={function(){sendEmail(group);}} disabled={!hasEmail}
+                style={{...S.btn(hasSent?C.green:C.cyan),marginTop:12,opacity:hasEmail?1:0.45,fontSize:13}}>
+                {hasSent?"✅ Email ouvert !":"📧 Envoyer à "+group.resp.split(" ")[0]}
+              </button>
+              {!hasEmail&&<div style={{fontSize:10,color:C.muted,textAlign:"center",marginTop:6}}>Configurez l&#39;email dans Paramètres → Utilisateurs</div>}
             </div>
           );
         })}
-      </div>
-    </div>
-  );
-}
-
-function ActionThread({action, user, onBack}){
-  const [messages,setMessages]=useState([]);
-  const [texte,setTexte]=useState("");
-  const [loading,setLoading]=useState(true);
-  const [sending,setSending]=useState(false);
-  const bottomRef=useRef(null);
-  var col=action.prio==="CRITIQUE"?C.red:action.prio==="ÉLEVÉE"?C.orange:C.amber;
-
-  function loadMessages(){
-    fetch(SUPA_URL+"/rest/v1/action_messages?action_id=eq."+String(action.id)+"&order=created_at.asc&select=*",{
-      headers:{"apikey":SUPA_KEY,"Authorization":"Bearer "+SUPA_KEY}
-    }).then(function(r){return r.json();}).then(function(data){
-      if(Array.isArray(data)) setMessages(data);
-      setLoading(false);
-    }).catch(function(){setLoading(false);});
-  }
-
-  React.useEffect(function(){
-    loadMessages();
-    var iv=setInterval(loadMessages,8000);
-    return function(){clearInterval(iv);};
-  },[action.id]);
-
-  React.useEffect(function(){
-    if(bottomRef.current) bottomRef.current.scrollIntoView({behavior:"smooth"});
-  },[messages]);
-
-  function send(){
-    if(!texte.trim()||sending) return;
-    setSending(true);
-    var msg={
-      action_id:String(action.id),
-      action_label:action.label,
-      site:action.site,
-      resp:action.resp||"",
-      user_nom:user.nom,
-      user_avatar:user.avatar||(user.nom||"?").split(" ").map(function(n){return n[0];}).join("").slice(0,2).toUpperCase(),
-      texte:texte.trim()
-    };
-    fetch(SUPA_URL+"/rest/v1/action_messages",{
-      method:"POST",
-      headers:{"apikey":SUPA_KEY,"Authorization":"Bearer "+SUPA_KEY,"Content-Type":"application/json","Prefer":"return=minimal"},
-      body:JSON.stringify(msg)
-    }).then(function(){
-      setTexte("");
-      setSending(false);
-      loadMessages();
-    }).catch(function(){setSending(false);});
-  }
-
-  function fmtTime(ts){
-    if(!ts) return "";
-    var d=new Date(ts);
-    return d.toLocaleDateString("fr-BE",{day:"2-digit",month:"2-digit"})+" "+d.toLocaleTimeString("fr-BE",{hour:"2-digit",minute:"2-digit"});
-  }
-
-  return (
-    <div style={{display:"flex",flexDirection:"column",height:"100vh",background:C.bg}}>
-      {/* Header */}
-      <div style={{padding:"52px 14px 12px",borderBottom:"1px solid "+C.border,background:C.surface,flexShrink:0}}>
-        <div style={{display:"flex",alignItems:"center",gap:10}}>
-          <button onClick={onBack} style={{background:"transparent",border:"none",color:C.cyan,fontSize:20,cursor:"pointer",padding:"4px",flexShrink:0}}>‹</button>
-          <div style={{width:38,height:38,borderRadius:11,background:col+"18",border:"1px solid "+col+"44",display:"flex",alignItems:"center",justifyContent:"center",fontSize:13,fontWeight:900,color:col,flexShrink:0}}>
-            {(action.resp||"?").split(" ").map(function(n){return n[0];}).join("").slice(0,2).toUpperCase()}
-          </div>
-          <div style={{flex:1,minWidth:0}}>
-            <div style={{fontSize:13,fontWeight:800,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{action.label}</div>
-            <div style={{fontSize:11,color:C.muted}}>👤 {action.resp} · 📍 {action.site}</div>
-          </div>
-          <span style={{fontSize:9,padding:"3px 8px",borderRadius:6,background:col+"18",color:col,fontWeight:800,flexShrink:0}}>{action.prio}</span>
-        </div>
-      </div>
-
-      {/* Messages */}
-      <div style={{flex:1,overflowY:"auto",padding:"16px 14px",display:"flex",flexDirection:"column",gap:4}}>
-        {loading&&<div style={{textAlign:"center",padding:"40px 0",color:C.muted,fontSize:12}}>Chargement...</div>}
-        {!loading&&messages.length===0&&(
-          <div style={{textAlign:"center",padding:"40px 20px",color:C.muted}}>
-            <div style={{fontSize:32,marginBottom:10}}>💬</div>
-            <div style={{fontSize:13,fontWeight:600,marginBottom:4}}>Démarrez la conversation</div>
-            <div style={{fontSize:11,opacity:.6}}>Échangez avec {action.resp} sur cette action corrective</div>
-          </div>
-        )}
-        {messages.map(function(m,i){
-          var mine=m.user_nom===user.nom;
-          var showName=!mine&&(i===0||messages[i-1].user_nom!==m.user_nom);
-          return (
-            <div key={i} style={{display:"flex",flexDirection:"column",alignItems:mine?"flex-end":"flex-start",marginBottom:2}}>
-              {showName&&<div style={{fontSize:10,color:C.muted,marginBottom:3,marginLeft:42}}>{m.user_nom}</div>}
-              <div style={{display:"flex",alignItems:"flex-end",gap:8,flexDirection:mine?"row-reverse":"row"}}>
-                {!mine&&(
-                  <div style={{width:32,height:32,borderRadius:99,background:C.purple+"22",border:"1px solid "+C.purple+"44",display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,fontWeight:800,color:C.purple,flexShrink:0}}>{m.user_avatar}</div>
-                )}
-                <div style={{maxWidth:"75%",padding:"10px 14px",borderRadius:mine?"18px 18px 4px 18px":"18px 18px 18px 4px",background:mine?"linear-gradient(135deg,"+C.cyan+","+C.cyan+"BB)":C.card,border:mine?"none":"1px solid "+C.border,boxShadow:"0 2px 8px rgba(0,0,0,.2)"}}>
-                  <div style={{fontSize:14,color:mine?"#000":C.text,lineHeight:1.5}}>{m.texte}</div>
-                </div>
-              </div>
-              <div style={{fontSize:9,color:C.muted,marginTop:3,marginRight:mine?4:0,marginLeft:mine?0:42}}>{fmtTime(m.created_at)}</div>
-            </div>
-          );
-        })}
-        <div ref={bottomRef}/>
-      </div>
-
-      {/* Saisie */}
-      <div style={{padding:"10px 14px 30px",borderTop:"1px solid "+C.border,background:C.surface,flexShrink:0,display:"flex",gap:10,alignItems:"center"}}>
-        <div style={{flex:1,background:C.card,border:"1px solid "+C.border,borderRadius:22,padding:"10px 16px",display:"flex",alignItems:"center"}}>
-          <input
-            style={{flex:1,background:"transparent",border:"none",outline:"none",color:C.text,fontSize:14}}
-            placeholder={"Message à "+action.resp+"..."}
-            value={texte}
-            onChange={function(e){setTexte(e.target.value);}}
-            onKeyDown={function(e){if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();send();}}}
-          />
-        </div>
-        <button onClick={send} disabled={!texte.trim()||sending}
-          style={{width:44,height:44,borderRadius:99,background:texte.trim()?C.cyan:C.dim,border:"none",cursor:texte.trim()?"pointer":"default",display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,flexShrink:0,transition:"background .2s",opacity:sending?.5:1}}>
-          <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke={texte.trim()?"#000":C.muted} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-        </button>
       </div>
     </div>
   );
@@ -3286,7 +3290,7 @@ function App(){
         {screen==="inspections" &&<InspectionsScreen inspections={inspections} onOpen={openDetail} onNav={nav} onDelete={deleteIns}/>}
         {screen==="actions"     &&<ActionsScreen actions={actions} onUpdate={updateAct} resps={respsState}/>}
         {screen==="rapports"    &&<RapportsScreen inspections={inspections} onDelete={deleteIns}/>}
-        {screen==="messages"    &&<MessagesScreen user={user} actions={actions}/>}
+        {screen==="messages"    &&<MessagesScreen user={user} actions={actions} resps={respsState} sitesState={sitesState}/>}
         {screen==="settings"    &&<SettingsScreen user={user} onLogout={()=>{setUser(null);setScreen("dashboard");}} config={config} onConfigUpdate={saveConfig} appState={appState} respsState={respsState} sitesState={sitesState} onAppStateUpdate={handleAppStateUpdate}/>}
       </div>
       <BottomNav active={screen} onChange={setScreen} badge={pending} msgBadge={0}/>
