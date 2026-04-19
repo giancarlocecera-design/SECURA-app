@@ -3917,6 +3917,7 @@ function ItemCard({
   onRespChange,
   onPoidsChange,
   onPoidsChangeDirect,
+  onSetPoids,
   showPhoto = true,
   resps
 }) {
@@ -4046,7 +4047,13 @@ function ItemCard({
     return /*#__PURE__*/React.createElement("button", {
       key: pv,
       onClick: function () {
-        if (onPoidsChange) onPoidsChange(pv);else if (onPoidsChangeDirect) onPoidsChangeDirect(String(item.id), pv);
+        if (onSetPoids) {
+          onSetPoids(pv);
+        } else if (onPoidsChange) {
+          onPoidsChange(pv);
+        } else if (onPoidsChangeDirect) {
+          onPoidsChangeDirect(String(item.id), pv);
+        }
       },
       style: {
         fontSize: 10,
@@ -5509,21 +5516,26 @@ function NewInspectionScreen({
           });
         },
         onPoidsChangeDirect: function (id, p) {
-          var matched = false;
           setItems(function (prev) {
-            var result = prev.map(function (i) {
-              if (String(i.id) === String(id)) {
-                matched = true;
-                return {
-                  ...i,
-                  poids: p,
-                  p: p
-                };
-              }
-              return i;
+            return prev.map(function (i) {
+              return String(i.id) === String(id) ? {
+                ...i,
+                poids: p,
+                p: p
+              } : i;
             });
-            alert("id=" + id + " p=" + p + " matched=" + matched + " items=" + prev.length);
-            return result;
+          });
+        },
+        onSetPoids: function (p) {
+          var capturedId = String(itemId);
+          setItems(function (prev) {
+            return prev.map(function (i) {
+              return String(i.id) === capturedId ? {
+                ...i,
+                poids: p,
+                p: p
+              } : i;
+            });
           });
         },
         resps: respList
