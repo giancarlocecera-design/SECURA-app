@@ -1895,11 +1895,10 @@ function RappelsScreen({actions,resps,config,onConfigUpdate,onBack}){
   }
 
   function send(group){
-    window.location.href=buildMailto(group);
-    setSent(function(p){var n=Object.assign({},p);n[group.resp]=true;return n;});
+    setDismissed(function(p){var n=Object.assign({},p);n[group.resp]=true;return n;});
     setTimeout(function(){
-      setDismissed(function(p){var n=Object.assign({},p);n[group.resp]=true;return n;});
-    },1500);
+      window.open(buildMailto(group),"_self");
+    },400);
   }
 
   return (
