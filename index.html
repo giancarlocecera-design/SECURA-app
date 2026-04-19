@@ -1945,8 +1945,7 @@ function RappelsScreen({actions,resps,config,onConfigUpdate,onBack}){
       <div style={{padding:"0 14px"}}>
         {groups.map(function(group,gi){
           var hasEmail=!!group.email;
-          var hasSent=!!sent[group.resp];
-          var retard=group.actions.filter(function(a){return Math.ceil((new Date(a.echeance)-today)/86400000)<0;}).length;
+                    var retard=group.actions.filter(function(a){return Math.ceil((new Date(a.echeance)-today)/86400000)<0;}).length;
           var critique=group.actions.filter(function(a){return a.prio==="CRITIQUE";}).length;
           var initials=(group.resp||"?").split(" ").map(function(n){return n[0];}).join("").slice(0,2).toUpperCase();
           return (
@@ -1986,10 +1985,10 @@ function RappelsScreen({actions,resps,config,onConfigUpdate,onBack}){
               })}
               <button onClick={function(){send(group);}} disabled={!hasEmail}
                 style={{marginTop:14,width:"100%",padding:"13px",borderRadius:12,
-                  background:hasSent?"linear-gradient(135deg,"+C.green+","+C.green+"BB)":hasEmail?"linear-gradient(135deg,"+C.cyan+","+C.cyan+"BB)":C.dim,
+                  background:hasEmail?"linear-gradient(135deg,"+C.cyan+","+C.cyan+"BB)":C.dim,
                   border:"none",color:hasEmail?"#000":C.muted,fontWeight:800,fontSize:13,
                   cursor:hasEmail?"pointer":"default",display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
-                <span>{hasSent?"✅":"📧"}</span>{hasSent?"Email ouvert !":"Envoyer rappel à "+group.resp.split(" ")[0]}
+                <span>📧</span>Envoyer rappel à {group.resp.split(" ")[0]}
               </button>
             </div>
           );
