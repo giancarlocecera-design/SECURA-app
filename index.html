@@ -22,8 +22,7 @@
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   <script type="text/babel" data-presets="react">
-console.log('SECURA chart-scroll v5 loaded');
-
+console.log('SECURA chart-scroll v6 loaded');
 const { useState, useRef } = React;
 
 
@@ -716,9 +715,10 @@ function LoginScreen({onLogin, users}){
 // ═══════════════════════════════════════════════════════════════════════
 // DASHBOARD
 // ═══════════════════════════════════════════════════════════════════════
+var _chartScrollEl = null; // référence DOM persistante hors composant
+
 function DashboardScreen({user,inspections,actions,onNav,darkMode,onToggleDark,config,sitesState,appState}){
   const [chartTab,setChartTab]=useState(CATEGORIES[0]);
-  var chartEl=null;
 
   function selectCat(c){
     var list=(sitesState&&sitesState.length>0)?sitesState:SITES;
@@ -727,8 +727,7 @@ function DashboardScreen({user,inspections,actions,onNav,darkMode,onToggleDark,c
     });
     setChartTab(c);
     setTimeout(function(){
-      if(chartEl&&idx>0){ chartEl.scrollLeft=idx*56-10; }
-      else if(chartEl){ chartEl.scrollLeft=0; }
+      if(_chartScrollEl) _chartScrollEl.scrollLeft = idx>0 ? idx*56-10 : 0;
     },150);
   }
   const avgScore=inspections.length?Math.round(inspections.reduce((s,i)=>s+i.score,0)/inspections.length):100;
@@ -812,7 +811,7 @@ function DashboardScreen({user,inspections,actions,onNav,darkMode,onToggleDark,c
             <button key={c} onClick={()=>selectCat(c)} style={{flexShrink:0,padding:"4px 9px",borderRadius:99,border:"1px solid",borderColor:chartTab===c?m.color:C.border,background:chartTab===c?`${m.color}15`:"transparent",color:chartTab===c?m.color:C.muted,fontSize:10,fontWeight:700,cursor:"pointer"}}>{m.icon} {c}</button>
           );})}
         </div>
-        <div ref={function(el){chartEl=el;}} style={{overflowX:"auto",WebkitOverflowScrolling:"touch",marginBottom:4}}>
+        <div ref={function(el){_chartScrollEl=el;}} style={{overflowX:"auto",WebkitOverflowScrolling:"touch",marginBottom:4}}>
           <div style={{display:"flex",alignItems:"flex-end",gap:6,height:130,minWidth:Math.max(siteList.length*54,280)+"px"}}>
             {siteList.map(function(site,i){
               var ins=inspections.find(function(x){return x.site===site&&x.categorie===chartTab;});
