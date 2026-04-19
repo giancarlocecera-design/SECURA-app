@@ -22,7 +22,6 @@
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   <script type="text/babel" data-presets="react">
-console.log('SECURA chart-scroll v10 sort+reset');
 const { useState, useRef } = React;
 
 
@@ -715,17 +714,8 @@ function LoginScreen({onLogin, users}){
 // ═══════════════════════════════════════════════════════════════════════
 // DASHBOARD
 // ═══════════════════════════════════════════════════════════════════════
-var _chartEl = null;
-
 function DashboardScreen({user,inspections,actions,onNav,darkMode,onToggleDark,config,sitesState,appState}){
   const [chartTab,setChartTab]=useState(CATEGORIES[0]);
-
-  function selectCat(c){
-    setChartTab(c);
-    setTimeout(function(){
-      if(_chartEl) _chartEl.scrollLeft=0;
-    },50);
-  }
   const avgScore=inspections.length?Math.round(inspections.reduce((s,i)=>s+i.score,0)/inspections.length):100;
   const totalNC=inspections.reduce((s,i)=>s+i.nc,0);
   const critActs=actions.filter(a=>a.prio==="CRITIQUE"&&a.statut!=="Clôturée").length;
@@ -804,20 +794,34 @@ function DashboardScreen({user,inspections,actions,onNav,darkMode,onToggleDark,c
         <div style={{fontSize:12,color:C.muted,marginBottom:12}}>Système pénalité : 100 − Σ déductions NC</div>
         <div style={{display:"flex",gap:5,flexWrap:"wrap",marginBottom:14}}>
           {CATEGORIES.map(c=>{const m=CAT_META[c]; return (
-            <button key={c} onClick={()=>selectCat(c)} style={{flexShrink:0,padding:"4px 9px",borderRadius:99,border:"1px solid",borderColor:chartTab===c?m.color:C.border,background:chartTab===c?`${m.color}15`:"transparent",color:chartTab===c?m.color:C.muted,fontSize:10,fontWeight:700,cursor:"pointer"}}>{m.icon} {c}</button>
+            <button key={c} onClick={()=>setChartTab(c)} style={{flexShrink:0,padding:"4px 9px",borderRadius:99,border:"1px solid",borderColor:chartTab===c?m.color:C.border,background:chartTab===c?`${m.color}15`:"transparent",color:chartTab===c?m.color:C.muted,fontSize:10,fontWeight:700,cursor:"pointer"}}>{m.icon} {c}</button>
           );})}
         </div>
-        <div ref={function(el){_chartEl=el;}} style={{overflowX:"auto",WebkitOverflowScrolling:"touch",marginBottom:4}}>
+        {(function(){
+          var activeSites=siteList.filter(function(s){return inspections.some(function(x){return x.site===s&&x.categorie===chartTab;});});
+          if(activeSites.length===0) return null;
+          return (
+            <div style={{marginBottom:10,display:"flex",gap:6,flexWrap:"wrap"}}>
+              {activeSites.map(function(s,i){
+                var ins=inspections.find(function(x){return x.site===s&&x.categorie===chartTab;});
+                var col=scoreColor(ins.score);
+                return (
+                  <div key={i} style={{display:"flex",alignItems:"center",gap:8,padding:"7px 12px",borderRadius:10,background:col+"15",border:"1px solid "+col+"44"}}>
+                    <ScoreRing score={ins.score} size={36}/>
+                    <div><div style={{fontSize:12,fontWeight:800,color:C.text}}>{s}</div><div style={{fontSize:10,color:col}}>{ins.score}/100</div></div>
+                  </div>
+                );
+              })}
+            </div>
+          );
+        })()}
+        <div style={{overflowX:"auto",WebkitOverflowScrolling:"touch",marginBottom:4}}>
           <div style={{display:"flex",alignItems:"flex-end",gap:6,height:130,minWidth:Math.max(siteList.length*54,280)+"px"}}>
-            {[...siteList].sort(function(a,b){
-              var aHas=inspections.some(function(x){return x.site===a&&x.categorie===chartTab;})?1:0;
-              var bHas=inspections.some(function(x){return x.site===b&&x.categorie===chartTab;})?1:0;
-              return bHas-aHas;
-            }).map(function(site,i){
+            {siteList.map(function(site,i){
               var ins=inspections.find(function(x){return x.site===site&&x.categorie===chartTab;});
               var v=ins?ins.score:0; var col=scoreColor(v);
               return (
-                <div key={site} style={{width:50,flexShrink:0,display:"flex",flexDirection:"column",alignItems:"center",gap:3,height:"100%",justifyContent:"flex-end"}}>
+                <div key={i} style={{width:50,flexShrink:0,display:"flex",flexDirection:"column",alignItems:"center",gap:3,height:"100%",justifyContent:"flex-end"}}>
                   <div style={{fontSize:9,fontWeight:800,color:v>0?col:C.muted}}>{v>0?v:"-"}</div>
                   <div style={{width:"100%",height:Math.max(v,6)+"%",borderRadius:"4px 4px 0 0",background:v>0?"linear-gradient(180deg,"+col+"BB,"+col+"22)":C.dim,transition:"height .6s"}}>{v>0&&<div style={{height:2,background:col}}/>}</div>
                   <div style={{fontSize:7,color:C.muted,textAlign:"center",lineHeight:1.1,width:50,wordBreak:"break-word"}}>{site}</div>
