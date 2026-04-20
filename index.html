@@ -3206,7 +3206,6 @@ function App(){
     var updated=inspections.map(function(i){return i.id===ins.id?ins:i;});
     setInspections(function(){return updated;});
     LS.save("inspections",updated);
-    if(ins.statut!=="Validée") setSub(null);
     // Generate actions from new NC items (that don't already have an action)
     var ncItems=(ins.items||[]).filter(function(it){return !it.ok&&!it.na;});
     if(ncItems.length>0){
