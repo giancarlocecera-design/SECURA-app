@@ -1405,7 +1405,15 @@ function InspectionDetailScreen({inspection,onBack,onUpdate,resps,sitesState}){
   const setComment=(id,v)=>setItems(p=>p.map(i=>i.id===id?{...i,comment:v}:i));
   const addPhoto=(id,src)=>setItems(p=>p.map(i=>i.id===id?{...i,photos:[...(i.photos||[]),src]}:i));
   const removePhoto=(id,idx)=>setItems(p=>p.map(i=>i.id===id?{...i,photos:(i.photos||[]).filter((_,j)=>j!==idx)}:i));
-  const setLabelItem=(id,v)=>setItems(p=>p.map(i=>i.id===id?{...i,l:v}:i));
+  const setLabelItem=(id,v)=>{
+    var newItems=items.map(function(i){return i.id===id?Object.assign({},i,{l:v}):i;});
+    setItems(newItems);
+    // Auto-save immédiat
+    var sc=calcScore(newItems);
+    var nc=newItems.filter(function(i){return !i.ok;}).length;
+    onUpdate(Object.assign({},inspection,metaForm,{items:newItems,notes:notes,score:sc,nc:nc}));
+    setSaved(true); setTimeout(function(){setSaved(false);},2000);
+  };
   const [showSig,setShowSig]=useState(false);
   const [sigInsp,setSigInsp]=useState(null);
   const [sigResp,setSigResp]=useState(null);
