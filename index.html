@@ -1291,7 +1291,17 @@ function ItemCard({item, onToggle, onComment, onPhotoAdd, onPhotoRemove, onRespC
       <div onClick={onToggle} style={{display:"flex",alignItems:"flex-start",gap:10,padding:"11px 10px",cursor:"pointer"}}>
         <div style={{width:24,height:24,borderRadius:7,background:item.ok?C.green:C.red,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,fontSize:13,color:"#000",fontWeight:900,marginTop:1}}>{item.ok?"✓":"✗"}</div>
         <div style={{flex:1}}>
-          <div style={{fontSize:12,lineHeight:1.45,color:item.custom?C.cyan:undefined}}>{item.l}</div>
+          {editLabel?(
+            <div onClick={function(e){e.stopPropagation();}} style={{marginBottom:4}}>
+              <textarea value={labelVal} onChange={function(e){setLabelVal(e.target.value);}} style={{...S.input,fontSize:12,minHeight:50,resize:"vertical",marginBottom:6}} autoFocus/>
+              <div style={{display:"flex",gap:6}}>
+                <button onClick={function(e){e.stopPropagation();if(onEditLabel)onEditLabel(labelVal);setEditLabel(false);}} style={{...S.btn(C.green),padding:"5px 10px",fontSize:11,width:"auto"}}>✓ Valider</button>
+                <button onClick={function(e){e.stopPropagation();setLabelVal(item.l||"");setEditLabel(false);}} style={{...S.btn(C.muted,true),padding:"5px 10px",fontSize:11,width:"auto"}}>✕ Annuler</button>
+              </div>
+            </div>
+          ):(
+            <div style={{fontSize:12,lineHeight:1.45,color:item.custom?C.cyan:undefined}}>{item.l}</div>
+          )}
           <div style={{marginTop:5,display:"flex",gap:4,alignItems:"center",flexWrap:"wrap"}}>
             <Tag label={poidsLabel(item.poids)} color={poidsColor(item.poids)} small/>
             {!item.ok&&<span style={{fontSize:9,color:C.red,fontWeight:800}}>{poidsPen(item.poids)}</span>}
@@ -1306,6 +1316,7 @@ function ItemCard({item, onToggle, onComment, onPhotoAdd, onPhotoRemove, onRespC
         <button onClick={e=>{e.stopPropagation();setShowComment(v=>!v);}} style={{fontSize:10,padding:"4px 8px",borderRadius:7,background:`${C.amber}12`,border:`1px solid ${C.amber}33`,color:C.amber,cursor:"pointer",fontWeight:700}}>
           💬 {showComment?"Cacher":"Remarque"}
         </button>
+        <button onClick={function(e){e.stopPropagation();setLabelVal(item.l||"");setEditLabel(function(v){return !v;});}} style={{fontSize:10,padding:"4px 8px",borderRadius:7,background:C.cyan+"12",border:"1px solid "+C.cyan+"33",color:C.cyan,cursor:"pointer",fontWeight:700}}>✏️ Modifier</button>
         {[["critique","CRIT",C.red],["eleve","ÉLEV",C.orange],["mineur","MOD",C.amber]].map(function(arr){
           var pv=arr[0],pl=arr[1],pc=arr[2];
           var active=(item.poids||item.p||"mineur")===pv;
@@ -1392,6 +1403,7 @@ function InspectionDetailScreen({inspection,onBack,onUpdate,resps,sitesState}){
   const setComment=(id,v)=>setItems(p=>p.map(i=>i.id===id?{...i,comment:v}:i));
   const addPhoto=(id,src)=>setItems(p=>p.map(i=>i.id===id?{...i,photos:[...(i.photos||[]),src]}:i));
   const removePhoto=(id,idx)=>setItems(p=>p.map(i=>i.id===id?{...i,photos:(i.photos||[]).filter((_,j)=>j!==idx)}:i));
+  const setLabelItem=(id,v)=>setItems(p=>p.map(i=>i.id===id?{...i,l:v}:i));
   const [showSig,setShowSig]=useState(false);
   const [sigInsp,setSigInsp]=useState(null);
   const [sigResp,setSigResp]=useState(null);
@@ -1497,6 +1509,7 @@ function InspectionDetailScreen({inspection,onBack,onUpdate,resps,sitesState}){
                     onToggle={function(){toggle(itemId);}}
                     onComment={function(v){setComment(itemId,v);}}
                     onPhotoAdd={function(src){addPhoto(itemId,src);}}
+                    onEditLabel={function(v){setLabelItem(itemId,v);}}
                     onPhotoRemove={function(idx){removePhoto(itemId,idx);}}
                     onRespChange={function(v){setItems(function(p){return p.map(function(i){return i.id===itemId?{...i,resp:v}:i;});});}}
                     onSetPoids={function(p){var capturedId=itemId;setItems(function(prev){return prev.map(function(i){return i.id===capturedId?{...i,poids:p,p:p}:i;});});}}
