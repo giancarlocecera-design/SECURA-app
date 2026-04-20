@@ -1147,7 +1147,7 @@ function ComparisonScreen({inspections,onBack}){
 }
 
 
-function InspectionsScreen({inspections,onOpen,onNav,onDelete}){
+function InspectionsScreen({inspections,onOpen,onNav,onDelete,user,config}){
   const [sf,setSf]=useState("Actifs"); const [cf,setCf]=useState("Tout");
   const filtered=inspections.filter(i=>{
     const statutOk=sf==="Tout"||(sf==="Actifs"?i.statut!=="Validée":i.statut===sf);
@@ -3237,7 +3237,7 @@ function App(){
       )}
       <div style={{overflowY:"auto",height:"100vh",paddingBottom:70}}>
         {screen==="dashboard"   &&<DashboardScreen user={user} inspections={inspections} actions={actions} onNav={nav} darkMode={darkMode} onToggleDark={()=>setDarkMode(d=>!d)} config={config} sitesState={sitesState} appState={appState}/>}
-        {screen==="inspections" &&<InspectionsScreen inspections={inspections} onOpen={openDetail} onNav={nav} onDelete={deleteIns}/>}
+        {screen==="inspections" &&<InspectionsScreen inspections={inspections} onOpen={openDetail} onNav={nav} onDelete={deleteIns} user={user} config={config}/>}
         {screen==="actions"     &&<ActionsScreen actions={actions} onUpdate={updateAct} resps={respsState} config={config} onConfigUpdate={saveConfig} user={user}/>}
         {screen==="rapports"    &&<RapportsScreen inspections={inspections} onDelete={deleteIns}/>}
         {screen==="settings"    &&<SettingsScreen user={user} onLogout={()=>{setUser(null);setScreen("dashboard");}} config={config} onConfigUpdate={saveConfig} appState={appState} respsState={respsState} sitesState={sitesState} onAppStateUpdate={handleAppStateUpdate}/>}
