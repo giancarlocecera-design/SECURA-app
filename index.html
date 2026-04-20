@@ -3036,7 +3036,11 @@ function App(){
           var c=cfg[0];
           if(c.resps&&c.resps.length){ setRespsState(c.resps); }
           if(c.sites&&c.sites.length){ setSitesState(c.sites); }
-          if(c.config&&Object.keys(c.config).length) setConfig(c.config);
+          if(c.config&&Object.keys(c.config).length){
+            setConfig(function(prev){
+              return Object.assign({},prev,c.config);
+            });
+          }
           if(c.penalites){ PENALITE.critique=c.penalites.critique; PENALITE.eleve=c.penalites.eleve; PENALITE.mineur=c.penalites.mineur; }
           if(c.delais){ DELAIS.critique=c.delais.critique; DELAIS.eleve=c.delais.eleve; DELAIS.mineur=c.delais.mineur; }
           // Load appState with all fields
@@ -3125,9 +3129,11 @@ function App(){
   }
 
   async function saveConfig(cfg){
-    setConfig(cfg);
+    var merged=Object.assign({},config,cfg);
+    setConfig(merged);
+    LS.save("config",{config:merged});
     try{
-      await supa.upsert("app_config",{id:"default",config:cfg});
+      await supa.upsert("app_config",{id:"default",config:merged});
     }catch(e){console.error(e);}
   };
 
