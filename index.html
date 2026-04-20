@@ -660,6 +660,29 @@ function mkIns(id,titre,site,cat,insp,date,statut,okMap=null){
 const initInspections=[];
 const initActions=[];
 
+
+// ═══════════════════════════════════════════════════════════════════════
+// PERMISSIONS — contrôle d'accès par rôle
+// ═══════════════════════════════════════════════════════════════════════
+function hasAccess(user, config, feature){
+  if(!user) return false;
+  if(user.role==="Admin") return true;
+  var perms=config&&config.permissions&&config.permissions[user.role];
+  if(!perms) return feature==="dashboard"||feature==="actions";
+  return !!perms[feature];
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// PERMISSIONS
+// ═══════════════════════════════════════════════════════════════════════
+function hasAccess(user,config,feature){
+  if(!user) return false;
+  if(user.role==="Admin") return true;
+  var perms=config&&config.permissions&&config.permissions[user.role];
+  if(!perms) return feature==="dashboard"||feature==="actions";
+  return !!perms[feature];
+}
+
 // ═══════════════════════════════════════════════════════════════════════
 // LOGIN
 // ═══════════════════════════════════════════════════════════════════════
@@ -800,13 +823,13 @@ function DashboardScreen({user,inspections,actions,onNav,darkMode,onToggleDark,c
       </div>
 
       {/* CTA */}
-      <div style={{margin:"14px 14px 0"}}>
+      {hasAccess(user,config,"inspections")&&<div style={{margin:"14px 14px 0"}}>
         <button onClick={()=>onNav("new-inspection")} style={{width:"100%",border:"none",borderRadius:18,padding:"17px",background:`linear-gradient(135deg,${C.cyan},#007799)`,cursor:"pointer",display:"flex",alignItems:"center",gap:12}}>
           <div style={{width:44,height:44,borderRadius:12,background:"rgba(0,0,0,.18)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,flexShrink:0}}>📋</div>
           <div style={{textAlign:"left"}}><div style={{fontSize:17,fontWeight:900,color:"#000"}}>Nouvelle inspection</div><div style={{fontSize:12,color:"rgba(0,0,0,.55)"}}>{(CHECKLISTS[chartTab]&&CHECKLISTS[chartTab].length)||40}+ questions · score pénalité 100→0</div></div>
           <div style={{marginLeft:"auto",fontSize:20,color:"rgba(0,0,0,.35)"}}>→</div>
         </button>
-      </div>
+      </div>}
 
       {/* Graphique */}
       <div style={{margin:"14px 14px 0",...S.card()}}>
@@ -1168,7 +1191,7 @@ function ComparisonScreen({inspections,onBack}){
 }
 
 
-function InspectionsScreen({inspections,onOpen,onNav,onDelete}){
+function InspectionsScreen({inspections,onOpen,onNav,onDelete,user,config}){
   const [sf,setSf]=useState("Actifs"); const [cf,setCf]=useState("Tout");
   const filtered=inspections.filter(i=>{
     const statutOk=sf==="Tout"||(sf==="Actifs"?i.statut!=="Validée":i.statut===sf);
@@ -1191,7 +1214,7 @@ function InspectionsScreen({inspections,onOpen,onNav,onDelete}){
         })}
       </div>
       <div style={{padding:"0 14px 10px",display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8}}>
-        <button onClick={()=>onNav("new-inspection")} style={{...S.btn(C.cyan),display:"flex",alignItems:"center",justifyContent:"center",gap:5,fontSize:12}}><span>+</span> Nouveau</button>
+        {hasAccess(user,config,"inspections")&&<button onClick={()=>onNav("new-inspection")} style={{...S.btn(C.cyan),display:"flex",alignItems:"center",justifyContent:"center",gap:5,fontSize:12}}><span>+</span> Nouveau</button>}
         <button onClick={()=>onNav("quick-visit")} style={{...S.btn(C.orange,true),display:"flex",alignItems:"center",justifyContent:"center",gap:5,fontSize:12}}>⚡ Rapide</button>
         <button onClick={()=>onNav("comparison")} style={{...S.btn(C.purple,true),display:"flex",alignItems:"center",justifyContent:"center",gap:5,fontSize:12}}>📊 N vs N-1</button>
       </div>
@@ -2007,7 +2030,7 @@ function RappelsScreen({actions,resps,config,onConfigUpdate,onBack}){
   );
 }
 
-function ActionsScreen({actions,onUpdate,resps,config,onConfigUpdate}){
+function ActionsScreen({actions,onUpdate,resps,config,onConfigUpdate,user}){
   const respList=(resps&&resps.length?resps:RESPONSABLES).map(function(r){return typeof r==="object"?r.nom:r;});
   const [filter,setFilter]=useState("Tout");
   const [editRespId,setEditRespId]=useState(null);
@@ -2029,9 +2052,7 @@ function ActionsScreen({actions,onUpdate,resps,config,onConfigUpdate}){
     <div style={{paddingBottom:88}}>
       <div style={{padding:"20px 16px 12px",display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
         <div><div style={{fontSize:20,fontWeight:900}}>Actions urgentes</div><div style={{fontSize:12,color:C.muted,marginTop:2}}>{actions.filter(a=>a.statut!=="Clôturée").length} en cours</div></div>
-        <button onClick={function(){setShowRappels(true);}} style={{background:"linear-gradient(135deg,"+C.cyan+",#007799)",border:"none",borderRadius:14,padding:"10px 16px",color:"#000",fontWeight:900,fontSize:13,cursor:"pointer",flexShrink:0,display:"flex",alignItems:"center",gap:7,boxShadow:"0 0 16px "+C.cyan+"55"}}>
-          <span style={{fontSize:18}}>📧</span><span>Rappels</span>
-        </button>
+        {hasAccess(user,config,"rappels")&&<button onClick={function(){setShowRappels(true);}} style={{background:"linear-gradient(135deg,"+C.cyan+",#007799)",border:"none",borderRadius:14,padding:"10px 16px",color:"#000",fontWeight:900,fontSize:13,cursor:"pointer",flexShrink:0,display:"flex",alignItems:"center",gap:7,boxShadow:"0 0 16px "+C.cyan+"55"}}><span style={{fontSize:18}}>📧</span><span>Rappels</span></button>}
       </div>
       <div style={{padding:"0 14px 12px",display:"flex",gap:6,overflowX:"auto",WebkitOverflowScrolling:"touch"}}>
         {["En cours","À faire","Tout"].map(function(s){return <button key={s} onClick={function(){setFilter(s);}} style={{flexShrink:0,padding:"5px 11px",borderRadius:99,border:"1px solid",borderColor:filter===s?C.cyan:C.border,background:filter===s?C.cyan+"15":"transparent",color:filter===s?C.cyan:C.muted,fontSize:11,fontWeight:700,cursor:"pointer"}}>{s}</button>;})}
@@ -2517,13 +2538,17 @@ function SettingsScreen({user,onLogout,appState,onAppStateUpdate,respsState,site
         <div style={{fontSize:11,color:C.muted,marginTop:2}}>{user.email}</div>
         <div style={{marginTop:6}}><Tag label={user.role} color={rc[user.role]||C.muted}/></div>
       </div>
-      <div style={{padding:"0 14px 12px",display:"flex",gap:6}}>
+      <div style={{padding:"0 14px 12px",display:"flex",gap:6,overflowX:"auto",WebkitOverflowScrolling:"touch"}}>
         <button style={tabStyle("equipe")} onClick={()=>setTab("equipe")}>👥 Équipe</button>
         <button style={tabStyle("sites")} onClick={()=>setTab("sites")}>📍 Sites</button>
         <button style={tabStyle("systeme")} onClick={()=>setTab("systeme")}>⚙️ Système</button>
         <button style={tabStyle("apparence")} onClick={()=>setTab("apparence")}>🎨 Style</button>
+        {user.role==="Admin"&&<button style={tabStyle("permissions")} onClick={()=>setTab("permissions")}>🔐 Accès</button>}
       </div>
       <div style={{padding:"0 14px"}}>
+        {tab==="permissions"&&user.role==="Admin"&&(
+          <PermissionsScreen config={config} onConfigUpdate={onConfigUpdate} onBack={function(){setTab("equipe");}}/>
+        )}
         {tab==="equipe"&&(
           <div style={{...S.card(),marginBottom:12}}>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
@@ -2813,14 +2838,15 @@ function NavIcon({name, col, size}){
   return icons[name]||null;
 }
 
-function BottomNav({active,onChange,badge}){
-  const tabs=[
-    {k:"dashboard",  l:"Accueil"},
-    {k:"inspections",l:"Audits"},
-    {k:"actions",    l:"Actions", badge},
-    {k:"rapports",   l:"Rapports"},
-    {k:"settings",   l:"Profil"},
+function BottomNav({active,onChange,badge,user,config}){
+  var allTabs=[
+    {k:"dashboard",  l:"Accueil",  f:"dashboard"},
+    {k:"inspections",l:"Audits",   f:"inspections"},
+    {k:"actions",    l:"Actions",  f:"actions",badge:badge},
+    {k:"rapports",   l:"Rapports", f:"rapports"},
+    {k:"settings",   l:"Profil",   f:"settings"},
   ];
+  var tabs=allTabs.filter(function(t){return hasAccess(user,config,t.f);});
   return (
     <div style={{position:"fixed",bottom:0,left:"50%",transform:"translateX(-50%)",width:"100%",maxWidth:430,background:"rgba(10,12,19,.96)",backdropFilter:"blur(20px)",borderTop:"1px solid "+C.border,display:"flex",justifyContent:"space-around",padding:"8px 0 20px",zIndex:100}}>
       {tabs.map(function(t){
@@ -2844,6 +2870,73 @@ function BottomNav({active,onChange,badge}){
   );
 }
 
+
+
+// ═══════════════════════════════════════════════════════════════════════
+// PERMISSIONS SCREEN — gestion des accès par rôle (Admin uniquement)
+// ═══════════════════════════════════════════════════════════════════════
+function PermissionsScreen({config,onConfigUpdate,onBack}){
+  var perms=config&&config.permissions?config.permissions:{
+    Inspecteur:{dashboard:true,inspections:true,actions:true,rapports:false,rappels:false,settings:false},
+    Responsable:{dashboard:true,inspections:false,actions:true,rapports:false,rappels:false,settings:false}
+  };
+
+  var features=[
+    {k:"dashboard",  l:"Tableau de bord", icon:"🏠"},
+    {k:"inspections",l:"Audits",           icon:"📋"},
+    {k:"actions",    l:"Actions",          icon:"⚡"},
+    {k:"rapports",   l:"Rapports",         icon:"📄"},
+    {k:"rappels",    l:"Rappels email",    icon:"📧"},
+    {k:"settings",   l:"Profil & Paramètres", icon:"👤"},
+  ];
+  var roles=["Inspecteur","Responsable"];
+
+  function toggle(role,feature){
+    var newPerms=JSON.parse(JSON.stringify(perms));
+    if(!newPerms[role]) newPerms[role]={};
+    newPerms[role][feature]=!newPerms[role][feature];
+    onConfigUpdate(Object.assign({},config,{permissions:newPerms}));
+  }
+
+  return (
+    <div style={{paddingBottom:88}}>
+      <div style={{padding:"20px 16px 12px",display:"flex",alignItems:"center",gap:10}}>
+        <button onClick={onBack} style={{background:C.surface,border:"1px solid "+C.border,borderRadius:10,padding:"8px 12px",color:C.cyan,cursor:"pointer",fontSize:13,fontWeight:700}}>← Retour</button>
+        <div><div style={{fontSize:18,fontWeight:900}}>🔐 Permissions</div><div style={{fontSize:11,color:C.muted}}>Accès par rôle — Admin a toujours tous les droits</div></div>
+      </div>
+      <div style={{margin:"0 14px",padding:"10px 14px",background:C.cyan+"12",border:"1px solid "+C.cyan+"33",borderRadius:12,marginBottom:14}}>
+        <div style={{fontSize:12,color:C.cyan}}>💡 Les modifications sont appliquées immédiatement à la prochaine connexion.</div>
+      </div>
+      {roles.map(function(role,ri){
+        var rolePerms=perms[role]||{};
+        var roleCol=role==="Inspecteur"?C.cyan:C.purple;
+        return (
+          <div key={ri} style={{...S.card(),margin:"0 14px 14px"}}>
+            <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:14,paddingBottom:12,borderBottom:"1px solid "+C.border}}>
+              <div style={{width:38,height:38,borderRadius:11,background:roleCol+"18",border:"1px solid "+roleCol+"33",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16}}>{role==="Inspecteur"?"🔍":"👤"}</div>
+              <div><div style={{fontSize:15,fontWeight:800}}>{role}</div><div style={{fontSize:11,color:C.muted}}>{Object.values(rolePerms).filter(Boolean).length} accès actifs</div></div>
+            </div>
+            {features.map(function(f,fi){
+              var active=!!rolePerms[f.k];
+              return (
+                <div key={fi} style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"10px 0",borderBottom:fi<features.length-1?"1px solid "+C.dim:"none"}}>
+                  <div style={{display:"flex",alignItems:"center",gap:10}}>
+                    <span style={{fontSize:16,width:24,textAlign:"center"}}>{f.icon}</span>
+                    <span style={{fontSize:13,fontWeight:active?700:400,color:active?C.text:C.muted}}>{f.l}</span>
+                  </div>
+                  <button onClick={function(){toggle(role,f.k);}}
+                    style={{width:46,height:26,borderRadius:99,background:active?roleCol:C.border,border:"none",cursor:"pointer",transition:"background .2s",position:"relative",flexShrink:0}}>
+                    <div style={{position:"absolute",top:3,left:active?22:3,width:20,height:20,borderRadius:99,background:"#fff",transition:"left .2s",boxShadow:"0 1px 3px rgba(0,0,0,.3)"}}/>
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
 
 // ═══════════════════════════════════════════════════════════════════════
 // APP ROOT
@@ -2988,6 +3081,10 @@ function App(){
     daltonMode:"normal",
     notificationsEnabled:false,
     rappelDelai:7,
+    permissions:{
+      Inspecteur:{dashboard:true,inspections:true,actions:true,rapports:false,rappels:false,settings:false},
+      Responsable:{dashboard:true,inspections:false,actions:true,rapports:false,rappels:false,settings:false}
+    },
   });
   const [appState,setAppState]=useState({sites:SITES_DEFAULT,resps:RESPONSABLES_DEFAULT,penalites:{critique:5,eleve:3,mineur:1},delais:{critique:0,eleve:60,mineur:120},customTemplates:{},siteAddresses:{}});
   const [respsState,setRespsState]=useState([...RESPONSABLES_DEFAULT]);
@@ -3265,12 +3362,12 @@ function App(){
       )}
       <div style={{overflowY:"auto",height:"100vh",paddingBottom:70}}>
         {screen==="dashboard"   &&<DashboardScreen user={user} inspections={inspections} actions={actions} onNav={nav} darkMode={darkMode} onToggleDark={()=>setDarkMode(d=>!d)} config={config} sitesState={sitesState} appState={appState}/>}
-        {screen==="inspections" &&<InspectionsScreen inspections={inspections} onOpen={openDetail} onNav={nav} onDelete={deleteIns}/>}
-        {screen==="actions"     &&<ActionsScreen actions={actions} onUpdate={updateAct} resps={respsState} config={config} onConfigUpdate={saveConfig}/>}
+        {screen==="inspections" &&<InspectionsScreen inspections={inspections} onOpen={openDetail} onNav={nav} onDelete={deleteIns} user={user} config={config}/>}
+        {screen==="actions"     &&<ActionsScreen actions={actions} onUpdate={updateAct} resps={respsState} config={config} onConfigUpdate={saveConfig} user={user}/>}
         {screen==="rapports"    &&<RapportsScreen inspections={inspections} onDelete={deleteIns}/>}
         {screen==="settings"    &&<SettingsScreen user={user} onLogout={()=>{setUser(null);setScreen("dashboard");}} config={config} onConfigUpdate={saveConfig} appState={appState} respsState={respsState} sitesState={sitesState} onAppStateUpdate={handleAppStateUpdate}/>}
       </div>
-      <BottomNav active={screen} onChange={setScreen} badge={pending}/>
+      <BottomNav active={screen} onChange={setScreen} badge={pending} user={user} config={config}/>
     </div>
   );
 }
