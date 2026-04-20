@@ -1246,7 +1246,7 @@ function PhotoBtn({photos=[], onAdd, onRemove}){
 }
 
 // ── Checklist item card (shared) ────────────────────────────────
-function ItemCard({item, onToggle, onComment, onPhotoAdd, onPhotoRemove, onRespChange, onPoidsChange, onPoidsChangeDirect, onSetPoids, showPhoto=true, resps}){
+function ItemCard({item, onToggle, onComment, onPhotoAdd, onPhotoRemove, onRespChange, onPoidsChange, onPoidsChangeDirect, onSetPoids, onDelete, showPhoto=true, resps}){
   // Normalize to string names for display
   var rawList=(resps&&resps.length>0)?resps:RESPONSABLES;
   const respList=rawList.map(function(r){return typeof r==="object"?r.nom:r;});
