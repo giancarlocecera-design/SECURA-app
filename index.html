@@ -2880,18 +2880,20 @@ function BottomNav({active,onChange,badge,user,config}){
 // PERMISSIONS SCREEN — gestion des accès par rôle (Admin uniquement)
 // ═══════════════════════════════════════════════════════════════════════
 function PermissionsScreen({config,onConfigUpdate,onBack}){
-  var perms=config&&config.permissions?config.permissions:{
+  var defaultPerms={
     Inspecteur:{dashboard:true,inspections:true,actions:true,rapports:false,rappels:false,settings:false},
     Responsable:{dashboard:true,inspections:false,actions:true,rapports:false,rappels:false,settings:false}
   };
+  const [perms,setPerms]=useState(config&&config.permissions?JSON.parse(JSON.stringify(config.permissions)):defaultPerms);
+  const [saved,setSaved]=useState(false);
 
   var features=[
-    {k:"dashboard",  l:"Tableau de bord", icon:"🏠"},
-    {k:"inspections",l:"Audits",           icon:"📋"},
-    {k:"actions",    l:"Actions",          icon:"⚡"},
-    {k:"rapports",   l:"Rapports",         icon:"📄"},
-    {k:"rappels",    l:"Rappels email",    icon:"📧"},
-    {k:"settings",   l:"Profil & Paramètres", icon:"👤"},
+    {k:"dashboard",  l:"Tableau de bord",      icon:"🏠"},
+    {k:"inspections",l:"Audits",                icon:"📋"},
+    {k:"actions",    l:"Actions",               icon:"⚡"},
+    {k:"rapports",   l:"Rapports",              icon:"📄"},
+    {k:"rappels",    l:"Rappels email",         icon:"📧"},
+    {k:"settings",   l:"Profil & Paramètres",  icon:"👤"},
   ];
   var roles=["Inspecteur","Responsable"];
 
@@ -2899,14 +2901,19 @@ function PermissionsScreen({config,onConfigUpdate,onBack}){
     var newPerms=JSON.parse(JSON.stringify(perms));
     if(!newPerms[role]) newPerms[role]={};
     newPerms[role][feature]=!newPerms[role][feature];
-    onConfigUpdate(Object.assign({},config,{permissions:newPerms}));
+    setPerms(newPerms);
+    var newConfig=Object.assign({},config,{permissions:newPerms});
+    onConfigUpdate(newConfig);
+    setSaved(true);
+    setTimeout(function(){setSaved(false);},2000);
   }
 
   return (
     <div style={{paddingBottom:88}}>
       <div style={{padding:"20px 16px 12px",display:"flex",alignItems:"center",gap:10}}>
         <button onClick={onBack} style={{background:C.surface,border:"1px solid "+C.border,borderRadius:10,padding:"8px 12px",color:C.cyan,cursor:"pointer",fontSize:13,fontWeight:700}}>← Retour</button>
-        <div><div style={{fontSize:18,fontWeight:900}}>🔐 Permissions</div><div style={{fontSize:11,color:C.muted}}>Accès par rôle — Admin a toujours tous les droits</div></div>
+        <div style={{flex:1}}><div style={{fontSize:18,fontWeight:900}}>🔐 Permissions</div><div style={{fontSize:11,color:C.muted}}>Accès par rôle — Admin a toujours tous les droits</div></div>
+        {saved&&<span style={{fontSize:11,color:C.green,fontWeight:700}}>✓ Sauvegardé</span>}
       </div>
       <div style={{margin:"0 14px",padding:"10px 14px",background:C.cyan+"12",border:"1px solid "+C.cyan+"33",borderRadius:12,marginBottom:14}}>
         <div style={{fontSize:12,color:C.cyan}}>💡 Les modifications sont appliquées immédiatement à la prochaine connexion.</div>
