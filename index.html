@@ -1847,8 +1847,7 @@ function RappelsScreen({actions,resps,config,onConfigUpdate,onBack}){
       lines.push((i+1)+". "+a.label);lines.push("   Site: "+a.site+" | Priorité: "+a.prio+" | "+st);lines.push("");
     });
     lines.push("Merci de traiter ces actions dans les délais impartis.");lines.push("");lines.push("Cordialement,");lines.push("L'équipe Prévention & Sécurité [SECURA]");
-    return "mailto:"+group.email+"?subject="+encodeURIComponent(subject)+"&body="+encodeURIComponent(lines.join("
-"));
+    return "mailto:"+group.email+"?subject="+encodeURIComponent(subject)+"&body="+encodeURIComponent(lines.join(String.fromCharCode(10)));
   }
   function send(group){
     var newD=Object.assign({},cleanDismissed);
