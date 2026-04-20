@@ -661,18 +661,7 @@ const initInspections=[];
 const initActions=[];
 
 // ═══════════════════════════════════════════════════════════════════════
-// PERMISSIONS
-// ═══════════════════════════════════════════════════════════════════════
-function hasAccess(user,config,feature){
-  if(!user) return false;
-  if(user.role==="Admin") return true;
-  var perms=config&&config.permissions&&config.permissions[user.role];
-  if(!perms) return feature==="dashboard"||feature==="actions";
-  return !!perms[feature];
-}
-
-// ═══════════════════════════════════════════════════════════════════════
-// PERMISSIONS
+// PERMISSIONS — contrôle d'accès par rôle
 // ═══════════════════════════════════════════════════════════════════════
 function hasAccess(user,config,feature){
   if(!user) return false;
