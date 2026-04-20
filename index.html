@@ -672,6 +672,17 @@ function hasAccess(user,config,feature){
 }
 
 // ═══════════════════════════════════════════════════════════════════════
+// PERMISSIONS
+// ═══════════════════════════════════════════════════════════════════════
+function hasAccess(user,config,feature){
+  if(!user) return false;
+  if(user.role==="Admin") return true;
+  var perms=config&&config.permissions&&config.permissions[user.role];
+  if(!perms) return feature==="dashboard"||feature==="actions";
+  return !!perms[feature];
+}
+
+// ═══════════════════════════════════════════════════════════════════════
 // LOGIN
 // ═══════════════════════════════════════════════════════════════════════
 function LoginScreen({onLogin, users}){
@@ -1267,6 +1278,7 @@ function ItemCard({item, onToggle, onComment, onPhotoAdd, onPhotoRemove, onRespC
             {item.comment&&<span style={{fontSize:9,color:C.amber}}>💬</span>}
           </div>
         </div>
+        {onDelete&&<button onClick={function(e){e.stopPropagation();onDelete();}} style={{background:"transparent",border:"none",color:C.muted,fontSize:16,cursor:"pointer",padding:"2px 4px",flexShrink:0,lineHeight:1}} title="Supprimer cette question">✕</button>}
       </div>
       {/* Tools row */}
       <div style={{padding:"0 10px 8px",display:"flex",gap:8,flexWrap:"wrap"}}>
@@ -1356,6 +1368,7 @@ function InspectionDetailScreen({inspection,onBack,onUpdate,resps,sitesState}){
   const sections=[...new Set(items.map(i=>i.s))];
 
   const toggle=(id)=>setItems(p=>p.map(i=>i.id===id?{...i,ok:!i.ok}:i));
+  const deleteItem=(id)=>setItems(p=>p.filter(i=>i.id!==id));
   const setComment=(id,v)=>setItems(p=>p.map(i=>i.id===id?{...i,comment:v}:i));
   const addPhoto=(id,src)=>setItems(p=>p.map(i=>i.id===id?{...i,photos:[...(i.photos||[]),src]}:i));
   const removePhoto=(id,idx)=>setItems(p=>p.map(i=>i.id===id?{...i,photos:(i.photos||[]).filter((_,j)=>j!==idx)}:i));
@@ -1467,6 +1480,7 @@ function InspectionDetailScreen({inspection,onBack,onUpdate,resps,sitesState}){
                     onPhotoRemove={function(idx){removePhoto(itemId,idx);}}
                     onRespChange={function(v){setItems(function(p){return p.map(function(i){return i.id===itemId?{...i,resp:v}:i;});});}}
                     onSetPoids={function(p){var capturedId=itemId;setItems(function(prev){return prev.map(function(i){return i.id===capturedId?{...i,poids:p,p:p}:i;});});}}
+                    onDelete={function(){deleteItem(itemId);}}
                     resps={respList}
                   />
                   );
@@ -2808,6 +2822,70 @@ function BottomNav({active,onChange,badge,user,config}){
   );
 }
 
+
+// ═══════════════════════════════════════════════════════════════════════
+// PERMISSIONS SCREEN
+// ═══════════════════════════════════════════════════════════════════════
+function PermissionsScreen({config,onConfigUpdate}){
+  var perms=config&&config.permissions?config.permissions:{
+    Inspecteur:{dashboard:true,inspections:true,actions:true,rapports:false,rappels:false,settings:false},
+    Responsable:{dashboard:true,inspections:false,actions:true,rapports:false,rappels:false,settings:false}
+  };
+  var features=[
+    {k:"dashboard",  l:"Tableau de bord",      icon:"🏠"},
+    {k:"inspections",l:"Audits",               icon:"📋"},
+    {k:"actions",    l:"Actions",              icon:"⚡"},
+    {k:"rapports",   l:"Rapports",             icon:"📄"},
+    {k:"rappels",    l:"Rappels email",         icon:"📧"},
+    {k:"settings",   l:"Profil & Paramètres",  icon:"👤"},
+  ];
+  var roles=["Inspecteur","Responsable"];
+
+  function togglePerm(role,feature){
+    var newPerms=JSON.parse(JSON.stringify(perms));
+    if(!newPerms[role]) newPerms[role]={};
+    newPerms[role][feature]=!newPerms[role][feature];
+    onConfigUpdate(Object.assign({},config,{permissions:newPerms}));
+  }
+
+  return (
+    <div>
+      <div style={{padding:"10px 0 12px",background:C.cyan+"12",border:"1px solid "+C.cyan+"33",borderRadius:12,marginBottom:14,padding:"10px 14px"}}>
+        <div style={{fontSize:12,color:C.cyan}}>💡 Admin a toujours tous les droits. Modifications appliquées à la prochaine connexion.</div>
+      </div>
+      {roles.map(function(role,ri){
+        var rolePerms=perms[role]||{};
+        var roleCol=role==="Inspecteur"?C.cyan:C.purple;
+        return (
+          <div key={ri} style={{...S.card(),marginBottom:14}}>
+            <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:14,paddingBottom:12,borderBottom:"1px solid "+C.border}}>
+              <div style={{width:38,height:38,borderRadius:11,background:roleCol+"18",border:"1px solid "+roleCol+"33",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16}}>{role==="Inspecteur"?"🔍":"👤"}</div>
+              <div>
+                <div style={{fontSize:15,fontWeight:800}}>{role}</div>
+                <div style={{fontSize:11,color:C.muted}}>{Object.values(rolePerms).filter(Boolean).length} accès actifs</div>
+              </div>
+            </div>
+            {features.map(function(f,fi){
+              var active=!!rolePerms[f.k];
+              return (
+                <div key={fi} style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"10px 0",borderBottom:fi<features.length-1?"1px solid "+C.dim:"none"}}>
+                  <div style={{display:"flex",alignItems:"center",gap:10}}>
+                    <span style={{fontSize:16,width:24,textAlign:"center"}}>{f.icon}</span>
+                    <span style={{fontSize:13,fontWeight:active?700:400,color:active?C.text:C.muted}}>{f.l}</span>
+                  </div>
+                  <button onClick={function(){togglePerm(role,f.k);}}
+                    style={{width:46,height:26,borderRadius:99,background:active?roleCol:C.border,border:"none",cursor:"pointer",transition:"background .2s",position:"relative",flexShrink:0}}>
+                    <div style={{position:"absolute",top:3,left:active?22:3,width:20,height:20,borderRadius:99,background:"#fff",transition:"left .2s",boxShadow:"0 1px 3px rgba(0,0,0,.3)"}}/>
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
 
 // ═══════════════════════════════════════════════════════════════════════
 // APP ROOT
