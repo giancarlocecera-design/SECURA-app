@@ -1696,7 +1696,7 @@ function NewInspectionScreen({user,onSave,onBack,resps,sitesState,customTemplate
             <label style={S.label}>Notes préliminaires</label>
             <textarea style={{...S.input,minHeight:60,resize:"vertical"}} placeholder="Contexte, périmètre, objectifs..." value={form.notes} onChange={e=>setForm({...form,notes:e.target.value})}/>
           </div>
-          <button onClick={next} disabled={!form.titre} style={{...S.btn(C.cyan),opacity:form.titre?1:.45}}>Suivant → Checklist ({(CHECKLISTS[form.categorie]&&CHECKLISTS[form.categorie].length)||0} questions)</button>
+          <button onClick={next} disabled={!form.titre} style={{...S.btn(C.cyan),opacity:form.titre?1:.45}}>Suivant →</button>
         </div>
       )}
 
