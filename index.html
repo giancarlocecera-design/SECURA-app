@@ -681,7 +681,6 @@ function LoginScreen({onLogin, users}){
     ? users
     : USERS).filter(function(u){return u&&u.nom;});
   const loginUsers=allUsers.filter(function(u){return u.role==="Admin"||u.role==="Inspecteur";});
-  const loginUsers=allUsers.filter(function(u){return u.role==="Admin"||u.role==="Inspecteur";});
   const handle=()=>{setLoad(true);setErr("");setTimeout(()=>{const u=allUsers.find(u=>u.email===email&&u.pass===pass);if(u)onLogin(u);else{setErr("Identifiants incorrects.");setLoad(false);}},700);};
   return (
     <div style={{minHeight:"100vh",display:"flex",flexDirection:"column",justifyContent:"center",padding:"32px 22px",background:`linear-gradient(165deg,${C.bg} 55%,#0D1825)`}}>
