@@ -1917,8 +1917,6 @@ function RappelsScreen({actions,resps,config,onConfigUpdate,onBack}){
     if(cleanDismissed[String(a.id)])return false;
     return Math.ceil((parseDateLocal(a.echeance)-today)/86400000)<=delai;
   });
-  console.log("[RAPPELS DEBUG] total actions reçues:", actions.length, "| delai:", delai, "| alertes après filtre:", alertes.length);
-  actions.forEach(function(a){console.log("[RAPPELS]", "resp=["+a.resp+"]", "ech=["+a.echeance+"]", "statut=["+a.statut+"]", "dismissed="+!!cleanDismissed[String(a.id)]);});
   var sansResp=actions.filter(function(a){
     if(a.statut==="Clôturée")return false;
     if(!a.resp||a.resp===""||a.resp==="Assigner un responsable")return true;
