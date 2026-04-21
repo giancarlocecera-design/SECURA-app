@@ -681,6 +681,7 @@ function LoginScreen({onLogin, users}){
     ? users
     : USERS).filter(function(u){return u&&u.nom;});
   const loginUsers=allUsers.filter(function(u){return u.role==="Admin"||u.role==="Inspecteur";});
+  const loginUsers=allUsers.filter(function(u){return u.role==="Admin"||u.role==="Inspecteur";});
   const handle=()=>{setLoad(true);setErr("");setTimeout(()=>{const u=allUsers.find(u=>u.email===email&&u.pass===pass);if(u)onLogin(u);else{setErr("Identifiants incorrects.");setLoad(false);}},700);};
   return (
     <div style={{minHeight:"100vh",display:"flex",flexDirection:"column",justifyContent:"center",padding:"32px 22px",background:`linear-gradient(165deg,${C.bg} 55%,#0D1825)`}}>
@@ -913,6 +914,86 @@ function DashboardScreen({user,inspections,actions,onNav,darkMode,onToggleDark,c
               </div>);})}
             </div>
           </div>);
+        })()}
+      </div>
+
+      {/* Top NC récurrentes */}
+      <div style={{margin:"14px 14px 0",...S.card()}}>
+        <div style={{fontSize:15,fontWeight:800,marginBottom:4}}>🔁 Top NC récurrentes</div>
+        <div style={{fontSize:12,color:C.muted,marginBottom:12}}>Non-conformités les plus fréquentes tous sites confondus</div>
+        {(function(){
+          var ncMap={};
+          inspections.forEach(function(ins){
+            (ins.items||[]).forEach(function(it){
+              if(it&&!it.ok){
+                var key=it.id||it.l;
+                if(!ncMap[key]) ncMap[key]={label:it.l||it.id||"NC inconnue",poids:it.poids||it.p||"mineur",count:0,cats:{}};
+                ncMap[key].count++;
+                if(ins.categorie) ncMap[key].cats[ins.categorie]=true;
+              }
+            });
+          });
+          var topNC=Object.values(ncMap).sort(function(a,b){return b.count-a.count;}).slice(0,5);
+          if(topNC.length===0) return <div style={{textAlign:"center",padding:"20px 0",color:C.muted}}><div style={{fontSize:13}}>Aucune NC enregistrée pour l&#39;instant</div></div>;
+          var maxCount=topNC[0].count;
+          return topNC.map(function(nc,i){
+            var col=nc.poids==="critique"?C.red:nc.poids==="eleve"?C.orange:C.amber;
+            var pct=Math.round((nc.count/maxCount)*100);
+            return (
+              <div key={i} style={{marginBottom:12,padding:"10px 12px",borderRadius:12,background:col+"08",border:"1px solid "+col+"22"}}>
+                <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:6}}>
+                  <div style={{flex:1,fontSize:12,fontWeight:600,paddingRight:8,lineHeight:1.4}}>{nc.label}</div>
+                  <div style={{display:"flex",flexDirection:"column",alignItems:"flex-end",gap:3,flexShrink:0}}>
+                    <span style={{fontSize:16,fontWeight:900,color:col}}>{nc.count}×</span>
+                    <span style={{fontSize:9,padding:"2px 6px",borderRadius:6,background:col+"20",color:col,fontWeight:800}}>{poidsLabel(nc.poids)}</span>
+                  </div>
+                </div>
+                <div style={{background:C.dim,borderRadius:99,height:5,overflow:"hidden",marginBottom:4}}>
+                  <div style={{width:pct+"%",height:"100%",background:col,borderRadius:99,transition:"width .6s",boxShadow:"0 0 4px "+col+"88"}}/>
+                </div>
+                <div style={{fontSize:10,color:C.muted}}>{Object.keys(nc.cats).join(" · ")}</div>
+              </div>
+            );
+          });
+        })()}
+      </div>
+      {/* Répartition NC par criticité */}
+      <div style={{margin:"14px 14px 0",...S.card()}}>
+        <div style={{fontSize:15,fontWeight:800,marginBottom:4}}>🎯 Répartition NC par criticité</div>
+        <div style={{fontSize:12,color:C.muted,marginBottom:14}}>Toutes inspections confondues</div>
+        {(function(){
+          var crit=0,elev=0,min=0;
+          inspections.forEach(function(ins){
+            (ins.items||[]).forEach(function(it){
+              if(it&&!it.ok){var p=it.poids||it.p||"mineur";if(p==="critique")crit++;else if(p==="eleve")elev++;else min++;}
+            });
+          });
+          var total=crit+elev+min;
+          if(total===0) return <div style={{textAlign:"center",padding:"20px 0",color:C.muted}}><div style={{fontSize:13}}>Aucune NC enregistrée</div></div>;
+          var its=[{label:"Critique",count:crit,col:C.red},{label:"Élevé",count:elev,col:C.orange},{label:"Mineur",count:min,col:C.amber}];
+          var r=54,cx=70,cy=70,circ=2*Math.PI*r,offset=0;
+          var segs=its.map(function(it){var pct=total>0?it.count/total:0;var dash=pct*circ;var seg=Object.assign({},it,{dash:dash,offset:offset,pct:Math.round(pct*100)});offset+=dash;return seg;});
+          return (
+            <div style={{display:"flex",alignItems:"center",gap:16}}>
+              <svg width={140} height={140} viewBox="0 0 140 140">
+                <circle cx={cx} cy={cy} r={r} fill="none" stroke={C.dim} strokeWidth={18}/>
+                {segs.map(function(seg,i){if(seg.count===0)return null;return <circle key={i} cx={cx} cy={cy} r={r} fill="none" stroke={seg.col} strokeWidth={18} strokeDasharray={seg.dash+" "+circ} strokeDashoffset={-seg.offset+circ/4} style={{filter:"drop-shadow(0 0 3px "+seg.col+"66)"}}/>;  })}
+                <text x={cx} y={cy-6} textAnchor="middle" fill={C.text} fontSize={22} fontWeight={900}>{total}</text>
+                <text x={cx} y={cy+12} textAnchor="middle" fill={C.muted} fontSize={10}>NC total</text>
+              </svg>
+              <div style={{flex:1,display:"flex",flexDirection:"column",gap:10}}>
+                {its.map(function(it,i){var pct=total>0?Math.round(it.count/total*100):0;return (
+                  <div key={i}>
+                    <div style={{display:"flex",justifyContent:"space-between",marginBottom:4}}>
+                      <span style={{fontSize:12,fontWeight:700,color:it.col}}>● {it.label}</span>
+                      <span style={{fontSize:12,fontWeight:900,color:it.col}}>{it.count} <span style={{fontSize:10,color:C.muted,fontWeight:400}}>({pct}%)</span></span>
+                    </div>
+                    <div style={{background:C.dim,borderRadius:99,height:5,overflow:"hidden"}}><div style={{width:pct+"%",height:"100%",background:it.col,borderRadius:99,transition:"width .6s"}}/></div>
+                  </div>
+                );})}
+              </div>
+            </div>
+          );
         })()}
       </div>
       {/* Actions */}
@@ -1267,7 +1348,7 @@ function ItemCard({item, onToggle, onComment, onPhotoAdd, onPhotoRemove, onRespC
             {item.comment&&<span style={{fontSize:9,color:C.amber}}>💬</span>}
           </div>
         </div>
-        {onDelete&&<button onClick={function(e){e.stopPropagation();onDelete();}} style={{background:"transparent",border:"none",color:C.muted,fontSize:16,cursor:"pointer",padding:"2px 4px",flexShrink:0,lineHeight:1}} title="Supprimer cette question">✕</button>}
+        {onDelete&&<button onClick={function(e){e.stopPropagation();if(window.confirm("Supprimer cette question ?"))onDelete();}} style={{background:"transparent",border:"none",color:C.muted,fontSize:16,cursor:"pointer",padding:"2px 4px",flexShrink:0,lineHeight:1}} title="Supprimer cette question">✕</button>}
       </div>
       {/* Tools row */}
       <div style={{padding:"0 10px 8px",display:"flex",gap:8,flexWrap:"wrap"}}>
@@ -1829,13 +1910,23 @@ function RappelsScreen({actions,resps,config,onConfigUpdate,onBack}){
   const [dismissed,setDismissed]=useState(function(){try{var d=localStorage.getItem("secura_rappels_sent");return d?JSON.parse(d):{};}catch(e){return {};}});
   function saveDismissed(newD){setDismissed(newD);try{localStorage.setItem("secura_rappels_sent",JSON.stringify(newD));}catch(e){}}
   function getEmail(nom){var r=(resps||[]).find(function(r){return typeof r==="object"&&r.nom===nom;});return r&&r.email?r.email:"";}
-  var today=new Date();today.setHours(0,0,0,0);
+  function parseDateLocal(d){if(!d)return new Date();var p=d.split("-");var dt=new Date(parseInt(p[0]),parseInt(p[1])-1,parseInt(p[2]));dt.setHours(0,0,0,0);return dt;}  var today=new Date();today.setHours(0,0,0,0);
   var activeIds=actions.filter(function(a){return a.statut!=="Clôturée";}).map(function(a){return String(a.id);});
   var cleanDismissed={};Object.keys(dismissed).forEach(function(k){if(activeIds.indexOf(k)!==-1)cleanDismissed[k]=true;});
   var alertes=actions.filter(function(a){
     if(a.statut==="Clôturée"||!a.resp||!a.echeance)return false;
     if(cleanDismissed[String(a.id)])return false;
-    return Math.ceil((new Date(a.echeance)-today)/86400000)<=delai;
+    return Math.ceil((parseDateLocal(a.echeance)-today)/86400000)<=delai;
+  });
+  console.log("[RAPPELS DEBUG] total actions reçues:", actions.length, "| delai:", delai, "| alertes après filtre:", alertes.length);
+  actions.forEach(function(a){console.log("[RAPPELS]", "resp=["+a.resp+"]", "ech=["+a.echeance+"]", "statut=["+a.statut+"]", "dismissed="+!!cleanDismissed[String(a.id)]);});
+  var sansResp=actions.filter(function(a){
+    if(a.statut==="Clôturée")return false;
+    if(!a.resp||a.resp===""||a.resp==="Assigner un responsable")return true;
+    return false;
+  });
+  var sansEcheance=actions.filter(function(a){
+    return a.statut!=="Clôturée"&&a.resp&&a.resp!==""&&!a.echeance;
   });
   var byResp={};
   alertes.forEach(function(a){if(!byResp[a.resp])byResp[a.resp]={resp:a.resp,email:getEmail(a.resp),actions:[]};byResp[a.resp].actions.push(a);});
@@ -1845,7 +1936,7 @@ function RappelsScreen({actions,resps,config,onConfigUpdate,onBack}){
     var subject="SECURA - Rappel actions correctives - "+d;
     var lines=["Bonjour "+group.resp.split(" ")[0]+",","","Rappel des actions correctives qui vous sont attribuées :",""];
     group.actions.forEach(function(a,i){
-      var dl=Math.ceil((new Date(a.echeance)-today)/86400000);
+      var dl=Math.ceil((parseDateLocal(a.echeance)-today)/86400000);
       var st=dl<0?"EN RETARD DE "+Math.abs(dl)+" JOUR(S)":dl===0?"AUJOURD'HUI":"Dans "+dl+" jour(s) ("+a.echeance+")";
       lines.push((i+1)+". "+a.label);lines.push("   Site: "+a.site+" | Priorité: "+a.prio+" | "+st);lines.push("");
     });
@@ -1863,7 +1954,8 @@ function RappelsScreen({actions,resps,config,onConfigUpdate,onBack}){
     <div style={{paddingBottom:88}}>
       <div style={{padding:"20px 16px 12px",display:"flex",alignItems:"center",gap:10}}>
         <button onClick={onBack} style={{background:C.surface,border:"1px solid "+C.border,borderRadius:10,padding:"8px 12px",color:C.cyan,cursor:"pointer",fontSize:13,fontWeight:700}}>← Retour</button>
-        <div><div style={{fontSize:18,fontWeight:900}}>📧 Rappels</div><div style={{fontSize:11,color:C.muted}}>Envoi aux responsables par email</div></div>
+        <div style={{flex:1}}><div style={{fontSize:18,fontWeight:900}}>📧 Rappels</div><div style={{fontSize:11,color:C.muted}}>Envoi aux responsables par email</div></div>
+        {Object.keys(dismissed).length>0&&<button onClick={function(){saveDismissed({});}} style={{background:"transparent",border:"1px solid "+C.border,borderRadius:10,padding:"6px 10px",color:C.muted,cursor:"pointer",fontSize:10,fontWeight:700}}>🔄 Reset</button>}
       </div>
       <div style={{margin:"0 14px 14px",...S.card(C.cyan+"22")}}>
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
@@ -1879,11 +1971,17 @@ function RappelsScreen({actions,resps,config,onConfigUpdate,onBack}){
           )}
         </div>
       </div>
-      {groups.length===0&&<div style={{textAlign:"center",padding:"50px 20px",color:C.muted}}><div style={{fontSize:36,marginBottom:12}}>✅</div><div style={{fontSize:14,fontWeight:700,marginBottom:6}}>Aucun rappel nécessaire</div><div style={{fontSize:12}}>Aucune action n&#39;arrive à échéance dans les {delai} prochains jours.</div></div>}
+      {sansResp.length>0&&(
+        <div style={{margin:"0 14px 10px",padding:"10px 14px",background:C.orange+"12",border:"1px solid "+C.orange+"33",borderRadius:12,display:"flex",alignItems:"center",gap:10}}>
+          <span style={{fontSize:18}}>⚠️</span>
+          <div><div style={{fontSize:12,fontWeight:700,color:C.orange}}>{sansResp.length} action(s) sans responsable</div><div style={{fontSize:11,color:C.muted,marginTop:2}}>Assignez un responsable dans Actions pour les inclure dans les rappels</div></div>
+        </div>
+      )}
+      {groups.length===0&&<div style={{textAlign:"center",padding:"50px 20px",color:C.muted}}><div style={{fontSize:36,marginBottom:12}}>✅</div><div style={{fontSize:14,fontWeight:700,marginBottom:6}}>Aucun rappel nécessaire</div><div style={{fontSize:12,marginBottom:16}}>Aucune action n&#39;arrive à échéance dans les {delai} prochains jours.</div>{Object.keys(dismissed).length>0&&<button onClick={function(){saveDismissed({});}} style={{...S.btn(C.muted,true),width:"auto",padding:"8px 16px",fontSize:11,margin:"0 auto"}}>🔄 Réafficher les rappels envoyés</button>}</div>}
       <div style={{padding:"0 14px"}}>
         {groups.map(function(group,gi){
           var hasEmail=!!group.email;
-          var retard=group.actions.filter(function(a){return Math.ceil((new Date(a.echeance)-today)/86400000)<0;}).length;
+          var retard=group.actions.filter(function(a){return Math.ceil((parseDateLocal(a.echeance)-today)/86400000)<0;}).length;
           var critique=group.actions.filter(function(a){return a.prio==="CRITIQUE";}).length;
           var initials=(group.resp||"?").split(" ").map(function(n){return n[0];}).join("").slice(0,2).toUpperCase();
           return (
@@ -1899,7 +1997,7 @@ function RappelsScreen({actions,resps,config,onConfigUpdate,onBack}){
               </div>}
               {group.actions.map(function(a,ai){
                 var col=a.prio==="CRITIQUE"?C.red:a.prio==="ÉLEVÉE"?C.orange:C.amber;
-                var dl=Math.ceil((new Date(a.echeance)-today)/86400000);
+                var dl=Math.ceil((parseDateLocal(a.echeance)-today)/86400000);
                 var dlCol=dl<0?C.red:dl<=3?C.orange:C.muted;
                 var dlTxt=dl<0?"⚠ "+Math.abs(dl)+"j retard":dl===0?"Aujourd'hui":"+"+dl+"j";
                 return (<div key={ai} style={{display:"flex",gap:10,padding:"8px 0",borderBottom:ai<group.actions.length-1?"1px solid "+C.dim:"none",alignItems:"flex-start"}}>
