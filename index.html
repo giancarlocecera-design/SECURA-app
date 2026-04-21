@@ -587,6 +587,20 @@ const CHECKLISTS = {
   {id:"PS39",s:"Déclaration & formation",l:"Coordination avec les services de secours externes (pompiers, SMUR) documentée",p:"eleve"},
   {id:"PS40",s:"Déclaration & formation",l:"Tableau de bord des indicateurs premiers secours (AT, formations, matériel) mis à jour",p:"mineur"},
 ],
+
+// ──────────────────────────────────────────────────────────────
+"Échelles & escabeaux": [
+  {id:"ECH01",s:"Identification",l:"Équipement identifiable : marque, type, charge maximale, marquage lisible",p:"critique"},
+  {id:"ECH02",s:"Structure",l:"Montants intacts — pas de fissure, déformation, torsion ou corrosion",p:"critique"},
+  {id:"ECH03",s:"Structure",l:"Tous les échelons/marches présents, solidement fixés et non déformés",p:"critique"},
+  {id:"ECH04",s:"Fixations",l:"Fixations (rivets, vis, soudures) en bon état — pas de jeu ni desserrage",p:"eleve"},
+  {id:"ECH05",s:"Pieds & patins",l:"Pieds/patins présents, non usés et correctement fixés",p:"critique"},
+  {id:"ECH06",s:"Verrouillage",l:"Systèmes de verrouillage fonctionnels et non endommagés",p:"critique"},
+  {id:"ECH07",s:"Parties mobiles",l:"Parties mobiles fonctionnelles sans blocage ni jeu excessif",p:"eleve"},
+  {id:"ECH08",s:"Accessoires",l:"Accessoires (plateforme, garde-corps, stabilisateurs) en bon état",p:"eleve"},
+  {id:"ECH09",s:"Propreté",l:"Équipement propre et exempt de substances altérant sa résistance",p:"mineur"},
+  {id:"ECH10",s:"Contrôle périodique",l:"Contrôle périodique documenté — étiquette, registre et date à jour",p:"critique"},
+],
 };
 
 const CATEGORIES = Object.keys(CHECKLISTS);
@@ -600,6 +614,7 @@ const CAT_META = {
   "Ergonomie":        {icon:"🪑", color:C.purple},
   "Risques chimiques":{icon:"⚗️", color:C.red},
   "Premiers secours": {icon:"🚑", color:C.green},
+  "Échelles & escabeaux": {icon:"🪜", color:C.blue},
 };
 
 // ═══════════════════════════════════════════════════════════════════════
