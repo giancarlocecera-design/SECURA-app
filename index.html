@@ -2892,28 +2892,15 @@ function SettingsScreen({user,onLogout,appState,onAppStateUpdate,respsState,site
             <div style={{...S.card(),marginBottom:12}}>
               <div style={{fontSize:13,fontWeight:800,marginBottom:12}}>🔡 Taille du texte</div>
               <div style={{display:"flex",gap:8}}>
-                {[[13,"Petit"],[15,"Normal"],[17,"Grand"]].map(function(s){
-                  var active=(config&&config.fontSize)===s[0];
+                {[[1,"Normal"],[1.12,"Grand"]].map(function(s){
+                  var active=((config&&config.textZoom)||1)===s[0];
                   return (
-                    <button key={s[0]} onClick={()=>onConfigUpdate&&onConfigUpdate({...config,fontSize:s[0]})}
-                      style={{flex:1,padding:"10px",borderRadius:10,border:"1px solid "+(active?C.cyan:C.border),background:active?C.cyan+"18":"transparent",color:active?C.cyan:C.muted,cursor:"pointer",fontSize:s[0],fontWeight:active?800:400}}>
+                    <button key={s[0]} onClick={()=>onConfigUpdate&&onConfigUpdate({...config,textZoom:s[0]})}
+                      style={{flex:1,padding:"12px",borderRadius:10,border:"1px solid "+(active?ac:C.border),background:active?ac+"18":"transparent",color:active?ac:C.muted,cursor:"pointer",fontSize:active?15:13,fontWeight:active?800:400}}>
                       {s[1]}
                     </button>
                   );
                 })}
-              </div>
-            </div>
-            {/* Compact mode */}
-            <div style={{...S.card(),marginBottom:12}}>
-              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-                <div>
-                  <div style={{fontSize:13,fontWeight:800}}>📐 Mode compact</div>
-                  <div style={{fontSize:11,color:C.muted,marginTop:2}}>Réduit l&#39;espacement des éléments</div>
-                </div>
-                <button onClick={()=>onConfigUpdate&&onConfigUpdate({...config,compactMode:!(config&&config.compactMode)})}
-                  style={{width:48,height:28,borderRadius:99,background:(config&&config.compactMode)?ac:C.border,border:"none",cursor:"pointer",transition:"background .2s",position:"relative"}}>
-                  <div style={{position:"absolute",top:3,left:(config&&config.compactMode)?22:3,width:22,height:22,borderRadius:99,background:"#fff",transition:"left .2s"}}/>
-                </button>
               </div>
             </div>
             {/* Mode daltonien */}
@@ -3202,6 +3189,7 @@ function App(){
     color:darkMode?C.text:"#1A1E2E",
     fontFamily:(config&&config.fontFamily)||"DM Sans,Segoe UI,sans-serif",
     fontSize:(config&&config.fontSize)||15,
+    zoom:(config&&config.textZoom)||1,
     filter:daltonFilter,
   };
 
