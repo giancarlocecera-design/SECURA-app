@@ -2451,21 +2451,20 @@ function RapportsScreen({inspections,onDelete,config}){
             <button onClick={function(){setReportHTML(null);}} style={{background:"transparent",border:"1px solid "+C.cyan+"44",borderRadius:10,padding:"7px 12px",color:C.cyan,cursor:"pointer",fontSize:12,fontWeight:700}}>← Fermer</button>
             <div style={{flex:1,fontSize:13,fontWeight:700,color:"#fff",minWidth:60}}>Rapport</div>
             <button onClick={function(){
-              var f=document.getElementById("secura-report-frame");
-              if(!f||!f.contentDocument||!f.contentDocument.body) return;
-              html2pdf().set({margin:0.3,filename:"rapport-secura.pdf",image:{type:"jpeg",quality:0.98},html2canvas:{scale:2,useCORS:true,logging:false},jsPDF:{unit:"in",format:"a4",orientation:"portrait"}}).from(f.contentDocument.body).save();
+              var w=window.open("","_blank");
+              if(!w)return;
+              w.document.write(reportHTML+"<script src='https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js'><\/script><script>window.onload=function(){setTimeout(function(){html2pdf().set({margin:0.3,filename:'rapport-secura.pdf',image:{type:'jpeg',quality:0.98},html2canvas:{scale:2,useCORS:true},jsPDF:{unit:'in',format:'a4',orientation:'portrait'}}).from(document.body).save().then(function(){setTimeout(function(){window.close();},1500);});},800);}<\/script>");
+              w.document.close();
             }} style={{background:"linear-gradient(135deg,"+C.cyan+",#007799)",border:"none",borderRadius:8,padding:"7px 12px",color:"#000",cursor:"pointer",fontSize:11,fontWeight:800,display:"flex",alignItems:"center",gap:5}}>📥 Télécharger PDF</button>
             <button onClick={function(){
               var f=document.getElementById("secura-report-frame");
               if(f&&f.contentWindow) f.contentWindow.print();
             }} style={{background:"transparent",border:"1px solid "+C.green+"66",borderRadius:8,padding:"7px 12px",color:C.green,cursor:"pointer",fontSize:11,fontWeight:800,display:"flex",alignItems:"center",gap:5}}>🖨️ Imprimer</button>
             {navigator.share&&<button onClick={function(){
-              var f=document.getElementById("secura-report-frame");
-              if(!f||!f.contentDocument||!f.contentDocument.body) return;
-              html2pdf().set({margin:0.3,image:{type:"jpeg",quality:0.98},html2canvas:{scale:2,useCORS:true,logging:false},jsPDF:{unit:"in",format:"a4",orientation:"portrait"}}).from(f.contentDocument.body).outputPdf("blob").then(function(blob){
-                var file=new File([blob],"rapport-secura.pdf",{type:"application/pdf"});
-                navigator.share({title:"Rapport SECURA",files:[file]}).catch(function(){});
-              });
+              var w=window.open("","_blank");
+              if(!w)return;
+              w.document.write(reportHTML+"<script src='https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js'><\/script><script>window.onload=function(){setTimeout(function(){html2pdf().set({margin:0.3,image:{type:'jpeg',quality:0.98},html2canvas:{scale:2,useCORS:true},jsPDF:{unit:'in',format:'a4',orientation:'portrait'}}).from(document.body).outputPdf('blob').then(function(blob){var file=new File([blob],'rapport-secura.pdf',{type:'application/pdf'});navigator.share({title:'Rapport SECURA',files:[file]}).then(function(){window.close();}).catch(function(){window.close();});});},800);}<\/script>");
+              w.document.close();
             }} style={{background:"transparent",border:"1px solid "+C.purple+"66",borderRadius:8,padding:"7px 12px",color:C.purple,cursor:"pointer",fontSize:11,fontWeight:800,display:"flex",alignItems:"center",gap:5}}>📤 Partager</button>}
           </div>
           <iframe id="secura-report-frame" srcDoc={reportHTML} style={{flex:1,border:"none",width:"100%"}} title="Rapport"/>
