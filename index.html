@@ -792,6 +792,7 @@ function DashboardScreen({user,inspections,actions,onNav,darkMode,onToggleDark,c
       {critActs>0&&<div style={{margin:"14px 14px 0",background:`${C.red}10`,border:`1px solid ${C.red}33`,borderRadius:14,padding:"11px 14px",display:"flex",gap:10,alignItems:"center"}}><span style={{fontSize:18}}>🚨</span><div><div style={{fontSize:13,fontWeight:700,color:C.red}}>{critActs} action(s) critique(s) — pénalité active</div><div style={{fontSize:11,color:C.muted}}>Chaque NC critique retire {(appState&&appState.penalites?appState.penalites.critique:5)} pts du score</div></div></div>}
 
       {/* Sites critiques */}
+      {siteFilter==="Tous"&&(
       <div style={{margin:"14px 14px 0",...S.card(`${C.red}25`),background:`linear-gradient(140deg,#0F1420,#180A0A)`}}>
         <div style={{fontSize:12,fontWeight:800,color:C.red,letterSpacing:1,marginBottom:12}}>⚠ SITES LES PLUS CRITIQUES</div>
         {sitePens.slice(0,5).map((s,i)=>(
@@ -805,6 +806,7 @@ function DashboardScreen({user,inspections,actions,onNav,darkMode,onToggleDark,c
           </div>
         ))}
       </div>
+      )}
 
       {/* 4 KPIs */}
       <div style={{padding:"14px 14px 0",display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
@@ -834,7 +836,7 @@ function DashboardScreen({user,inspections,actions,onNav,darkMode,onToggleDark,c
 
       {/* Graphique */}
       <div style={{margin:"14px 14px 0",...S.card()}}>
-        <div style={{fontSize:15,fontWeight:800,marginBottom:2}}>Score par catégorie & site</div>
+        <div style={{fontSize:15,fontWeight:800,marginBottom:2}}>{siteFilter==="Tous"?"Score par catégorie & site":"Score par catégorie — "+siteFilter}</div>
         <div style={{fontSize:12,color:C.muted,marginBottom:12}}>Système pénalité : 100 − Σ déductions NC</div>
         <div style={{display:"flex",gap:5,flexWrap:"wrap",marginBottom:14}}>
           {CATEGORIES.map(c=>{const m=CAT_META[c]; return (
@@ -842,8 +844,8 @@ function DashboardScreen({user,inspections,actions,onNav,darkMode,onToggleDark,c
           );})}
         </div>
         <div ref={function(el){_chartEl=el;}} style={{overflowX:"scroll",marginBottom:4}}>
-          <div style={{display:"flex",alignItems:"flex-end",gap:6,height:130,minWidth:Math.max(siteList.length*54,280)+"px"}}>
-            {siteList.map(function(site,i){
+          <div style={{display:"flex",alignItems:"flex-end",gap:6,height:130,minWidth:Math.max((siteFilter==="Tous"?siteList.length:1)*54,280)+"px"}}>
+            {(siteFilter==="Tous"?siteList:siteList.filter(function(s){return s===siteFilter;})).map(function(site,i){
               var ins=fInspections.find(function(x){return x.site===site&&x.categorie===chartTab;});
               var v=ins?ins.score:0; var col=scoreColor(v);
               return (
@@ -884,7 +886,7 @@ function DashboardScreen({user,inspections,actions,onNav,darkMode,onToggleDark,c
       {/* Top NC récurrentes */}
       <div style={{margin:"14px 14px 0",...S.card()}}>
         <div style={{fontSize:15,fontWeight:800,marginBottom:4}}>🔁 Top NC récurrentes</div>
-        <div style={{fontSize:12,color:C.muted,marginBottom:12}}>Non-conformités les plus fréquentes tous sites confondus</div>
+        <div style={{fontSize:12,color:C.muted,marginBottom:12}}>{siteFilter==="Tous"?"Non-conformités les plus fréquentes tous sites confondus":"Non-conformités sur "+siteFilter}</div>
         {(function(){
           var ncMap={};
           fInspections.forEach(function(ins){(ins.items||[]).forEach(function(it){if(it&&!it.ok){var key=it.id||it.l;if(!ncMap[key])ncMap[key]={label:it.l||it.id||"NC inconnue",poids:it.poids||it.p||"mineur",count:0,cats:{}};ncMap[key].count++;if(ins.categorie)ncMap[key].cats[ins.categorie]=true;}});});
@@ -911,7 +913,7 @@ function DashboardScreen({user,inspections,actions,onNav,darkMode,onToggleDark,c
       {/* Répartition NC par criticité */}
       <div style={{margin:"14px 14px 0",...S.card()}}>
         <div style={{fontSize:15,fontWeight:800,marginBottom:4}}>🎯 Répartition NC par criticité</div>
-        <div style={{fontSize:12,color:C.muted,marginBottom:14}}>Toutes inspections confondues</div>
+        <div style={{fontSize:12,color:C.muted,marginBottom:14}}>{siteFilter==="Tous"?"Toutes inspections confondues":"Inspections — "+siteFilter}</div>
         {(function(){
           var crit=0,elev=0,min=0;
           fInspections.forEach(function(ins){(ins.items||[]).forEach(function(it){if(it&&!it.ok){var p=it.poids||it.p||"mineur";if(p==="critique")crit++;else if(p==="eleve")elev++;else min++;}});});
@@ -943,12 +945,13 @@ function DashboardScreen({user,inspections,actions,onNav,darkMode,onToggleDark,c
       {/* Sites — dernière inspection */}
       <div style={{margin:"14px 14px 0",...S.card()}}>
         <div style={{fontSize:15,fontWeight:800,marginBottom:4}}>📍 Suivi des sites</div>
-        <div style={{fontSize:12,color:C.muted,marginBottom:12}}>Dernière inspection par site</div>
+        <div style={{fontSize:12,color:C.muted,marginBottom:12}}>{siteFilter==="Tous"?"Dernière inspection par site":"Détail — "+siteFilter}</div>
         {(function(){
           var today=new Date();today.setHours(0,0,0,0);
           var seuils=(config&&config.seuilSites)||{vert:90,jaune:120,rouge:365};
-          var siteData=siteList.map(function(site){
-            var siteIns=fInspections.filter(function(ins){return ins.site===site;});
+          var filteredSiteList=siteFilter==="Tous"?siteList:siteList.filter(function(s){return s===siteFilter;});
+          var siteData=filteredSiteList.map(function(site){
+            var siteIns=inspections.filter(function(ins){return ins.site===site;});
             if(siteIns.length===0) return {site:site,lastDate:null,days:null,count:0};
             var sorted=siteIns.sort(function(a,b){return b.date.localeCompare(a.date);});
             var lastDate=sorted[0].date;
