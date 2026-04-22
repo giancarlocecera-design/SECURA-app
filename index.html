@@ -145,6 +145,9 @@ const ANIM_CSS = [
   "@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}",
   ".card-hover{transition:transform .2s,box-shadow .2s}",
   ".card-hover:hover{transform:translateY(-2px)}",
+  ".tech-bg{background:linear-gradient(145deg,#0D0508 0%,#1A0A10 25%,#2A0F1A 50%,#1A0A10 75%,#0D0508 100%);background-size:400% 400%;animation:techShift 20s ease infinite;}",
+  "@keyframes techShift{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}",
+  ".tech-grid{position:fixed;top:0;left:0;right:0;bottom:0;background-image:linear-gradient(rgba(128,0,32,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(128,0,32,.06) 1px,transparent 1px);background-size:30px 30px;pointer-events:none;z-index:0;}",
 ].join("\n");
 
 function InjectCSS(){
@@ -2746,6 +2749,25 @@ function SettingsScreen({user,onLogout,appState,onAppStateUpdate,respsState,site
         {tab==="apparence"&&(
           <div>
 
+            {/* Mode Tec */}
+            <div style={{...S.card(),marginBottom:12,background:(config&&config.techMode)?"linear-gradient(135deg,#1A0A10,#2D0F1A)":C.card,border:"1px solid "+((config&&config.techMode)?"#5A1A30":"#1E2433")}}>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                <div>
+                  <div style={{fontSize:13,fontWeight:800}}>🎭 Mode Tec</div>
+                  <div style={{fontSize:11,color:C.muted,marginTop:2}}>{(config&&config.techMode)?"Ambiance bordeaux active":"Fond sombre standard"}</div>
+                </div>
+                <button onClick={function(){onConfigUpdate&&onConfigUpdate(Object.assign({},config,{techMode:!(config&&config.techMode)}));}}
+                  style={{width:48,height:28,borderRadius:99,background:(config&&config.techMode)?"linear-gradient(135deg,#8B2252,#5A1A30)":C.border,border:"none",cursor:"pointer",transition:"background .3s",position:"relative",flexShrink:0}}>
+                  <div style={{position:"absolute",top:3,left:(config&&config.techMode)?22:3,width:22,height:22,borderRadius:99,background:"#fff",transition:"left .2s",boxShadow:"0 1px 3px rgba(0,0,0,.3)"}}/>
+                </button>
+              </div>
+              {(config&&config.techMode)&&(
+                <div style={{marginTop:10,display:"flex",gap:8}}>
+                  <div style={{flex:1,height:6,borderRadius:99,background:"linear-gradient(90deg,#0D0508,#1A0A10,#2D0F1A,#5A1A30,#8B2252)"}}/>
+                </div>
+              )}
+            </div>
+
             {/* Accent color */}
             <div style={{...S.card(),marginBottom:12}}>
               <div style={{fontSize:13,fontWeight:800,marginBottom:12}}>🎨 Couleur principale</div>
@@ -3038,6 +3060,7 @@ function App(){
     daltonMode:"normal",
     notificationsEnabled:false,
     rappelDelai:7,
+    techMode:false,
     seuilSites:{vert:90,jaune:120,rouge:365},
     permissions:{
       Inspecteur:{dashboard:true,inspections:true,actions:true,rapports:false,rappels:false,settings:false},
@@ -3078,7 +3101,8 @@ function App(){
     }catch(e){console.error(e);}
   };
 
-  const bg=darkMode?C.bg:"#F0F4FA";
+  const isTech=!!(config&&config.techMode);
+  const bg=isTech?"linear-gradient(160deg,#0D0508 0%,#1A0A10 30%,#2D0F1A 60%,#1A0A10 100%)":darkMode?C.bg:"#F0F4FA";
   const daltonFilter=(config&&config.daltonMode)==="deuteranopie"?"url(#dalton-deut)"
     :(config&&config.daltonMode)==="protanopie"?"url(#dalton-prot)"
     :(config&&config.daltonMode)==="tritanopie"?"url(#dalton-trit)"
