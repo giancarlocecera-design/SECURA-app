@@ -2322,6 +2322,7 @@ function RapportsScreen({inspections,onDelete,config}){
     setPrinting(true);
     try{
       var appName=(config&&config.appName)||"SECURA";
+      var logoUrl=window.location.origin+"/icon-final-512.png";
       var ncItems=(ins.items||[]).filter(function(i){return !i.ok;});
       var okItems=(ins.items||[]).filter(function(i){return i.ok;});
       var penTotal=ncItems.reduce(function(s,i){return s+(PENALITE[i.poids||i.p]||0);},0);
@@ -2361,7 +2362,7 @@ function RapportsScreen({inspections,onDelete,config}){
         +".page{max-width:820px;margin:0 auto;padding:24px 32px}"
         +".header-band{background:linear-gradient(135deg,#07090F,#0D1825);color:#fff;padding:20px 32px;display:flex;justify-content:space-between;align-items:center}"
         +".header-left{display:flex;align-items:center;gap:16px}"
-        +".logo-box{width:50px;height:50px;border-radius:12px;background:linear-gradient(135deg,#00E5FF22,#00557722);border:2px solid #00E5FF44;display:flex;align-items:center;justify-content:center;font-size:24px}"
+        +".logo-box{width:50px;height:50px;border-radius:12px;overflow:hidden}"
         +".header-title{font-size:20px;font-weight:900;letter-spacing:4px;color:#00E5FF}"
         +".header-sub{font-size:11px;color:#8899aa;margin-top:3px;letter-spacing:1px}"
         +".header-right{text-align:right}"
@@ -2408,7 +2409,7 @@ function RapportsScreen({inspections,onDelete,config}){
         +"@media print{body{padding:0}.header-band,.score-card,.row,.score-fill,.num,.badge,.nc-chip{-webkit-print-color-adjust:exact;print-color-adjust:exact}}"
         +"</style></head><body>"
         +"<div class='header-band'>"
-        +"<div class='header-left'><div class='logo-box'>"+catIcon+"</div><div><div class='header-title'>"+appName+"</div><div class='header-sub'>RAPPORT D'AUDIT PREVENTION &amp; SECURITE</div></div></div>"
+        +"<div class='header-left'><div class='logo-box'><img src='"+logoUrl+"' style='width:50px;height:50px;object-fit:cover'/></div><div><div class='header-title'>"+appName+"</div><div class='header-sub'>RAPPORT D'AUDIT PREVENTION &amp; SECURITE</div></div></div>"
         +"<div class='header-right'><div class='header-ref'>REF : "+refNum+"</div><div class='header-date'>"+new Date().toLocaleDateString("fr-BE",{day:"2-digit",month:"long",year:"numeric"})+"</div></div>"
         +"</div>"
         +"<div class='page'>"
