@@ -725,27 +725,33 @@ function LoginScreen({onLogin, users}){
 var _chartEl=null;
 function DashboardScreen({user,inspections,actions,onNav,darkMode,onToggleDark,config,sitesState,appState}){
   const [chartTab,setChartTab]=useState(CATEGORIES[0]);
+  const [siteFilter,setSiteFilter]=useState("Tous");
   function selectCat(c){
     var list=(sitesState&&sitesState.length>0)?sitesState:SITES;
-    var idx=list.findIndex(function(s){return inspections.some(function(x){return x.site===s&&x.categorie===c;});});
+    var idx=list.findIndex(function(s){return fInspections.some(function(x){return x.site===s&&x.categorie===c;});});
     setChartTab(c);
     function doScroll(){if(!_chartEl||idx<=0)return;var t=idx*56-10;_chartEl.scrollLeft=t;try{_chartEl.scrollTo({left:t,behavior:"instant"});}catch(e){}}
     setTimeout(doScroll,300);setTimeout(doScroll,600);
   }
-  const avgScore=inspections.length?Math.round(inspections.reduce((s,i)=>s+i.score,0)/inspections.length):100;
-  const totalNC=inspections.reduce((s,i)=>s+i.nc,0);
-  const critActs=actions.filter(a=>a.prio==="CRITIQUE"&&a.statut!=="Clôturée").length;
-  const validated=inspections.filter(i=>i.statut==="Validée").length;
-  const penTotal=inspections.reduce((s,i)=>s+(100-i.score),0);
+
+  // Données filtrées par site
+  var fInspections=siteFilter==="Tous"?inspections:inspections.filter(function(i){return i.site===siteFilter;});
+  var fActions=siteFilter==="Tous"?actions:actions.filter(function(a){return a.site===siteFilter;});
+
+  const avgScore=fInspections.length?Math.round(fInspections.reduce((s,i)=>s+i.score,0)/fInspections.length):100;
+  const totalNC=fInspections.reduce((s,i)=>s+i.nc,0);
+  const critActs=fActions.filter(a=>a.prio==="CRITIQUE"&&a.statut!=="Clôturée").length;
+  const validated=fInspections.filter(i=>i.statut==="Validée").length;
+  const penTotal=fInspections.reduce((s,i)=>s+(100-i.score),0);
 
   const siteList=(sitesState&&sitesState.length>0)?sitesState:SITES;
   const sitePens=siteList.map(function(site){
-    var ins=inspections.filter(function(i){return i.site===site;});
+    var ins=fInspections.filter(function(i){return i.site===site;});
     var sc=ins.length?Math.round(ins.reduce(function(s,i){return s+i.score;},0)/ins.length):100;
     return {site:site,score:sc,ins:ins.length};
   }).sort(function(a,b){return a.score-b.score;});
 
-  const catBarData=inspections.filter(i=>i.categorie===chartTab);
+  const catBarData=fInspections.filter(i=>i.categorie===chartTab);
   const catColor=(CAT_META[chartTab]&&CAT_META[chartTab].color)||C.cyan;
 
   return (
@@ -761,6 +767,28 @@ function DashboardScreen({user,inspections,actions,onNav,darkMode,onToggleDark,c
           <div style={{width:36,height:36,borderRadius:11,background:C.cyan+"18",border:"1px solid "+C.cyan+"33",display:"flex",alignItems:"center",justifyContent:"center",fontSize:14,fontWeight:900,color:C.cyan}}>{user.avatar}</div>
         </div>
       </div>
+      {/* Filtre par site */}
+      <div style={{padding:"12px 14px 0",display:"flex",gap:6,overflowX:"auto",WebkitOverflowScrolling:"touch"}}>
+        {["Tous"].concat(siteList).map(function(s){
+          var active=siteFilter===s;
+          return (
+            <button key={s} onClick={function(){setSiteFilter(s);}}
+              style={{flexShrink:0,padding:"6px 14px",borderRadius:99,border:"1px solid",
+                borderColor:active?C.cyan:C.border,
+                background:active?C.cyan+"15":"transparent",
+                color:active?C.cyan:C.muted,
+                fontSize:11,fontWeight:active?800:500,cursor:"pointer",transition:"all .2s"}}>
+              {s==="Tous"?"🏢 Tous les sites":s}
+            </button>
+          );
+        })}
+      </div>
+      {siteFilter!=="Tous"&&(
+        <div style={{margin:"10px 14px 0",padding:"8px 12px",background:C.cyan+"10",border:"1px solid "+C.cyan+"33",borderRadius:10,display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+          <span style={{fontSize:12,color:C.cyan,fontWeight:700}}>📍 Filtré : {siteFilter}</span>
+          <button onClick={function(){setSiteFilter("Tous");}} style={{background:"transparent",border:"1px solid "+C.border,borderRadius:8,padding:"3px 10px",color:C.muted,fontSize:10,cursor:"pointer"}}>✕ Réinitialiser</button>
+        </div>
+      )}
       {critActs>0&&<div style={{margin:"14px 14px 0",background:`${C.red}10`,border:`1px solid ${C.red}33`,borderRadius:14,padding:"11px 14px",display:"flex",gap:10,alignItems:"center"}}><span style={{fontSize:18}}>🚨</span><div><div style={{fontSize:13,fontWeight:700,color:C.red}}>{critActs} action(s) critique(s) — pénalité active</div><div style={{fontSize:11,color:C.muted}}>Chaque NC critique retire {(appState&&appState.penalites?appState.penalites.critique:5)} pts du score</div></div></div>}
 
       {/* Sites critiques */}
@@ -784,7 +812,7 @@ function DashboardScreen({user,inspections,actions,onNav,darkMode,onToggleDark,c
           {label:"Score moyen",val:`${avgScore}/100`,sub:`−${100-avgScore}pts de pénalité moy.`,col:scoreColor(avgScore),prog:avgScore},
           {label:"Total pénalités",val:`−${penTotal}`,sub:`${totalNC} NC au total`,col:C.red,prog:null},
           {label:"Actions critiques",val:critActs,sub:"Chacune = −"+(appState&&appState.penalites?appState.penalites.critique:5)+"pts",col:C.orange,prog:null},
-          {label:"Inspections",val:`${validated}/${inspections.length}`,sub:"validées",col:C.cyan,prog:inspections.length?Math.round(validated/inspections.length*100):0},
+          {label:"Inspections",val:`${validated}/${fInspections.length}`,sub:"validées",col:C.cyan,prog:fInspections.length?Math.round(validated/fInspections.length*100):0},
         ].map((k,i)=>(
           <div key={i} style={{...S.card(`${k.col}22`)}}>
             <div style={{fontSize:10,color:C.muted,letterSpacing:1,textTransform:"uppercase",marginBottom:6}}>{k.label}</div>
@@ -816,7 +844,7 @@ function DashboardScreen({user,inspections,actions,onNav,darkMode,onToggleDark,c
         <div ref={function(el){_chartEl=el;}} style={{overflowX:"scroll",marginBottom:4}}>
           <div style={{display:"flex",alignItems:"flex-end",gap:6,height:130,minWidth:Math.max(siteList.length*54,280)+"px"}}>
             {siteList.map(function(site,i){
-              var ins=inspections.find(function(x){return x.site===site&&x.categorie===chartTab;});
+              var ins=fInspections.find(function(x){return x.site===site&&x.categorie===chartTab;});
               var v=ins?ins.score:0; var col=scoreColor(v);
               return (
                 <div key={i} style={{width:50,flexShrink:0,display:"flex",flexDirection:"column",alignItems:"center",gap:3,height:"100%",justifyContent:"flex-end"}}>
@@ -837,7 +865,7 @@ function DashboardScreen({user,inspections,actions,onNav,darkMode,onToggleDark,c
       <div style={{margin:"14px 14px 0",...S.card()}}>
         <div style={{fontSize:15,fontWeight:800,marginBottom:12}}>Scores moyens par catégorie</div>
         {CATEGORIES.map(c=>{
-          const ins=inspections.filter(i=>i.categorie===c);
+          const ins=fInspections.filter(i=>i.categorie===c);
           const sc=ins.length?Math.round(ins.reduce((s,i)=>s+i.score,0)/ins.length):100;
           const m=CAT_META[c];
           return (
@@ -859,7 +887,7 @@ function DashboardScreen({user,inspections,actions,onNav,darkMode,onToggleDark,c
         <div style={{fontSize:12,color:C.muted,marginBottom:12}}>Non-conformités les plus fréquentes tous sites confondus</div>
         {(function(){
           var ncMap={};
-          inspections.forEach(function(ins){(ins.items||[]).forEach(function(it){if(it&&!it.ok){var key=it.id||it.l;if(!ncMap[key])ncMap[key]={label:it.l||it.id||"NC inconnue",poids:it.poids||it.p||"mineur",count:0,cats:{}};ncMap[key].count++;if(ins.categorie)ncMap[key].cats[ins.categorie]=true;}});});
+          fInspections.forEach(function(ins){(ins.items||[]).forEach(function(it){if(it&&!it.ok){var key=it.id||it.l;if(!ncMap[key])ncMap[key]={label:it.l||it.id||"NC inconnue",poids:it.poids||it.p||"mineur",count:0,cats:{}};ncMap[key].count++;if(ins.categorie)ncMap[key].cats[ins.categorie]=true;}});});
           var topNC=Object.values(ncMap).sort(function(a,b){return b.count-a.count;}).slice(0,5);
           if(topNC.length===0) return <div style={{textAlign:"center",padding:"20px 0",color:C.muted,fontSize:13}}>Aucune NC enregistrée pour l&#39;instant</div>;
           var maxCount=topNC[0].count;
@@ -886,7 +914,7 @@ function DashboardScreen({user,inspections,actions,onNav,darkMode,onToggleDark,c
         <div style={{fontSize:12,color:C.muted,marginBottom:14}}>Toutes inspections confondues</div>
         {(function(){
           var crit=0,elev=0,min=0;
-          inspections.forEach(function(ins){(ins.items||[]).forEach(function(it){if(it&&!it.ok){var p=it.poids||it.p||"mineur";if(p==="critique")crit++;else if(p==="eleve")elev++;else min++;}});});
+          fInspections.forEach(function(ins){(ins.items||[]).forEach(function(it){if(it&&!it.ok){var p=it.poids||it.p||"mineur";if(p==="critique")crit++;else if(p==="eleve")elev++;else min++;}});});
           var total=crit+elev+min;
           if(total===0) return <div style={{textAlign:"center",padding:"20px 0",color:C.muted,fontSize:13}}>Aucune NC enregistrée</div>;
           var its=[{label:"Critique",count:crit,col:C.red},{label:"Élevé",count:elev,col:C.orange},{label:"Mineur",count:min,col:C.amber}];
@@ -920,7 +948,7 @@ function DashboardScreen({user,inspections,actions,onNav,darkMode,onToggleDark,c
           var today=new Date();today.setHours(0,0,0,0);
           var seuils=(config&&config.seuilSites)||{vert:90,jaune:120,rouge:365};
           var siteData=siteList.map(function(site){
-            var siteIns=inspections.filter(function(ins){return ins.site===site;});
+            var siteIns=fInspections.filter(function(ins){return ins.site===site;});
             if(siteIns.length===0) return {site:site,lastDate:null,days:null,count:0};
             var sorted=siteIns.sort(function(a,b){return b.date.localeCompare(a.date);});
             var lastDate=sorted[0].date;
@@ -964,7 +992,7 @@ function DashboardScreen({user,inspections,actions,onNav,darkMode,onToggleDark,c
           <div style={{fontSize:15,fontWeight:800}}>⚡ Actions urgentes</div>
           <button onClick={()=>onNav("actions")} style={{...S.btn(C.cyan,true),width:"auto",padding:"5px 12px",fontSize:11}}>Tout voir</button>
         </div>
-        {[...actions].filter(a=>a.statut!=="Clôturée").sort((a,b)=>{
+        {[...fActions].filter(a=>a.statut!=="Clôturée").sort((a,b)=>{
           if(a.echeance&&b.echeance) return a.echeance.localeCompare(b.echeance);
           return 0;
         }).slice(0,4).map((a,i)=>{
@@ -2052,7 +2080,7 @@ function ActionsScreen({actions,onUpdate,resps,config,onConfigUpdate,user}){
   return (
     <div style={{paddingBottom:88}}>
       <div style={{padding:"20px 16px 12px",display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
-        <div><div style={{fontSize:20,fontWeight:900}}>Actions urgentes</div><div style={{fontSize:12,color:C.muted,marginTop:2}}>{actions.filter(a=>a.statut!=="Clôturée").length} en cours</div></div>
+        <div><div style={{fontSize:20,fontWeight:900}}>Actions urgentes</div><div style={{fontSize:12,color:C.muted,marginTop:2}}>{fActions.filter(a=>a.statut!=="Clôturée").length} en cours</div></div>
         {hasAccess(user,config,"rappels")&&<button onClick={function(){setShowRappels(true);}} style={{background:"linear-gradient(135deg,"+C.cyan+",#007799)",border:"none",borderRadius:14,padding:"10px 16px",color:"#000",fontWeight:900,fontSize:13,cursor:"pointer",flexShrink:0,display:"flex",alignItems:"center",gap:7,boxShadow:"0 0 16px "+C.cyan+"55"}}><span style={{fontSize:18}}>📧</span><span>Rappels</span></button>}
       </div>
       <div style={{padding:"0 14px 12px",display:"flex",gap:6,overflowX:"auto",WebkitOverflowScrolling:"touch"}}>
