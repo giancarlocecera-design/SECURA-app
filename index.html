@@ -695,7 +695,6 @@ function LoginScreen({onLogin, users}){
   const allUsers=(users&&users.length&&typeof users[0]==="object"&&users[0].email
     ? users
     : USERS).filter(function(u){return u&&u.nom;});
-  const loginUsers=allUsers.filter(function(u){return u.role==="Admin"||u.role==="Inspecteur";});
   const handle=()=>{setLoad(true);setErr("");setTimeout(()=>{const u=allUsers.find(u=>u.email===email&&u.pass===pass);if(u)onLogin(u);else{setErr("Identifiants incorrects.");setLoad(false);}},700);};
   return (
     <div style={{minHeight:"100vh",display:"flex",flexDirection:"column",justifyContent:"center",padding:"32px 22px",background:`linear-gradient(165deg,${C.bg} 55%,#0D1825)`}}>
@@ -713,27 +712,6 @@ function LoginScreen({onLogin, users}){
         {err&&<div style={{fontSize:12,color:C.red,marginBottom:10,padding:"8px 12px",background:`${C.red}12`,borderRadius:8}}>{err}</div>}
         <button style={{...S.btn(C.cyan),marginTop:8,opacity:(load?0.65:1)}} onClick={handle} disabled={load}>{load?"Connexion...":"Se connecter →"}</button>
       </div>
-      {loginUsers.length>0&&(
-        <div style={{marginTop:4}}>
-          <div style={{fontSize:10,color:C.muted,textAlign:"center",marginBottom:10,letterSpacing:2}}>CONNEXION RAPIDE</div>
-          <div style={{display:"flex",flexDirection:"column",gap:7}}>
-            {loginUsers.map(function(u,i){
-              var initials=(u.avatar||(u.nom||"?").split(" ").map(function(n){return n[0];}).join("").slice(0,2)).toUpperCase();
-              var roleCol=u.role==="Admin"?C.red:u.role==="Inspecteur"?C.cyan:C.muted;
-              return (
-                <button key={i} onClick={()=>{setEmail(u.email);setPass(u.pass);}} style={{background:C.surface,border:"1px solid "+C.border,borderRadius:10,padding:"10px 14px",display:"flex",alignItems:"center",gap:10,cursor:"pointer",color:C.text,textAlign:"left"}}>
-                  <div style={{width:32,height:32,borderRadius:99,background:C.cyan+"18",display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,fontWeight:900,color:C.cyan,flexShrink:0}}>{initials}</div>
-                  <div style={{flex:1}}>
-                    <div style={{fontSize:12,fontWeight:700}}>{u.nom}</div>
-                    <div style={{fontSize:10,color:C.muted}}>{u.role||"Inspecteur"}</div>
-                  </div>
-                  <span style={{fontSize:10,color:C.muted}}>→</span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      )}
     </div>
   );
 }
