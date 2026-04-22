@@ -2861,7 +2861,7 @@ function SettingsScreen({user,onLogout,appState,onAppStateUpdate,respsState,site
           </div>
         )}
         <button onClick={save} style={{...S.btn(savedMsg?C.green:C.cyan),marginBottom:10}}>
-          {savedMsg?"✓ Sauvegardé":"💾 Sauvegarder pénalités & délais"}
+          {savedMsg?"✓ Sauvegardé":tab==="systeme"?"💾 Sauvegarder pénalités & délais":"SAUVEGARDER"}
         </button>
         <button onClick={onLogout} style={{...S.btn(C.red,true)}}>Déconnexion</button>
       </div>
