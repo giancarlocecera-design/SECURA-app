@@ -2446,11 +2446,14 @@ function RapportsScreen({inspections,onDelete,config}){
     <div style={{paddingBottom:88}}>
       {reportHTML&&(
         <div style={{position:"fixed",inset:0,zIndex:300,background:"#fff",display:"flex",flexDirection:"column"}}>
-          <div style={{display:"flex",alignItems:"center",gap:10,padding:"12px 14px",background:"#0A0C13",borderBottom:"1px solid #1E2433",flexShrink:0}}>
-            <button onClick={function(){setReportHTML(null);}} style={{background:"transparent",border:"1px solid "+C.cyan+"44",borderRadius:10,padding:"7px 14px",color:C.cyan,cursor:"pointer",fontSize:13,fontWeight:700}}>← Fermer</button>
-            <div style={{flex:1,fontSize:13,fontWeight:700,color:"#fff"}}>Rapport</div>
+          <div style={{display:"flex",alignItems:"center",gap:8,padding:"12px 14px",background:"#0A0C13",borderBottom:"1px solid #1E2433",flexShrink:0,flexWrap:"wrap"}}>
+            <button onClick={function(){setReportHTML(null);}} style={{background:"transparent",border:"1px solid "+C.cyan+"44",borderRadius:10,padding:"7px 12px",color:C.cyan,cursor:"pointer",fontSize:12,fontWeight:700}}>← Fermer</button>
+            <div style={{flex:1,fontSize:13,fontWeight:700,color:"#fff",minWidth:60}}>Rapport</div>
+            <button onClick={function(){var f=document.getElementById("secura-report-frame");if(f&&f.contentWindow){f.contentWindow.print();}}} style={{background:"linear-gradient(135deg,"+C.cyan+",#007799)",border:"none",borderRadius:8,padding:"7px 12px",color:"#000",cursor:"pointer",fontSize:11,fontWeight:800,display:"flex",alignItems:"center",gap:5}}>🖨️ Imprimer</button>
+            <button onClick={function(){var blob=new Blob([reportHTML],{type:"text/html"});var url=URL.createObjectURL(blob);var a=document.createElement("a");a.href=url;a.download="rapport-secura.html";a.click();URL.revokeObjectURL(url);}} style={{background:"transparent",border:"1px solid "+C.green+"66",borderRadius:8,padding:"7px 12px",color:C.green,cursor:"pointer",fontSize:11,fontWeight:800,display:"flex",alignItems:"center",gap:5}}>💾 Télécharger</button>
+            {navigator.share&&<button onClick={function(){var blob=new Blob([reportHTML],{type:"text/html"});var file=new File([blob],"rapport-secura.html",{type:"text/html"});navigator.share({title:"Rapport SECURA",files:[file]}).catch(function(){});}} style={{background:"transparent",border:"1px solid "+C.purple+"66",borderRadius:8,padding:"7px 12px",color:C.purple,cursor:"pointer",fontSize:11,fontWeight:800,display:"flex",alignItems:"center",gap:5}}>📤 Partager</button>}
           </div>
-          <iframe srcDoc={reportHTML} style={{flex:1,border:"none",width:"100%"}} title="Rapport"/>
+          <iframe id="secura-report-frame" srcDoc={reportHTML} style={{flex:1,border:"none",width:"100%"}} title="Rapport"/>
         </div>
       )}
       <div style={{padding:"20px 16px 12px"}}>
