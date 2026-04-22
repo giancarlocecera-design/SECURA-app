@@ -909,6 +909,51 @@ function DashboardScreen({user,inspections,actions,onNav,darkMode,onToggleDark,c
         })()}
       </div>
 
+      {/* Sites — dernière inspection */}
+      <div style={{margin:"14px 14px 0",...S.card()}}>
+        <div style={{fontSize:15,fontWeight:800,marginBottom:4}}>📍 Suivi des sites</div>
+        <div style={{fontSize:12,color:C.muted,marginBottom:12}}>Dernière inspection par site</div>
+        {(function(){
+          var today=new Date();today.setHours(0,0,0,0);
+          var siteData=siteList.map(function(site){
+            var siteIns=inspections.filter(function(ins){return ins.site===site;});
+            if(siteIns.length===0) return {site:site,lastDate:null,days:null,count:0};
+            var sorted=siteIns.sort(function(a,b){return b.date.localeCompare(a.date);});
+            var lastDate=sorted[0].date;
+            var p=lastDate.split("-");
+            var ld=new Date(parseInt(p[0]),parseInt(p[1])-1,parseInt(p[2]));ld.setHours(0,0,0,0);
+            var days=Math.floor((today-ld)/86400000);
+            return {site:site,lastDate:lastDate,days:days,count:siteIns.length};
+          }).sort(function(a,b){
+            if(a.days===null&&b.days===null) return 0;
+            if(a.days===null) return -1;
+            if(b.days===null) return 1;
+            return b.days-a.days;
+          });
+          if(siteData.length===0) return <div style={{textAlign:"center",padding:"20px 0",color:C.muted,fontSize:13}}>Aucun site configuré</div>;
+          return siteData.map(function(s,i){
+            var col=s.days===null?C.muted:s.days>60?C.red:s.days>30?C.orange:s.days>14?C.amber:C.green;
+            var label=s.days===null?"Jamais inspecté":s.days===0?"Aujourd'hui":s.days===1?"Hier":"Il y a "+s.days+" jours";
+            var urgent=s.days===null||s.days>30;
+            return (
+              <div key={i} style={{display:"flex",alignItems:"center",gap:10,padding:"10px 0",borderBottom:i<siteData.length-1?"1px solid "+C.dim:"none"}}>
+                <div style={{width:42,height:42,borderRadius:11,background:col+"15",border:"1px solid "+col+"33",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+                  <div style={{fontSize:14,fontWeight:900,color:col}}>{s.days===null?"?":s.days}</div>
+                </div>
+                <div style={{flex:1,minWidth:0}}>
+                  <div style={{fontSize:13,fontWeight:700}}>{s.site}</div>
+                  <div style={{fontSize:11,color:col,marginTop:1}}>{label}{s.lastDate?" · "+fmt(s.lastDate):""}</div>
+                </div>
+                <div style={{textAlign:"right",flexShrink:0}}>
+                  <div style={{fontSize:10,color:C.muted}}>{s.count} audit{s.count>1?"s":""}</div>
+                  {urgent&&<span style={{fontSize:9,padding:"2px 6px",borderRadius:6,background:col+"18",color:col,fontWeight:800}}>{s.days===null?"⚠ AUCUN":s.days>60?"🔴 URGENT":"⚠ +30j"}</span>}
+                </div>
+              </div>
+            );
+          });
+        })()}
+      </div>
+
 {/* Actions */}
       <div style={{margin:"14px 14px 0",...S.card(`${C.red}22`)}}>
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
