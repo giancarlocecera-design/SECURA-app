@@ -915,6 +915,7 @@ function DashboardScreen({user,inspections,actions,onNav,darkMode,onToggleDark,c
         <div style={{fontSize:12,color:C.muted,marginBottom:12}}>Dernière inspection par site</div>
         {(function(){
           var today=new Date();today.setHours(0,0,0,0);
+          var seuils=(config&&config.seuilSites)||{vert:90,jaune:120,rouge:365};
           var siteData=siteList.map(function(site){
             var siteIns=inspections.filter(function(ins){return ins.site===site;});
             if(siteIns.length===0) return {site:site,lastDate:null,days:null,count:0};
@@ -932,9 +933,9 @@ function DashboardScreen({user,inspections,actions,onNav,darkMode,onToggleDark,c
           });
           if(siteData.length===0) return <div style={{textAlign:"center",padding:"20px 0",color:C.muted,fontSize:13}}>Aucun site configuré</div>;
           return siteData.map(function(s,i){
-            var col=s.days===null?C.muted:s.days>60?C.red:s.days>30?C.orange:s.days>14?C.amber:C.green;
+            var col=s.days===null?C.muted:s.days>seuils.rouge?C.red:s.days>seuils.jaune?C.orange:s.days>seuils.vert?C.amber:C.green;
             var label=s.days===null?"Jamais inspecté":s.days===0?"Aujourd'hui":s.days===1?"Hier":"Il y a "+s.days+" jours";
-            var urgent=s.days===null||s.days>30;
+            var urgent=s.days===null||s.days>seuils.jaune;
             return (
               <div key={i} style={{display:"flex",alignItems:"center",gap:10,padding:"10px 0",borderBottom:i<siteData.length-1?"1px solid "+C.dim:"none"}}>
                 <div style={{width:42,height:42,borderRadius:11,background:col+"15",border:"1px solid "+col+"33",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
@@ -946,7 +947,7 @@ function DashboardScreen({user,inspections,actions,onNav,darkMode,onToggleDark,c
                 </div>
                 <div style={{textAlign:"right",flexShrink:0}}>
                   <div style={{fontSize:10,color:C.muted}}>{s.count} audit{s.count>1?"s":""}</div>
-                  {urgent&&<span style={{fontSize:9,padding:"2px 6px",borderRadius:6,background:col+"18",color:col,fontWeight:800}}>{s.days===null?"⚠ AUCUN":s.days>60?"🔴 URGENT":"⚠ +30j"}</span>}
+                  {urgent&&<span style={{fontSize:9,padding:"2px 6px",borderRadius:6,background:col+"18",color:col,fontWeight:800}}>{s.days===null?"⚠ AUCUN":s.days>seuils.rouge?"🔴 URGENT":"⚠ +"+seuils.jaune+"j"}</span>}
                 </div>
               </div>
             );
@@ -2642,9 +2643,106 @@ function SettingsScreen({user,onLogout,appState,onAppStateUpdate,respsState,site
                 );
               })}
             </div>
+            <div style={{...S.card(),marginBottom:12}}>
+              <div style={{fontSize:13,fontWeight:800,marginBottom:4}}>📍 Seuils suivi des sites</div>
+              <div style={{fontSize:11,color:C.muted,marginBottom:12}}>Nombre de jours depuis la dernière inspection</div>
+              {(function(){
+                var seuils=(config&&config.seuilSites)||{vert:90,jaune:120,rouge:365};
+                function setSeuil(k,v){
+                  var ns=Object.assign({},seuils);
+                  ns[k]=parseInt(v)||0;
+                  onConfigUpdate&&onConfigUpdate(Object.assign({},config,{seuilSites:ns}));
+                }
+                return [
+                  {k:"vert",label:"Vert (récent)",col:C.green,desc:"jours"},
+                  {k:"jaune",label:"Jaune (attention)",col:C.amber,desc:"jours"},
+                  {k:"rouge",label:"Rouge (urgent)",col:C.red,desc:"jours"}
+                ].map(function(s){
+                  return (
+                    <div key={s.k} style={{display:"flex",alignItems:"center",gap:10,marginBottom:10}}>
+                      <div style={{width:10,height:10,borderRadius:99,background:s.col,flexShrink:0}}/>
+                      <span style={{fontSize:12,color:s.col,fontWeight:700,minWidth:110}}>{s.label}</span>
+                      <span style={{fontSize:11,color:C.muted}}>≤</span>
+                      <input type="text" inputMode="numeric" pattern="[0-9]*" value={seuils[s.k]} onFocus={function(e){e.target.select();}} onChange={function(e){setSeuil(s.k,e.target.value.replace(/[^0-9]/g,""));}} style={{...S.input,width:60,padding:"6px 10px",textAlign:"center",fontSize:14,fontWeight:800}}/>
+                      <span style={{fontSize:12,color:C.muted}}>{s.desc}</span>
+                    </div>
+                  );
+                });
+              })()}
+            </div>
+                    <div style={{...S.card(),marginBottom:12}}>
+            <div style={{fontSize:13,fontWeight:800,marginBottom:10}}>📋 Templates personnalisés</div>
+            {Object.keys(appState&&appState.customTemplates||{}).length===0?(
+              <div style={{fontSize:12,color:C.muted}}>Aucun template modifié — checklists d'origine utilisées</div>
+            ):(
+              <div>
+                {Object.keys(appState.customTemplates||{}).map(function(cat){
+                  var tpl=appState.customTemplates[cat];
+                  var orig=CHECKLISTS[cat]||[];
+                  var added=(tpl||[]).filter(function(q){return (q.id||"").startsWith("custom_");}).length;
+                  return (
+                    <div key={cat} style={{display:"flex",alignItems:"center",gap:8,padding:"8px 0",borderBottom:"1px solid "+C.border}}>
+                      <div style={{flex:1}}>
+                        <div style={{fontSize:12,fontWeight:700}}>{cat}</div>
+                        <div style={{fontSize:10,color:C.muted}}>{(tpl||[]).length} questions ({added} ajoutée(s))</div>
+                      </div>
+                      <button onClick={function(){
+                        var newTpls={...(appState.customTemplates||{})};
+                        delete newTpls[cat];
+                        update({customTemplates:newTpls});
+                      }} style={{background:"transparent",border:"1px solid "+C.red+"44",borderRadius:8,color:C.red,padding:"4px 10px",fontSize:11,cursor:"pointer"}}>
+                        ↩ Original
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+          <div style={{...S.card(),marginBottom:12}}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+              <div>
+                <div style={{fontSize:13,fontWeight:800}}>🔔 Notifications push</div>
+                <div style={{fontSize:11,color:C.muted,marginTop:2}}>Alertes échéances actions sur iPhone</div>
+              </div>
+              <button onClick={function(){
+                var enabled=!(config&&config.notificationsEnabled);
+                if(enabled){
+                  if(!("Notification" in window)){
+                    alert("Notifications non supportées sur cet appareil.");
+                    return;
+                  }
+                  Notification.requestPermission().then(function(perm){
+                    if(perm==="granted"){
+                      onConfigUpdate&&onConfigUpdate({...config,notificationsEnabled:true});
+                      // Show test notification
+                      setTimeout(function(){
+                        new Notification("🛡️ SECURA",{body:"Notifications activées ! Vous serez alerté des échéances.",icon:"/icon-192.png"});
+                      },500);
+                    } else {
+                      alert("Permission refusée. Activez les notifications dans les réglages iPhone → Safari.");
+                    }
+                  });
+                } else {
+                  onConfigUpdate&&onConfigUpdate({...config,notificationsEnabled:false});
+                }
+              }} style={{width:48,height:28,borderRadius:99,background:(config&&config.notificationsEnabled)?ac:C.border,border:"none",cursor:"pointer",transition:"background .2s",position:"relative",flexShrink:0}}>
+                <div style={{position:"absolute",top:3,left:(config&&config.notificationsEnabled)?22:3,width:22,height:22,borderRadius:99,background:"#fff",transition:"left .2s"}}/>
+              </button>
+            </div>
+            {config&&config.notificationsEnabled&&(
+              <div style={{marginTop:10,fontSize:11,color:C.green,padding:"6px 10px",background:C.green+"15",borderRadius:8}}>
+                ✅ Notifications actives — alertes J-3, J-1 et le jour J
+              </div>
+            )}
+          </div>
           </div>
         )}
-
+        {savedMsg&&(
+          <div style={{background:C.green+"18",border:"1px solid "+C.green+"44",borderRadius:10,padding:"10px 14px",marginBottom:10,textAlign:"center",color:C.green,fontWeight:700,fontSize:13}}>
+            ✓ Paramètres sauvegardés !
+          </div>
+        )}
         {tab==="apparence"&&(
           <div>
 
@@ -2734,76 +2832,7 @@ function SettingsScreen({user,onLogout,appState,onAppStateUpdate,respsState,site
             </div>
           </div>
         )}
-        {tab==="systeme"&&(
-          <div>
-          <div style={{...S.card(),marginBottom:12}}>
-            <div style={{fontSize:13,fontWeight:800,marginBottom:10}}>📋 Templates personnalisés</div>
-            {Object.keys(appState&&appState.customTemplates||{}).length===0?(
-              <div style={{fontSize:12,color:C.muted}}>Aucun template modifié — checklists d'origine utilisées</div>
-            ):(
-              <div>
-                {Object.keys(appState.customTemplates||{}).map(function(cat){
-                  var tpl=appState.customTemplates[cat];
-                  var orig=CHECKLISTS[cat]||[];
-                  var added=(tpl||[]).filter(function(q){return (q.id||"").startsWith("custom_");}).length;
-                  return (
-                    <div key={cat} style={{display:"flex",alignItems:"center",gap:8,padding:"8px 0",borderBottom:"1px solid "+C.border}}>
-                      <div style={{flex:1}}>
-                        <div style={{fontSize:12,fontWeight:700}}>{cat}</div>
-                        <div style={{fontSize:10,color:C.muted}}>{(tpl||[]).length} questions ({added} ajoutée(s))</div>
-                      </div>
-                      <button onClick={function(){
-                        var newTpls={...(appState.customTemplates||{})};
-                        delete newTpls[cat];
-                        update({customTemplates:newTpls});
-                      }} style={{background:"transparent",border:"1px solid "+C.red+"44",borderRadius:8,color:C.red,padding:"4px 10px",fontSize:11,cursor:"pointer"}}>
-                        ↩ Original
-                      </button>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-          <div style={{...S.card(),marginBottom:12}}>
-            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-              <div>
-                <div style={{fontSize:13,fontWeight:800}}>🔔 Notifications push</div>
-                <div style={{fontSize:11,color:C.muted,marginTop:2}}>Alertes échéances actions sur iPhone</div>
-              </div>
-              <button onClick={function(){
-                var enabled=!(config&&config.notificationsEnabled);
-                if(enabled){
-                  if(!("Notification" in window)){
-                    alert("Notifications non supportées sur cet appareil.");
-                    return;
-                  }
-                  Notification.requestPermission().then(function(perm){
-                    if(perm==="granted"){
-                      onConfigUpdate&&onConfigUpdate({...config,notificationsEnabled:true});
-                      // Show test notification
-                      setTimeout(function(){
-                        new Notification("🛡️ SECURA",{body:"Notifications activées ! Vous serez alerté des échéances.",icon:"/icon-192.png"});
-                      },500);
-                    } else {
-                      alert("Permission refusée. Activez les notifications dans les réglages iPhone → Safari.");
-                    }
-                  });
-                } else {
-                  onConfigUpdate&&onConfigUpdate({...config,notificationsEnabled:false});
-                }
-              }} style={{width:48,height:28,borderRadius:99,background:(config&&config.notificationsEnabled)?ac:C.border,border:"none",cursor:"pointer",transition:"background .2s",position:"relative",flexShrink:0}}>
-                <div style={{position:"absolute",top:3,left:(config&&config.notificationsEnabled)?22:3,width:22,height:22,borderRadius:99,background:"#fff",transition:"left .2s"}}/>
-              </button>
-            </div>
-            {config&&config.notificationsEnabled&&(
-              <div style={{marginTop:10,fontSize:11,color:C.green,padding:"6px 10px",background:C.green+"15",borderRadius:8}}>
-                ✅ Notifications actives — alertes J-3, J-1 et le jour J
-              </div>
-            )}
-          </div>
-          </div>
-        )}
+
         {savedMsg&&(
           <div style={{background:C.green+"18",border:"1px solid "+C.green+"44",borderRadius:10,padding:"10px 14px",marginBottom:10,textAlign:"center",color:C.green,fontWeight:700,fontSize:13}}>
             ✓ Paramètres sauvegardés !
@@ -3009,6 +3038,7 @@ function App(){
     daltonMode:"normal",
     notificationsEnabled:false,
     rappelDelai:7,
+    seuilSites:{vert:90,jaune:120,rouge:365},
     permissions:{
       Inspecteur:{dashboard:true,inspections:true,actions:true,rapports:false,rappels:false,settings:false},
       Responsable:{dashboard:true,inspections:false,actions:true,rapports:false,rappels:false,settings:false}
