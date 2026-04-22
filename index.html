@@ -2157,7 +2157,10 @@ function SignaturePad({onSave, label}){
   const getPos=(e,canvas)=>{
     const r=canvas.getBoundingClientRect();
     const src=e.touches?e.touches[0]:e;
-    return {x:(src.clientX-r.left)*(canvas.width/r.width), y:(src.clientY-r.top)*(canvas.height/r.height)};
+    const zoom=r.width/canvas.offsetWidth;
+    const x=((src.clientX-r.left)/zoom)*(canvas.width/canvas.offsetWidth);
+    const y=((src.clientY-r.top)/zoom)*(canvas.height/canvas.offsetHeight);
+    return {x:x,y:y};
   };
 
   // Use useEffect to attach NON-PASSIVE touch listeners directly on the canvas
