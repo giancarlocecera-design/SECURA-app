@@ -2539,14 +2539,54 @@ function RapportsScreen({inspections,onDelete,config}){
           <div style={{fontSize:12,color:C.muted,marginBottom:12}}>Toutes inspections · scores pénalisés</div>
           <button onClick={function(){
             try{
-              const rows=validated.map(function(ins,i){
-                const ncC=(ins.items||[]).filter(function(x){return !x.ok&&(x.poids||x.p)==="critique";}).length;
-                const ncE=(ins.items||[]).filter(function(x){return !x.ok&&(x.poids||x.p)==="eleve";}).length;
-                const ncM=(ins.items||[]).filter(function(x){return !x.ok&&(x.poids||x.p)==="mineur";}).length;
-                const pen=ncC*10+ncE*5+ncM;
-                return "<tr><td>"+(i+1)+"</td><td>"+ins.titre+"</td><td>"+ins.site+"</td><td>"+ins.categorie+"</td><td>"+ins.inspecteur+"</td><td>"+fmt(ins.date)+"</td><td style='font-weight:900;color:"+scoreColor(ins.score)+"'>"+ins.score+"/100</td><td style='color:#FF1744'>-"+pen+"pts</td><td>"+ncC+"</td><td>"+ncE+"</td><td>"+ncM+"</td><td>"+ins.statut+"</td></tr>";
-              }).join("");
-              const html="<!DOCTYPE html><html><head><meta charset='utf-8'><title>Rapport Global</title><style>body{font-family:sans-serif;padding:32px;max-width:1100px;margin:0 auto;font-size:12px}table{width:100%;border-collapse:collapse}th{background:#00607a;color:#fff;padding:9px;text-align:left;font-size:11px}td{padding:8px;border-bottom:1px solid #eee}h1{color:#00607a;font-size:20px}</style></head><body><h1>SECURA - Rapport Global</h1><table><tr><th>#</th><th>Titre</th><th>Site</th><th>Categ.</th><th>Inspecteur</th><th>Date</th><th>Score</th><th>Penalite</th><th>NC C.</th><th>NC E.</th><th>NC M.</th><th>Statut</th></tr>"+rows+"</table><p><strong>Score moyen: "+avg+"/100 - Total NC: "+totalNC+"</strong></p></body></html>";
+              var bySite={};
+              validated.forEach(function(ins){
+                if(!bySite[ins.site]) bySite[ins.site]=[];
+                bySite[ins.site].push(ins);
+              });
+              var sites=Object.keys(bySite).sort();
+              var appName=(config&&config.appName)||"SECURA";
+              var tableRows="";
+              var num=0;
+              sites.forEach(function(site){
+                var siteIns=bySite[site].sort(function(a,b){return b.date.localeCompare(a.date);});
+                var siteAvg=Math.round(siteIns.reduce(function(s,i){return s+i.score;},0)/siteIns.length);
+                var siteCol=scoreColor(siteAvg);
+                tableRows+="<tr class='site-header'><td colspan='12'><div class='site-name'>📍 "+site+"</div><div class='site-stats'>"+siteIns.length+" audit(s) · Score moyen : <span style='color:"+siteCol+";font-weight:900'>"+siteAvg+"/100</span></div></td></tr>";
+                siteIns.forEach(function(ins){
+                  num++;
+                  var ncC=(ins.items||[]).filter(function(x){return !x.ok&&(x.poids||x.p)==="critique";}).length;
+                  var ncE=(ins.items||[]).filter(function(x){return !x.ok&&(x.poids||x.p)==="eleve";}).length;
+                  var ncM=(ins.items||[]).filter(function(x){return !x.ok&&(x.poids||x.p)==="mineur";}).length;
+                  var pen=ncC*(PENALITE.critique||5)+ncE*(PENALITE.eleve||3)+ncM*(PENALITE.mineur||1);
+                  tableRows+="<tr><td>"+num+"</td><td>"+ins.titre+"</td><td>"+ins.site+"</td><td>"+ins.categorie+"</td><td>"+ins.inspecteur+"</td><td>"+fmt(ins.date)+"</td><td style='font-weight:900;color:"+scoreColor(ins.score)+"'>"+ins.score+"/100</td><td style='color:#FF1744'>-"+pen+"pts</td><td>"+ncC+"</td><td>"+ncE+"</td><td>"+ncM+"</td><td>"+ins.statut+"</td></tr>";
+                });
+              });
+              var html="<!DOCTYPE html><html><head><meta charset='utf-8'><title>"+appName+" - Rapport Global</title><style>"
+                +"body{font-family:Segoe UI,sans-serif;padding:32px;max-width:1100px;margin:0 auto;font-size:12px}"
+                +".header{background:linear-gradient(135deg,#07090F,#0D1825);color:#fff;padding:20px 24px;border-radius:8px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center}"
+                +".header h1{font-size:20px;letter-spacing:4px;color:#00E5FF;margin:0}"
+                +".header .sub{font-size:11px;color:#8899aa;margin-top:3px}"
+                +".header .date{font-size:11px;color:#aab}"
+                +".stats{display:flex;gap:16px;margin-bottom:20px}"
+                +".stat-box{flex:1;background:#f5f8fc;border:1px solid #e0e8f0;border-radius:8px;padding:12px;text-align:center}"
+                +".stat-val{font-size:24px;font-weight:900}"
+                +".stat-label{font-size:10px;color:#888;margin-top:4px}"
+                +"table{width:100%;border-collapse:collapse;margin-top:8px}"
+                +"th{background:#0D1825;color:#00E5FF;padding:9px 8px;text-align:left;font-size:10px;letter-spacing:1px;text-transform:uppercase}"
+                +"td{padding:7px 8px;border-bottom:1px solid #eee;font-size:11px}"
+                +"tr:hover{background:#f8fafc}"
+                +".site-header td{background:linear-gradient(135deg,#f0f4fa,#e8eef6);padding:12px;border-bottom:2px solid #00E5FF}"
+                +".site-name{font-size:14px;font-weight:800;color:#07090F}"
+                +".site-stats{font-size:11px;color:#666;margin-top:2px}"
+                +".footer{margin-top:24px;padding-top:10px;border-top:2px solid #07090F;font-size:10px;color:#888;display:flex;justify-content:space-between}"
+                +"@media print{.header{-webkit-print-color-adjust:exact;print-color-adjust:exact}th,.site-header td{-webkit-print-color-adjust:exact;print-color-adjust:exact}}"
+                +"</style></head><body>"
+                +"<div class='header'><div><h1>"+appName+"</h1><div class='sub'>RAPPORT GLOBAL - TOUS LES AUDITS</div></div><div class='date'>"+new Date().toLocaleDateString("fr-BE",{day:"2-digit",month:"long",year:"numeric"})+"</div></div>"
+                +"<div class='stats'><div class='stat-box'><div class='stat-val' style='color:"+scoreColor(avg)+"'>"+avg+"/100</div><div class='stat-label'>Score moyen</div></div><div class='stat-box'><div class='stat-val' style='color:#FF1744'>"+totalNC+"</div><div class='stat-label'>Total NC</div></div><div class='stat-box'><div class='stat-val' style='color:#00C853'>"+validated.length+"</div><div class='stat-label'>Audits valides</div></div><div class='stat-box'><div class='stat-val'>"+sites.length+"</div><div class='stat-label'>Sites</div></div></div>"
+                +"<table><tr><th>#</th><th>Titre</th><th>Site</th><th>Categ.</th><th>Inspecteur</th><th>Date</th><th>Score</th><th>Penalite</th><th>NC C.</th><th>NC E.</th><th>NC M.</th><th>Statut</th></tr>"+tableRows+"</table>"
+                +"<div class='footer'><div><strong>"+appName+"</strong> · Rapport genere le "+new Date().toLocaleDateString("fr-BE",{day:"2-digit",month:"long",year:"numeric"})+"</div><div>Document confidentiel</div></div>"
+                +"</body></html>";
               setReportHTML(html);
             }catch(e){console.error("Export error:",e);}
           }} style={{...S.btn(C.purple)}}>📥 Exporter tableau global</button>
