@@ -2840,22 +2840,35 @@ function SettingsScreen({user,onLogout,appState,onAppStateUpdate,respsState,site
           <div>
 
             {/* Mode Tec */}
-            <div style={{...S.card(),marginBottom:12,background:(config&&config.techMode)?"linear-gradient(135deg,#1A0A10,#2D0F1A)":C.card,border:"1px solid "+((config&&config.techMode)?"#5A1A30":"#1E2433")}}>
-              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-                <div>
-                  <div style={{fontSize:13,fontWeight:800}}>🎭 Mode Tec</div>
-                  <div style={{fontSize:11,color:C.muted,marginTop:2}}>{(config&&config.techMode)?"Ambiance bordeaux active":"Fond sombre standard"}</div>
-                </div>
-                <button onClick={function(){onConfigUpdate&&onConfigUpdate(Object.assign({},config,{techMode:!(config&&config.techMode)}));}}
-                  style={{width:48,height:28,borderRadius:99,background:(config&&config.techMode)?"linear-gradient(135deg,#8B2252,#5A1A30)":C.border,border:"none",cursor:"pointer",transition:"background .3s",position:"relative",flexShrink:0}}>
-                  <div style={{position:"absolute",top:3,left:(config&&config.techMode)?22:3,width:22,height:22,borderRadius:99,background:"#fff",transition:"left .2s",boxShadow:"0 1px 3px rgba(0,0,0,.3)"}}/>
-                </button>
-              </div>
-              {(config&&config.techMode)&&(
-                <div style={{marginTop:10,display:"flex",gap:8}}>
-                  <div style={{flex:1,height:6,borderRadius:99,background:"linear-gradient(90deg,#0D0508,#1A0A10,#2D0F1A,#5A1A30,#8B2252)"}}/>
-                </div>
-              )}
+            <div style={{...S.card(),marginBottom:12}}>
+              <div style={{fontSize:13,fontWeight:800,marginBottom:4}}>🎭 Mode Tec</div>
+              <div style={{fontSize:11,color:C.muted,marginBottom:12}}>Changer l&#39;ambiance de fond de l&#39;application</div>
+              {(function(){
+                var current=(config&&config.techMode)||"off";
+                var ambiances=[
+                  {k:"off",label:"Standard",desc:"Fond sombre par défaut",gradient:"linear-gradient(135deg,#07090F,#0D1825)",border:C.border},
+                  {k:"bordeaux",label:"Bordeaux",desc:"Ambiance chaleureuse",gradient:"linear-gradient(135deg,#1A0A10,#2D0F1A)",border:"#5A1A30"},
+                  {k:"ocean",label:"Bleu Océan",desc:"Ambiance marine profonde",gradient:"linear-gradient(135deg,#081420,#0A1A2D)",border:"#1A3A5A"},
+                  {k:"beton",label:"Gris Béton",desc:"Ambiance urbaine moderne",gradient:"linear-gradient(135deg,#161618,#1E1E22)",border:"#3A3A40"}
+                ];
+                return ambiances.map(function(a,i){
+                  var active=current===a.k;
+                  return (
+                    <button key={a.k} onClick={function(){onConfigUpdate&&onConfigUpdate(Object.assign({},config,{techMode:a.k==="off"?false:a.k}));}}
+                      style={{display:"flex",alignItems:"center",gap:12,width:"100%",padding:"12px",marginBottom:6,borderRadius:12,
+                        border:"2px solid "+(active?ac:a.border+"44"),
+                        background:active?ac+"10":"transparent",
+                        cursor:"pointer",textAlign:"left",color:C.text,transition:"all .2s"}}>
+                      <div style={{width:40,height:40,borderRadius:10,background:a.gradient,border:"1px solid "+a.border,flexShrink:0}}/>
+                      <div style={{flex:1}}>
+                        <div style={{fontSize:13,fontWeight:active?800:600,color:active?ac:C.text}}>{a.label}</div>
+                        <div style={{fontSize:10,color:C.muted,marginTop:1}}>{a.desc}</div>
+                      </div>
+                      {active&&<div style={{width:22,height:22,borderRadius:99,background:ac,display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,color:"#000",fontWeight:900,flexShrink:0}}>✓</div>}
+                    </button>
+                  );
+                });
+              })()}
             </div>
 
             {/* Accent color */}
@@ -3179,7 +3192,11 @@ function App(){
   };
 
   const isTech=!!(config&&config.techMode);
-  const bg=isTech?"linear-gradient(160deg,#0D0508 0%,#1A0A10 30%,#2D0F1A 60%,#1A0A10 100%)":darkMode?C.bg:"#F0F4FA";
+  var techBg=C.bg;
+  if(config&&config.techMode==="bordeaux") techBg="linear-gradient(160deg,#0D0508 0%,#1A0A10 30%,#2D0F1A 60%,#1A0A10 100%)";
+  else if(config&&config.techMode==="ocean") techBg="linear-gradient(160deg,#040810 0%,#081420 30%,#0A1A2D 60%,#081420 100%)";
+  else if(config&&config.techMode==="beton") techBg="linear-gradient(160deg,#0D0D0F 0%,#161618 30%,#1E1E22 60%,#161618 100%)";
+  const bg=isTech?techBg:darkMode?C.bg:"#F0F4FA";
   const daltonFilter=(config&&config.daltonMode)==="deuteranopie"?"url(#dalton-deut)"
     :(config&&config.daltonMode)==="protanopie"?"url(#dalton-prot)"
     :(config&&config.daltonMode)==="tritanopie"?"url(#dalton-trit)"
