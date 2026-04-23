@@ -14,6 +14,7 @@
     *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
     body{background:#07090F;overflow-x:hidden;}
     input,button,select,textarea{font-family:inherit;}
+    @keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
   </style>
 </head>
 <body>
@@ -835,13 +836,128 @@ function HelpScreen({onBack,config}){
   );
 }
 
+// ═══════════════════════════════════════════════════════════════════════
+// ASSISTANT IA — Code du bien-être au travail belge
+// ═══════════════════════════════════════════════════════════════════════
+function AIScreen({onBack,config}){
+  var appName=(config&&config.appName)||"SECURA";
+  const [messages,setMessages]=useState([]);
+  const [input,setInput]=useState("");
+  const [loading,setLoading]=useState(false);
+  const endRef=useRef(null);
+  var SYSTEM_PROMPT="Tu es un expert juridique spécialisé exclusivement dans le Code du bien-être au travail belge (Loi du 4 août 1996 et ses arrêtés d'exécution). Tu travailles au sein de l'application "+appName+", un outil d'audit de prévention et sécurité.\n\nRègles strictes :\n- Tu ne réponds QU'AUX questions relatives au Code du bien-être au travail belge, à la prévention, à la sécurité au travail, à l'hygiène, à l'ergonomie, aux risques psychosociaux, aux accidents du travail, aux équipements de protection, et à la législation HSE belge.\n- Si la question ne concerne PAS ces domaines, tu refuses poliment en expliquant que tu es limité au Code du bien-être au travail belge.\n- Tu cites les articles, livres et titres du Code quand c'est pertinent (ex: Livre I Titre 2, Livre III, etc.).\n- Tu réponds en français, de manière claire et accessible, même si la question est posée de façon informelle.\n- Tu précises toujours que tes réponses sont informatives et ne remplacent pas un avis juridique professionnel.\n- Si tu n'es pas sûr d'une information, dis-le honnêtement.";
+
+  function scrollDown(){setTimeout(function(){endRef.current&&endRef.current.scrollIntoView({behavior:"smooth"});},100);}
+
+  var apiKey=localStorage.getItem("secura_ai_key")||"";
+
+  function send(){
+    if(!input.trim()||loading) return;
+    if(!apiKey){alert("Clé API non configurée. Allez dans Profil → Système → Clé API IA.");return;}
+    var userMsg={role:"user",content:input.trim()};
+    var newMsgs=[].concat(messages,[userMsg]);
+    setMessages(newMsgs);
+    setInput("");
+    setLoading(true);
+    scrollDown();
+    var apiMessages=newMsgs.map(function(m){return {role:m.role,content:m.content};});
+    fetch("https://api.anthropic.com/v1/messages",{
+      method:"POST",
+      headers:{"Content-Type":"application/json","x-api-key":localStorage.getItem("secura_ai_key")||"","anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
+      body:JSON.stringify({model:"claude-haiku-4-5-20251001",max_tokens:1500,system:SYSTEM_PROMPT,messages:apiMessages})
+    }).then(function(r){return r.json();}).then(function(data){
+      var txt="";
+      if(data.content&&data.content.length>0){
+        txt=data.content.map(function(c){return c.text||"";}).join("");
+      } else if(data.error){
+        txt="Erreur : "+(data.error.message||"Problème de connexion");
+      } else {
+        txt="Pas de réponse reçue. Réessayez.";
+      }
+      setMessages(function(prev){return [].concat(prev,[{role:"assistant",content:txt}]);});
+      setLoading(false);
+      scrollDown();
+    }).catch(function(err){
+      setMessages(function(prev){return [].concat(prev,[{role:"assistant",content:"Erreur de connexion. Vérifiez votre connexion internet et réessayez."}]);});
+      setLoading(false);
+      scrollDown();
+    });
+  }
+
+  return (
+    <div style={{display:"flex",flexDirection:"column",height:"100vh",maxHeight:"100vh"}}>
+      <div style={{padding:"16px",display:"flex",alignItems:"center",gap:10,borderBottom:"1px solid "+C.border,flexShrink:0}}>
+        <button onClick={onBack} style={{background:C.surface,border:"1px solid "+C.border,borderRadius:10,padding:"8px 12px",color:C.cyan,cursor:"pointer",fontSize:13,fontWeight:700}}>← Retour</button>
+        <div style={{flex:1}}>
+          <div style={{fontSize:16,fontWeight:900,display:"flex",alignItems:"center",gap:6}}>🤖 Assistant IA</div>
+          <div style={{fontSize:10,color:C.purple}}>Code du bien-être au travail belge</div>
+        </div>
+        {messages.length>0&&<button onClick={function(){setMessages([]);}} style={{background:"transparent",border:"1px solid "+C.border,borderRadius:8,padding:"5px 10px",color:C.muted,cursor:"pointer",fontSize:10}}>🗑️ Effacer</button>}
+      </div>
+      <div style={{flex:1,overflowY:"auto",padding:"14px",display:"flex",flexDirection:"column",gap:12}}>
+        {messages.length===0&&(
+          <div style={{textAlign:"center",padding:"40px 16px",color:C.muted}}>
+            <div style={{fontSize:48,marginBottom:16}}>🤖</div>
+            <div style={{fontSize:16,fontWeight:800,color:C.purple,marginBottom:8}}>Assistant IA</div>
+            <div style={{fontSize:13,lineHeight:1.6,marginBottom:20}}>Posez vos questions sur le Code du bien-être au travail belge. Je suis là pour vous aider.</div>
+            {!apiKey&&<div style={{padding:"12px 16px",background:C.orange+"15",border:"1px solid "+C.orange+"33",borderRadius:10,marginBottom:16,fontSize:12,color:C.orange}}>⚠️ Clé API non configurée — Allez dans Profil → Système → Clé API IA</div>}
+            <div style={{display:"flex",flexDirection:"column",gap:8,maxWidth:320,margin:"0 auto"}}>
+              {["Quelles sont les obligations de l'employeur en matière de premiers secours ?","Un travailleur peut-il refuser un travail dangereux ?","Quels EPI sont obligatoires sur un chantier ?","Quelle est la fréquence des contrôles des extincteurs ?"].map(function(q,i){
+                return (
+                  <button key={i} onClick={function(){setInput(q);}} style={{background:C.surface,border:"1px solid "+C.border,borderRadius:10,padding:"10px 14px",color:C.text,cursor:"pointer",fontSize:12,textAlign:"left",lineHeight:1.4}}>
+                    <span style={{color:C.purple,marginRight:6}}>💬</span>{q}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+        {messages.map(function(msg,i){
+          var isUser=msg.role==="user";
+          return (
+            <div key={i} style={{display:"flex",justifyContent:isUser?"flex-end":"flex-start"}}>
+              <div style={{maxWidth:"85%",padding:"12px 16px",borderRadius:isUser?"16px 16px 4px 16px":"16px 16px 16px 4px",background:isUser?C.cyan+"20":C.surface,border:"1px solid "+(isUser?C.cyan+"33":C.border),color:C.text}}>
+                {!isUser&&<div style={{fontSize:10,color:C.purple,fontWeight:700,marginBottom:4}}>🤖 Assistant IA</div>}
+                <div style={{fontSize:13,lineHeight:1.6,whiteSpace:"pre-wrap"}}>{msg.content}</div>
+              </div>
+            </div>
+          );
+        })}
+        {loading&&(
+          <div style={{display:"flex",justifyContent:"flex-start"}}>
+            <div style={{padding:"12px 16px",borderRadius:"16px 16px 16px 4px",background:C.surface,border:"1px solid "+C.border}}>
+              <div style={{fontSize:10,color:C.purple,fontWeight:700,marginBottom:4}}>🤖 Assistant IA</div>
+              <div style={{fontSize:13,color:C.muted}}>Recherche en cours<span style={{animation:"blink 1s infinite"}}>...</span></div>
+            </div>
+          </div>
+        )}
+        <div ref={endRef}/>
+      </div>
+      <div style={{padding:"12px 14px",borderTop:"1px solid "+C.border,display:"flex",gap:8,flexShrink:0,background:C.bg}}>
+        <input value={input} onChange={function(e){setInput(e.target.value);}} onKeyDown={function(e){if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();send();}}}
+          placeholder="Posez votre question..."
+          style={{...S.input,flex:1,padding:"12px 16px",fontSize:14,borderRadius:14}}/>
+        <button onClick={send} disabled={!input.trim()||loading}
+          style={{background:input.trim()&&!loading?"linear-gradient(135deg,"+C.purple+",#7C3AFF)":"transparent",
+            border:input.trim()&&!loading?"none":"1px solid "+C.border,
+            borderRadius:14,padding:"12px 18px",color:input.trim()&&!loading?"#fff":C.muted,
+            cursor:input.trim()&&!loading?"pointer":"default",fontSize:14,fontWeight:900,flexShrink:0}}>
+          ➤
+        </button>
+      </div>
+    </div>
+  );
+}
+
 var _chartEl=null;
 function DashboardScreen({user,inspections,actions,onNav,config,sitesState,appState}){
   const [chartTab,setChartTab]=useState(CATEGORIES[0]);
   const [siteFilter,setSiteFilter]=useState("Tous");
   const [showHelp,setShowHelp]=useState(false);
+  const [showAI,setShowAI]=useState(false);
 
   if(showHelp) return <HelpScreen onBack={function(){setShowHelp(false);}} config={config}/>;
+  if(showAI) return <AIScreen onBack={function(){setShowAI(false);}} config={config}/>;
 
   function selectCat(c){
     var list=(sitesState&&sitesState.length>0)?sitesState:SITES;
@@ -880,6 +996,7 @@ function DashboardScreen({user,inspections,actions,onNav,config,sitesState,appSt
           <div style={{fontSize:20,fontWeight:900,marginTop:3}}>{(config&&config.appName)||"SECURA"}</div>
         </div>
         <div style={{display:"flex",gap:8,alignItems:"center"}}>
+          <button onClick={function(){setShowAI(true);}} style={{width:36,height:36,borderRadius:11,background:C.purple+"15",border:"1px solid "+C.purple+"44",display:"flex",alignItems:"center",justifyContent:"center",fontSize:15,cursor:"pointer",color:C.purple,fontWeight:900}}>🤖</button>
           <button onClick={function(){setShowHelp(true);}} style={{width:36,height:36,borderRadius:11,background:C.cyan+"15",border:"1px solid "+C.cyan+"44",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,cursor:"pointer",color:C.cyan,fontWeight:900}}>?</button>
           <div style={{width:36,height:36,borderRadius:11,background:C.cyan+"18",border:"1px solid "+C.cyan+"33",display:"flex",alignItems:"center",justifyContent:"center",fontSize:14,fontWeight:900,color:C.cyan}}>{user.avatar}</div>
         </div>
@@ -2925,6 +3042,25 @@ function SettingsScreen({user,onLogout,appState,onAppStateUpdate,respsState,site
                     </div>
                   );
                 });
+              })()}
+            </div>
+            <div style={{...S.card(),marginBottom:12}}>
+              <div style={{fontSize:13,fontWeight:800,marginBottom:4}}>🤖 Clé API IA</div>
+              <div style={{fontSize:11,color:C.muted,marginBottom:10}}>Clé Anthropic pour l&#39;assistant IA (Code du bien-être)</div>
+              {(function(){
+                var savedKey=localStorage.getItem("secura_ai_key")||"";
+                var hasKey=savedKey.length>10;
+                return (
+                  <div>
+                    <div style={{display:"flex",gap:8,alignItems:"center"}}>
+                      <input type="password" placeholder="sk-ant-api03-..." defaultValue={savedKey}
+                        onBlur={function(e){localStorage.setItem("secura_ai_key",e.target.value.trim());}}
+                        style={{...S.input,flex:1,padding:"10px 14px",fontSize:12,fontFamily:"monospace"}}/>
+                      <div style={{width:12,height:12,borderRadius:99,background:hasKey?C.green:C.red,flexShrink:0}}/>
+                    </div>
+                    <div style={{fontSize:10,color:hasKey?C.green:C.muted,marginTop:6}}>{hasKey?"✅ Clé configurée — l'assistant IA est actif":"⚠ Aucune clé — obtenez-la sur console.anthropic.com"}</div>
+                  </div>
+                );
               })()}
             </div>
                     <div style={{...S.card(),marginBottom:12}}>
