@@ -845,7 +845,7 @@ function AIScreen({onBack,config}){
   const [input,setInput]=useState("");
   const [loading,setLoading]=useState(false);
   const endRef=useRef(null);
-  var SYSTEM_PROMPT="Tu es un expert juridique spécialisé exclusivement dans le Code du bien-être au travail belge (Loi du 4 août 1996 et ses arrêtés d'exécution). Tu travailles au sein de l'application "+appName+", un outil d'audit de prévention et sécurité.\n\nRègles strictes :\n- Tu ne réponds QU'AUX questions relatives au Code du bien-être au travail belge, à la prévention, à la sécurité au travail, à l'hygiène, à l'ergonomie, aux risques psychosociaux, aux accidents du travail, aux équipements de protection, et à la législation HSE belge.\n- Si la question ne concerne PAS ces domaines, tu refuses poliment en expliquant que tu es limité au Code du bien-être au travail belge.\n- Tu cites les articles, livres et titres du Code quand c'est pertinent (ex: Livre I Titre 2, Livre III, etc.).\n- Tu réponds en français, de manière claire et accessible, même si la question est posée de façon informelle.\n- Tu précises toujours que tes réponses sont informatives et ne remplacent pas un avis juridique professionnel.\n- Si tu n'es pas sûr d'une information, dis-le honnêtement.";
+  var SYSTEM_PROMPT="Tu es un expert juridique spécialisé exclusivement dans le Code du bien-être au travail belge (Loi du 4 août 1996 et ses arrêtés d'exécution). Tu travailles au sein de l'application "+appName+", un outil d'audit de prévention et sécurité.\n\nRègles strictes :\n- Tu ne réponds QU'AUX questions relatives au Code du bien-être au travail belge, à la prévention, à la sécurité au travail, à l'hygiène, à l'ergonomie, aux risques psychosociaux, aux accidents du travail, aux équipements de protection, et à la législation HSE belge.\n- Si la question ne concerne PAS ces domaines, tu refuses poliment en expliquant que tu es limité au Code du bien-être au travail belge.\n- Tu cites les articles, livres et titres du Code quand c'est pertinent (ex: Livre I Titre 2, Livre III, etc.).\n- Tu réponds en français, de manière claire et accessible, même si la question est posée de façon informelle.\n- Tu précises toujours que tes réponses sont informatives et ne remplacent pas un avis juridique professionnel.\n- Si tu n'es pas sûr d'une information, dis-le honnêtement.\n- Si tu effectues une recherche web pour compléter ou vérifier ta réponse, signale-le au début de ta réponse avec le symbole 🌐 suivi de 'Source web consultée'.\n- Privilégie les sources officielles belges : SPF Emploi, Moniteur belge, BeSWIC, Fedris.";
 
   function scrollDown(){setTimeout(function(){endRef.current&&endRef.current.scrollIntoView({behavior:"smooth"});},100);}
 
@@ -864,11 +864,11 @@ function AIScreen({onBack,config}){
     fetch("https://api.anthropic.com/v1/messages",{
       method:"POST",
       headers:{"Content-Type":"application/json","x-api-key":localStorage.getItem("secura_ai_key")||"","anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
-      body:JSON.stringify({model:"claude-haiku-4-5-20251001",max_tokens:1500,system:SYSTEM_PROMPT,messages:apiMessages})
+      body:JSON.stringify({model:"claude-haiku-4-5-20251001",max_tokens:1500,system:SYSTEM_PROMPT,messages:apiMessages,tools:[{type:"web_search_20250305",name:"web_search"}]})
     }).then(function(r){return r.json();}).then(function(data){
       var txt="";
       if(data.content&&data.content.length>0){
-        txt=data.content.map(function(c){return c.text||"";}).join("");
+        txt=data.content.filter(function(c){return c.type==="text";}).map(function(c){return c.text||"";}).join("");
       } else if(data.error){
         txt="Erreur : "+(data.error.message||"Problème de connexion");
       } else {
