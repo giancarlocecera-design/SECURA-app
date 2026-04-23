@@ -724,10 +724,125 @@ function LoginScreen({onLogin, users}){
 // ═══════════════════════════════════════════════════════════════════════
 // DASHBOARD
 // ═══════════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════════
+// AIDE
+// ═══════════════════════════════════════════════════════════════════════
+function HelpScreen({onBack,config}){
+  var appName=(config&&config.appName)||"SECURA";
+  const [open,setOpen]=useState(null);
+  function toggle(i){setOpen(open===i?null:i);}
+  var sections=[
+    {icon:"🏠",title:"Tableau de bord",sub:"Vue globale de vos audits",color:C.cyan,items:[
+      "Score moyen de conformité calculé automatiquement sur 100 points",
+      "Filtre par site — tapez sur un site pour voir uniquement ses données",
+      "Top NC récurrentes — les 5 non-conformités les plus fréquentes",
+      "Donut de criticité — répartition visuelle Critique / Élevé / Mineur",
+      "Suivi des sites — nombre de jours depuis la dernière inspection avec codes couleurs configurables",
+      "Actions urgentes — aperçu des actions critiques en cours"
+    ]},
+    {icon:"📋",title:"Audits & Inspections",sub:"Créer et gérer les inspections",color:C.green,items:[
+      "Nouvelle inspection — choisissez un site, une catégorie et lancez l'audit",
+      "8 catégories disponibles : Incendie, Électricité, Sécurité générale, Hygiène, Ergonomie, Risques chimiques, Premiers secours, Échelles",
+      "Checklist de contrôle — répondez OK ou NC à chaque point",
+      "Photos — ajoutez des photos pour documenter chaque observation",
+      "Remarques — commentaire libre sur chaque point de contrôle",
+      "Assignation responsable — attribuez un responsable à chaque NC",
+      "Signature — signez numériquement pour valider l'inspection",
+      "Score automatique — calculé par pénalités (Critique, Élevé, Mineur)"
+    ]},
+    {icon:"⚡",title:"Actions correctives",sub:"Suivi et résolution des NC",color:C.orange,items:[
+      "Actions générées automatiquement à partir des non-conformités détectées",
+      "Priorité — CRITIQUE, ÉLEVÉE ou MODÉRÉE selon la gravité",
+      "Échéance — délai de résolution configurable par niveau de criticité",
+      "Responsable — assignez la personne en charge de la correction",
+      "Statut — En cours, À faire ou Clôturée",
+      "Filtres rapides pour voir les actions par statut"
+    ]},
+    {icon:"📧",title:"Rappels email",sub:"Relancer les responsables",color:"#00BCD4",items:[
+      "Bouton Rappels dans l'écran Actions — envoie un email de rappel par responsable",
+      "Délai paramétrable — par défaut 7 jours avant échéance",
+      "Email pré-rédigé avec la liste des actions, sites, priorités et retards",
+      "Masquage après envoi — le rappel disparaît une fois envoyé",
+      "Bouton ✕ pour retirer un rappel individuellement",
+      "Bouton Reset pour réafficher tous les rappels envoyés",
+      "Alerte si des actions n'ont pas de responsable assigné"
+    ]},
+    {icon:"📄",title:"Rapports & Export",sub:"PDF professionnel et tableau global",color:C.purple,items:[
+      "Export PDF individuel — rapport professionnel avec en-tête, logo, score, détail des NC et signatures",
+      "Impression directe depuis l'aperçu du rapport",
+      "Téléchargement PDF ou partage via le menu natif du téléphone",
+      "QR Code imprimable — lien direct vers le rapport du site",
+      "Tableau global — toutes les inspections regroupées par site avec scores moyens",
+      "Rapport public — lien partageable pour chaque site"
+    ]},
+    {icon:"👤",title:"Profil & Paramètres",sub:"Configuration de l'application",color:C.red,items:[
+      "Équipe — ajouter / supprimer des inspecteurs et responsables avec email et mot de passe",
+      "Sites — gérer la liste des sites inspectés avec adresses",
+      "Système — configurer les pénalités par criticité, les délais de résolution et les seuils de suivi des sites",
+      "Style — choisir l'ambiance (Standard, Bordeaux, Bleu Océan, Gris Béton), la couleur principale, la police et la taille du texte",
+      "Permissions — l'Admin peut configurer les accès par rôle (Inspecteur / Responsable) pour chaque fonctionnalité",
+      "Mode daltonien — palettes accessibles pour deutéranopie, protanopie et tritanopie"
+    ]}
+  ];
+  return (
+    <div style={{paddingBottom:90}}>
+      <div style={{padding:"20px 16px 12px",display:"flex",alignItems:"center",gap:10}}>
+        <button onClick={onBack} style={{background:C.surface,border:"1px solid "+C.border,borderRadius:10,padding:"8px 12px",color:C.cyan,cursor:"pointer",fontSize:13,fontWeight:700}}>← Retour</button>
+        <div><div style={{fontSize:18,fontWeight:900}}>📖 Aide</div><div style={{fontSize:11,color:C.muted}}>Guide des fonctionnalités {appName}</div></div>
+      </div>
+      <div style={{margin:"0 14px 14px",padding:"14px",background:"linear-gradient(135deg,"+C.cyan+"10,"+C.purple+"10)",border:"1px solid "+C.cyan+"22",borderRadius:14}}>
+        <div style={{fontSize:14,fontWeight:800,marginBottom:4}}>Bienvenue dans {appName}</div>
+        <div style={{fontSize:12,color:C.muted,lineHeight:1.6}}>Application de gestion des audits de prévention et sécurité. Consultez les sections ci-dessous pour découvrir toutes les fonctionnalités.</div>
+      </div>
+      <div style={{padding:"0 14px"}}>
+        {sections.map(function(sec,i){
+          var isOpen=open===i;
+          return (
+            <div key={i} style={{marginBottom:10,borderRadius:14,border:"1px solid "+(isOpen?sec.color+"44":C.border),background:isOpen?sec.color+"06":"transparent",overflow:"hidden",transition:"all .2s"}}>
+              <button onClick={function(){toggle(i);}} style={{width:"100%",display:"flex",alignItems:"center",gap:12,padding:"14px 16px",background:"transparent",border:"none",cursor:"pointer",color:C.text,textAlign:"left"}}>
+                <div style={{width:42,height:42,borderRadius:12,background:sec.color+"15",border:"1px solid "+sec.color+"33",display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,flexShrink:0}}>{sec.icon}</div>
+                <div style={{flex:1}}>
+                  <div style={{fontSize:14,fontWeight:800,color:isOpen?sec.color:C.text}}>{sec.title}</div>
+                  <div style={{fontSize:11,color:C.muted,marginTop:1}}>{sec.sub}</div>
+                </div>
+                <div style={{fontSize:16,color:C.muted,transform:isOpen?"rotate(90deg)":"rotate(0deg)",transition:"transform .2s",flexShrink:0}}>›</div>
+              </button>
+              {isOpen&&(
+                <div style={{padding:"0 16px 16px"}}>
+                  {sec.items.map(function(item,j){
+                    var parts=item.split(" — ");
+                    return (
+                      <div key={j} style={{display:"flex",gap:10,padding:"8px 0",borderBottom:j<sec.items.length-1?"1px solid "+C.dim:"none",alignItems:"flex-start"}}>
+                        <div style={{width:6,height:6,borderRadius:99,background:sec.color,marginTop:6,flexShrink:0}}/>
+                        <div style={{fontSize:12,lineHeight:1.5,color:C.text}}>
+                          {parts.length>1?(
+                            <span><span style={{fontWeight:700}}>{parts[0]}</span><span style={{color:C.muted}}> — {parts[1]}</span></span>
+                          ):item}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+      <div style={{padding:"20px 14px",textAlign:"center"}}>
+        <div style={{fontSize:11,color:C.muted}}>Version {appName} · Développé avec ❤️</div>
+      </div>
+    </div>
+  );
+}
+
 var _chartEl=null;
 function DashboardScreen({user,inspections,actions,onNav,config,sitesState,appState}){
   const [chartTab,setChartTab]=useState(CATEGORIES[0]);
   const [siteFilter,setSiteFilter]=useState("Tous");
+  const [showHelp,setShowHelp]=useState(false);
+
+  if(showHelp) return <HelpScreen onBack={function(){setShowHelp(false);}} config={config}/>;
+
   function selectCat(c){
     var list=(sitesState&&sitesState.length>0)?sitesState:SITES;
     var idx=list.findIndex(function(s){return fInspections.some(function(x){return x.site===s&&x.categorie===c;});});
@@ -765,6 +880,7 @@ function DashboardScreen({user,inspections,actions,onNav,config,sitesState,appSt
           <div style={{fontSize:20,fontWeight:900,marginTop:3}}>{(config&&config.appName)||"SECURA"}</div>
         </div>
         <div style={{display:"flex",gap:8,alignItems:"center"}}>
+          <button onClick={function(){setShowHelp(true);}} style={{width:36,height:36,borderRadius:11,background:"transparent",border:"1px solid "+C.border,display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,cursor:"pointer",color:C.muted}}>?</button>
           <div style={{width:36,height:36,borderRadius:11,background:C.cyan+"18",border:"1px solid "+C.cyan+"33",display:"flex",alignItems:"center",justifyContent:"center",fontSize:14,fontWeight:900,color:C.cyan}}>{user.avatar}</div>
         </div>
       </div>
