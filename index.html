@@ -1584,7 +1584,7 @@ function PhotoBtn({photos=[], onAdd, onRemove}){
       <button onClick={e=>{e.stopPropagation();ref.current.click();}} style={{display:"flex",alignItems:"center",gap:5,background:`${C.cyan}12`,border:`1px dashed ${C.cyan}55`,borderRadius:8,padding:"5px 10px",color:C.cyan,fontSize:10,fontWeight:700,cursor:"pointer"}}>
         📷 {photos.length>0?`+ photo (${photos.length})`:"Ajouter une photo"}
       </button>
-      <input ref={ref} type="file" accept="image/*" capture="environment" style={{display:"none"}} onChange={handleFile}/>
+      <input ref={ref} type="file" accept="image/*" style={{display:"none"}} onChange={handleFile}/>
     </div>
   );
 }
