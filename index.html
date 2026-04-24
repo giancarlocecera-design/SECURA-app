@@ -819,6 +819,14 @@ function HelpScreen({onBack,config}){
       "Style — choisir l'ambiance (Standard, Bordeaux, Bleu Océan, Gris Béton), la couleur principale, la police et la taille du texte",
       "Permissions — l'Admin peut configurer les accès par rôle (Inspecteur / Responsable) pour chaque fonctionnalité",
       "Mode daltonien — palettes accessibles pour deutéranopie, protanopie et tritanopie"
+    ]},
+    {icon:"🤖",title:"Assistant IA",sub:"Législation HSE belge",color:C.purple,items:[
+      "Chat intelligent — posez vos questions en langage naturel sur la prévention et la sécurité",
+      "Sources couvertes — Code du bien-être, RGPT, RGIE, CODEX, normes NBN, directives européennes, SEVESO",
+      "Recherche web automatique — uniquement pour les informations postérieures à 2025, signalée par 🌐",
+      "Questions suggérées — exemples de questions courantes pour démarrer",
+      "Accès configurable — l'Admin peut activer ou désactiver l'IA par rôle dans Profil → Accès",
+      "Clé API — à configurer dans Profil → Système par l'Admin"
     ]}
   ];
   return (
@@ -1032,7 +1040,7 @@ function DashboardScreen({user,inspections,actions,onNav,config,sitesState,appSt
           <div style={{fontSize:20,fontWeight:900,marginTop:3}}>{(config&&config.appName)||"SECURA"}</div>
         </div>
         <div style={{display:"flex",gap:8,alignItems:"center"}}>
-          <button onClick={function(){setShowAI(true);}} style={{width:36,height:36,borderRadius:11,background:C.purple+"15",border:"1px solid "+C.purple+"44",display:"flex",alignItems:"center",justifyContent:"center",fontSize:15,cursor:"pointer",color:C.purple,fontWeight:900}}>🤖</button>
+          {hasAccess(user,config,"ia")&&<button onClick={function(){setShowAI(true);}} style={{width:36,height:36,borderRadius:11,background:C.purple+"15",border:"1px solid "+C.purple+"44",display:"flex",alignItems:"center",justifyContent:"center",fontSize:15,cursor:"pointer",color:C.purple,fontWeight:900}}>🤖</button>}
           <button onClick={function(){setShowHelp(true);}} style={{width:36,height:36,borderRadius:11,background:C.cyan+"15",border:"1px solid "+C.cyan+"44",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,cursor:"pointer",color:C.cyan,fontWeight:900}}>?</button>
           <div style={{width:36,height:36,borderRadius:11,background:C.cyan+"18",border:"1px solid "+C.cyan+"33",display:"flex",alignItems:"center",justifyContent:"center",fontSize:14,fontWeight:900,color:C.cyan}}>{user.avatar}</div>
         </div>
@@ -2291,10 +2299,10 @@ function RappelsScreen({actions,resps,config,onConfigUpdate,onBack}){
 // ═══════════════════════════════════════════════════════════════════════
 function PermissionsScreen({config,onConfigUpdate,onBack}){
   var perms=config&&config.permissions?config.permissions:{
-    Inspecteur:{dashboard:true,inspections:true,actions:true,rapports:false,rappels:false,settings:false},
-    Responsable:{dashboard:true,inspections:false,actions:true,rapports:false,rappels:false,settings:false}
+    Inspecteur:{dashboard:true,inspections:true,actions:true,rapports:false,rappels:false,settings:false,ia:false},
+    Responsable:{dashboard:true,inspections:false,actions:true,rapports:false,rappels:false,settings:false,ia:false}
   };
-  var features=[{k:"dashboard",l:"Tableau de bord",icon:"🏠"},{k:"inspections",l:"Audits",icon:"📋"},{k:"actions",l:"Actions",icon:"⚡"},{k:"rapports",l:"Rapports",icon:"📄"},{k:"rappels",l:"Rappels email",icon:"📧"},{k:"settings",l:"Profil & Paramètres",icon:"👤"}];
+  var features=[{k:"dashboard",l:"Tableau de bord",icon:"🏠"},{k:"inspections",l:"Audits",icon:"📋"},{k:"actions",l:"Actions",icon:"⚡"},{k:"rapports",l:"Rapports",icon:"📄"},{k:"rappels",l:"Rappels email",icon:"📧"},{k:"ia",l:"Assistant IA",icon:"🤖"},{k:"settings",l:"Profil & Paramètres",icon:"👤"}];
   var roles=["Inspecteur","Responsable"];
   function toggle(role,feature){var newP=JSON.parse(JSON.stringify(perms));if(!newP[role])newP[role]={};newP[role][feature]=!newP[role][feature];onConfigUpdate(Object.assign({},config,{permissions:newP}));}
   return (
@@ -3492,8 +3500,8 @@ function App(){
     techMode:false,
     seuilSites:{vert:90,jaune:120,rouge:365},
     permissions:{
-      Inspecteur:{dashboard:true,inspections:true,actions:true,rapports:false,rappels:false,settings:false},
-      Responsable:{dashboard:true,inspections:false,actions:true,rapports:false,rappels:false,settings:false}
+      Inspecteur:{dashboard:true,inspections:true,actions:true,rapports:false,rappels:false,settings:false,ia:false},
+      Responsable:{dashboard:true,inspections:false,actions:true,rapports:false,rappels:false,settings:false,ia:false}
     },
   });
   const [appState,setAppState]=useState({sites:SITES_DEFAULT,resps:RESPONSABLES_DEFAULT,penalites:{critique:5,eleve:3,mineur:1},delais:{critique:0,eleve:60,mineur:120},customTemplates:{},siteAddresses:{}});
