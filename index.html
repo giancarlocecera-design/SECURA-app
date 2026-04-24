@@ -643,6 +643,98 @@ const CHECKLISTS = {
   {id:"ECH09",s:"Propreté",l:"Équipement propre et exempt de substances altérant sa résistance",p:"mineur"},
   {id:"ECH10",s:"Contrôle périodique",l:"Contrôle périodique documenté — étiquette, registre et date à jour",p:"critique"},
 ],
+
+// ──────────────────────────────────────────────────────────────
+"AMOK - Intrusion malveillante": [
+  // 1. Organisation & préparation
+  {id:"AMK01",s:"Organisation & préparation",l:"Procédure AMOK existante, formalisée et validée par la direction",p:"critique"},
+  {id:"AMK02",s:"Organisation & préparation",l:"Rôles et responsabilités clairement définis pour chaque intervenant",p:"critique"},
+  {id:"AMK03",s:"Organisation & préparation",l:"Personnel sensibilisé à la menace AMOK — information documentée",p:"critique"},
+  {id:"AMK04",s:"Organisation & préparation",l:"Exercices AMOK réalisés périodiquement — rapport et évaluation disponibles",p:"critique"},
+  {id:"AMK05",s:"Organisation & préparation",l:"Coordination établie avec la police locale — protocole d'intervention convenu",p:"critique"},
+  {id:"AMK06",s:"Organisation & préparation",l:"Plan interne d'urgence incluant le scénario AMOK",p:"critique"},
+  {id:"AMK07",s:"Organisation & préparation",l:"Numéros d'urgence connus du personnel et affichés",p:"eleve"},
+  {id:"AMK08",s:"Organisation & préparation",l:"Système d'alerte AMOK défini et distinct de l'alarme incendie",p:"critique"},
+
+  // 2. Contrôle des accès
+  {id:"AMK09",s:"Contrôle des accès",l:"Accès au bâtiment contrôlés — système de contrôle fonctionnel",p:"critique"},
+  {id:"AMK10",s:"Contrôle des accès",l:"Entrée principale clairement identifiée et surveillée",p:"eleve"},
+  {id:"AMK11",s:"Contrôle des accès",l:"Visiteurs systématiquement enregistrés et accompagnés",p:"eleve"},
+  {id:"AMK12",s:"Contrôle des accès",l:"Portes verrouillables rapidement depuis l'intérieur en cas d'alerte",p:"critique"},
+  {id:"AMK13",s:"Contrôle des accès",l:"Accès secondaires sécurisés — pas d'entrée non contrôlée",p:"eleve"},
+  {id:"AMK14",s:"Contrôle des accès",l:"Surveillance des accès assurée — caméras ou personnel dédié",p:"eleve"},
+  {id:"AMK15",s:"Contrôle des accès",l:"Horaires d'ouverture maîtrisés — fermeture hors heures contrôlée",p:"mineur"},
+  {id:"AMK16",s:"Contrôle des accès",l:"Gestion des badges et clés sécurisée — inventaire à jour",p:"eleve"},
+
+  // 3. Détection & alerte
+  {id:"AMK17",s:"Détection & alerte",l:"Système d'alerte interne opérationnel et testé régulièrement",p:"critique"},
+  {id:"AMK18",s:"Détection & alerte",l:"Personnel formé à la vigilance — détection de comportements suspects",p:"eleve"},
+  {id:"AMK19",s:"Détection & alerte",l:"Procédure de signalement des comportements inquiétants en place",p:"critique"},
+  {id:"AMK20",s:"Détection & alerte",l:"Procédure de remontée d'information rapide et fiable",p:"eleve"},
+  {id:"AMK21",s:"Détection & alerte",l:"Moyens de communication fiables en cas de crise — réseau indépendant",p:"critique"},
+  {id:"AMK22",s:"Détection & alerte",l:"Possibilité d'alerte discrète sans exposer la personne alertante",p:"critique"},
+  {id:"AMK23",s:"Détection & alerte",l:"Consignes d'alerte connues de l'ensemble du personnel",p:"eleve"},
+
+  // 4. Mise en sécurité
+  {id:"AMK24",s:"Mise en sécurité",l:"Zones de confinement identifiées et communiquées au personnel",p:"critique"},
+  {id:"AMK25",s:"Mise en sécurité",l:"Locaux verrouillables de l'intérieur — serrures fonctionnelles",p:"critique"},
+  {id:"AMK26",s:"Mise en sécurité",l:"Capacité de barricade évaluée — mobilier utilisable pour bloquer les accès",p:"eleve"},
+  {id:"AMK27",s:"Mise en sécurité",l:"Itinéraires de fuite alternatifs identifiés et praticables",p:"critique"},
+  {id:"AMK28",s:"Mise en sécurité",l:"Sorties de secours accessibles et utilisables en cas de fuite",p:"critique"},
+  {id:"AMK29",s:"Mise en sécurité",l:"Consignes de mise en sécurité connues — fuir, se cacher, alerter",p:"critique"},
+  {id:"AMK30",s:"Mise en sécurité",l:"Prise en compte des personnes vulnérables et à mobilité réduite",p:"critique"},
+
+  // 5. Aménagement des locaux
+  {id:"AMK31",s:"Aménagement des locaux",l:"Zones de protection existantes dans chaque secteur du bâtiment",p:"eleve"},
+  {id:"AMK32",s:"Aménagement des locaux",l:"Vitrages sécurisés ou film de protection — résistance aux impacts",p:"eleve"},
+  {id:"AMK33",s:"Aménagement des locaux",l:"Portes résistantes à l'effraction dans les zones sensibles",p:"eleve"},
+  {id:"AMK34",s:"Aménagement des locaux",l:"Mobilier pouvant servir de protection ou de barricade",p:"mineur"},
+  {id:"AMK35",s:"Aménagement des locaux",l:"Zones à forte densité d'occupation identifiées et sécurisées",p:"critique"},
+  {id:"AMK36",s:"Aménagement des locaux",l:"Espaces ouverts maîtrisés — limitation des lignes de vue directes",p:"eleve"},
+  {id:"AMK37",s:"Aménagement des locaux",l:"Angles morts et zones de dissimulation limités",p:"mineur"},
+
+  // 6. Communication de crise
+  {id:"AMK38",s:"Communication de crise",l:"Protocole de communication de crise prévu et documenté",p:"critique"},
+  {id:"AMK39",s:"Communication de crise",l:"Message type d'alerte préparé — diffusion rapide possible",p:"critique"},
+  {id:"AMK40",s:"Communication de crise",l:"Contacts prioritaires définis — liste à jour et accessible",p:"eleve"},
+  {id:"AMK41",s:"Communication de crise",l:"Lien permanent avec les services de secours établi",p:"critique"},
+  {id:"AMK42",s:"Communication de crise",l:"Gestion des parents et du public prévue — point d'accueil défini",p:"eleve"},
+  {id:"AMK43",s:"Communication de crise",l:"Moyens de communication fiables et redondants disponibles",p:"critique"},
+  {id:"AMK44",s:"Communication de crise",l:"Gestion des rumeurs et des réseaux sociaux anticipée",p:"mineur"},
+
+  // 7. Intervention & coordination
+  {id:"AMK45",s:"Intervention & coordination",l:"Accès des services de secours facilité — itinéraires dégagés",p:"critique"},
+  {id:"AMK46",s:"Intervention & coordination",l:"Plans du bâtiment disponibles pour les forces d'intervention",p:"critique"},
+  {id:"AMK47",s:"Intervention & coordination",l:"Point de rassemblement défini et connu — distinct de celui incendie",p:"eleve"},
+  {id:"AMK48",s:"Intervention & coordination",l:"Réaction attendue face à la police connue du personnel — mains visibles, obéir",p:"critique"},
+  {id:"AMK49",s:"Intervention & coordination",l:"Informations centralisées en un point de commandement identifié",p:"eleve"},
+  {id:"AMK50",s:"Intervention & coordination",l:"Personne de contact désignée pour la liaison avec les secours",p:"critique"},
+
+  // 8. Facteurs humains
+  {id:"AMK51",s:"Facteurs humains",l:"Climat de travail sain — évaluation du bien-être au travail réalisée",p:"eleve"},
+  {id:"AMK52",s:"Facteurs humains",l:"Situations de tension identifiées et gérées de manière proactive",p:"eleve"},
+  {id:"AMK53",s:"Facteurs humains",l:"Dispositif de prévention psychosociale en place — personne de confiance",p:"critique"},
+  {id:"AMK54",s:"Facteurs humains",l:"Comportements inquiétants suivis et documentés",p:"critique"},
+  {id:"AMK55",s:"Facteurs humains",l:"Canal de signalement confidentiel connu de tous",p:"eleve"},
+  {id:"AMK56",s:"Facteurs humains",l:"Gestion des conflits — médiation et procédures en place",p:"eleve"},
+  {id:"AMK57",s:"Facteurs humains",l:"Culture de vigilance collective promue sans climat de peur",p:"mineur"},
+
+  // 9. Public spécifique
+  {id:"AMK58",s:"Public spécifique",l:"Enfants informés des consignes adaptées à leur âge (si applicable)",p:"critique"},
+  {id:"AMK59",s:"Public spécifique",l:"Encadrants spécifiquement formés à la gestion AMOK avec du public",p:"critique"},
+  {id:"AMK60",s:"Public spécifique",l:"Accès aux zones accueillant du public strictement contrôlés",p:"critique"},
+  {id:"AMK61",s:"Public spécifique",l:"Entrées et sorties des zones publiques sécurisées",p:"eleve"},
+  {id:"AMK62",s:"Public spécifique",l:"Regroupements de personnes encadrés et surveillés",p:"eleve"},
+  {id:"AMK63",s:"Public spécifique",l:"Parents et familles informés des dispositifs de sécurité",p:"mineur"},
+
+  // 10. Évaluation globale
+  {id:"AMK64",s:"Évaluation globale",l:"Mise en sécurité rapide possible dans un délai réaliste",p:"critique"},
+  {id:"AMK65",s:"Évaluation globale",l:"Organisation réactive — chaîne de commandement claire et testée",p:"critique"},
+  {id:"AMK66",s:"Évaluation globale",l:"Procédures réalistes et applicables dans les conditions réelles",p:"critique"},
+  {id:"AMK67",s:"Évaluation globale",l:"Moyens matériels et humains suffisants pour la mise en œuvre",p:"eleve"},
+  {id:"AMK68",s:"Évaluation globale",l:"Failles et points faibles identifiés — analyse de vulnérabilité réalisée",p:"critique"},
+  {id:"AMK69",s:"Évaluation globale",l:"Actions correctives définies avec échéances et responsables",p:"eleve"},
+],
 };
 
 const CATEGORIES = Object.keys(CHECKLISTS);
@@ -657,6 +749,7 @@ const CAT_META = {
   "Risques chimiques":{icon:"⚗️", color:C.red},
   "Premiers secours": {icon:"🚑", color:C.green},
   "Échelles & escabeaux": {icon:"🪜", color:C.blue},
+  "AMOK - Intrusion malveillante": {icon:"🚨", color:C.red},
 };
 
 // ═══════════════════════════════════════════════════════════════════════
