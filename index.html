@@ -345,53 +345,89 @@ const CHECKLISTS = {
 
 // ──────────────────────────────────────────────────────────────
 "Sécurité générale": [
-  // Signalétique
-  {id:"SEC01",s:"Signalétique",l:"Signaux de sécurité conformes ISO 7010 — pictogrammes corrects, lisibles, non décolorés",p:"eleve"},
-  {id:"SEC02",s:"Signalétique",l:"Zones dangereuses délimitées par marquage au sol et/ou barrières physiques",p:"critique"},
-  {id:"SEC03",s:"Signalétique",l:"Signalisation port EPI obligatoire affichée aux accès des zones concernées",p:"eleve"},
-  {id:"SEC04",s:"Signalétique",l:"Zones de circulation piétons séparées des voies de chariots/véhicules et marquées",p:"critique"},
-  {id:"SEC05",s:"Signalétique",l:"Zones de stockage délimitées et capacités maximales affichées",p:"eleve"},
-  // EPI
-  {id:"SEC06",s:"Équipements de protection individuelle",l:"EPI appropriés disponibles pour chaque poste de travail identifié (fiche EPI par poste)",p:"critique"},
-  {id:"SEC07",s:"Équipements de protection individuelle",l:"EPI en bon état : aucun EPI endommagé, périmé ou mal entretenu en service",p:"critique"},
-  {id:"SEC08",s:"Équipements de protection individuelle",l:"Marquage CE et notice d'utilisation présents pour chaque type d'EPI",p:"eleve"},
-  {id:"SEC09",s:"Équipements de protection individuelle",l:"Personnel formé à l'utilisation, l'entretien et au remplacement des EPI",p:"critique"},
-  {id:"SEC10",s:"Équipements de protection individuelle",l:"Registre de distribution et de remplacement des EPI tenu à jour",p:"eleve"},
-  {id:"SEC11",s:"Équipements de protection individuelle",l:"EPC (protections collectives) prioritaires sur les EPI — hiérarchie des mesures respectée",p:"critique"},
-  // Ordre & rangement
-  {id:"SEC12",s:"Ordre & rangement (5S)",l:"Allées, dégagements et accès secours dégagés en permanence",p:"critique"},
-  {id:"SEC13",s:"Ordre & rangement (5S)",l:"Matériaux et charges stockés de façon stable — risque de chute éliminé",p:"critique"},
-  {id:"SEC14",s:"Ordre & rangement (5S)",l:"Sol exempt de trous, déformations, obstacles et substances glissantes",p:"critique"},
-  {id:"SEC15",s:"Ordre & rangement (5S)",l:"Déchets collectés quotidiennement — pas d'accumulation de matières combustibles",p:"eleve"},
-  {id:"SEC16",s:"Ordre & rangement (5S)",l:"Outils et équipements rangés à leurs emplacements définis après usage",p:"mineur"},
-  {id:"SEC17",s:"Ordre & rangement (5S)",l:"Zones de pose et de dépôt temporaire définies et respectées",p:"mineur"},
-  // Travaux dangereux
-  {id:"SEC18",s:"Travaux dangereux",l:"Système de permis de travail formel pour travaux dangereux : hauteur, confiné, chaud, électrique",p:"critique"},
-  {id:"SEC19",s:"Travaux dangereux",l:"Travaux en hauteur : EPI anti-chute (harnais, longe) adaptés, vérifiés et utilisés",p:"critique"},
-  {id:"SEC20",s:"Travaux dangereux",l:"Garde-corps fixes ≥ 1 m sur toutes les ouvertures et bords de planchers élevés",p:"critique"},
-  {id:"SEC21",s:"Travaux dangereux",l:"Espaces confinés : analyse atmosphérique avant entrée (O₂, CO, H₂S, explosivité)",p:"critique"},
-  {id:"SEC22",s:"Travaux dangereux",l:"Espaces confinés : surveillance extérieure assurée, moyen de sauvetage disponible",p:"critique"},
-  {id:"SEC23",s:"Travaux dangereux",l:"Échafaudages : vérification avant montage, réception formelle, filets/plinthes en place",p:"critique"},
-  {id:"SEC24",s:"Travaux dangereux",l:"Échelles : antidérapantes, calées ou fixées, dépassement ≥ 1 m au-delà du point d'accès",p:"eleve"},
-  // Machines & équipements
-  {id:"SEC25",s:"Machines & équipements",l:"Protecteurs et carters sur toutes les parties mobiles dangereuses — aucun contournement",p:"critique"},
-  {id:"SEC26",s:"Machines & équipements",l:"Machines : déclaration CE de conformité disponible — notice en langue locale",p:"eleve"},
-  {id:"SEC27",s:"Machines & équipements",l:"Registre de maintenance préventive des machines tenu et délais respectés",p:"eleve"},
-  {id:"SEC28",s:"Machines & équipements",l:"Engins de levage (chariots, ponts roulants, nacelles) vérifiés annuellement par OC",p:"critique"},
-  {id:"SEC29",s:"Machines & équipements",l:"Capacités de charge affichées sur les équipements de levage et accessoires",p:"eleve"},
-  {id:"SEC30",s:"Machines & équipements",l:"Conducteurs d'engins : attestation de formation ou CACES valide",p:"critique"},
-  {id:"SEC31",s:"Machines & équipements",l:"Zones de travail des engins et piétons physiquement séparées ou gestion par priorité",p:"critique"},
-  // Accidents & gestion
-  {id:"SEC32",s:"Accidents & gestion",l:"Registre des accidents, incidents et presque-accidents tenu, signé et transmis",p:"critique"},
-  {id:"SEC33",s:"Accidents & gestion",l:"Analyse des causes (méthode arbre des causes) réalisée après chaque AT avec action corrective",p:"critique"},
-  {id:"SEC34",s:"Accidents & gestion",l:"Document Unique d'Évaluation des Risques (DUER) à jour — révisé après tout changement",p:"critique"},
-  {id:"SEC35",s:"Accidents & gestion",l:"CPPT (ou délégation syndicale) informé et consulté — PV de réunion trimestrielle disponible",p:"eleve"},
-  {id:"SEC36",s:"Accidents & gestion",l:"Conseiller en prévention niveau I ou II désigné et coordonnées affichées",p:"critique"},
-  {id:"SEC37",s:"Accidents & gestion",l:"Plan annuel de prévention établi, validé par la direction et suivi",p:"eleve"},
-  {id:"SEC38",s:"Accidents & gestion",l:"Rapport annuel de prévention transmis au CPPT dans les délais",p:"eleve"},
-  {id:"SEC39",s:"Accidents & gestion",l:"Numéros d'urgence (112, médecin du travail, CPPT) affichés aux emplacements clés",p:"eleve"},
-  {id:"SEC40",s:"Accidents & gestion",l:"Procédure de gestion des visiteurs et sous-traitants en matière de sécurité",p:"eleve"},
-  {id:"SEC41",s:"Accidents & gestion",l:"Taux de fréquence et de gravité calculés et communiqués au personnel",p:"mineur"},
+  // 1. Organisation & gestion de la sécurité
+  {id:"SEC01",s:"Organisation & gestion de la sécurité",l:"Responsable sécurité désigné et coordonnées affichées",p:"critique"},
+  {id:"SEC02",s:"Organisation & gestion de la sécurité",l:"Analyse de risques à jour — révisée après tout changement significatif",p:"critique"},
+  {id:"SEC03",s:"Organisation & gestion de la sécurité",l:"Procédures d'urgence formalisées, documentées et accessibles",p:"critique"},
+  {id:"SEC04",s:"Organisation & gestion de la sécurité",l:"Personnel informé des consignes de sécurité — preuve de communication",p:"eleve"},
+  {id:"SEC05",s:"Organisation & gestion de la sécurité",l:"Plan interne d'urgence existant, validé et diffusé",p:"critique"},
+  {id:"SEC06",s:"Organisation & gestion de la sécurité",l:"Formations obligatoires réalisées dans les délais — registre à jour",p:"eleve"},
+  {id:"SEC07",s:"Organisation & gestion de la sécurité",l:"Registre des incidents et accidents tenu, signé et transmis",p:"critique"},
+  {id:"SEC08",s:"Organisation & gestion de la sécurité",l:"Encadrement des intervenants externes — procédure d'accueil sécurité",p:"eleve"},
+
+  // 2. Circulation & évacuation
+  {id:"SEC09",s:"Circulation & évacuation",l:"Issues de secours dégagées en permanence — aucun obstacle",p:"critique"},
+  {id:"SEC10",s:"Circulation & évacuation",l:"Portes de secours ouvrables sans clé depuis l'intérieur",p:"critique"},
+  {id:"SEC11",s:"Circulation & évacuation",l:"Cheminements d'évacuation libres de tout encombrement",p:"critique"},
+  {id:"SEC12",s:"Circulation & évacuation",l:"Signalisation d'évacuation visible et conforme — pictogrammes éclairés",p:"eleve"},
+  {id:"SEC13",s:"Circulation & évacuation",l:"Plans d'évacuation affichés aux emplacements stratégiques",p:"eleve"},
+  {id:"SEC14",s:"Circulation & évacuation",l:"Éclairage de secours fonctionnel — testé périodiquement",p:"critique"},
+  {id:"SEC15",s:"Circulation & évacuation",l:"Escaliers sécurisés — rampes, antidérapants, dégagement suffisant",p:"eleve"},
+  {id:"SEC16",s:"Circulation & évacuation",l:"Capacité d'évacuation suffisante par rapport à l'occupation des locaux",p:"critique"},
+
+  // 3. Incendie (niveau général)
+  {id:"SEC17",s:"Incendie (niveau général)",l:"Extincteurs présents en nombre suffisant et accessibles",p:"critique"},
+  {id:"SEC18",s:"Incendie (niveau général)",l:"Extincteurs contrôlés périodiquement — étiquette de vérification à jour",p:"critique"},
+  {id:"SEC19",s:"Incendie (niveau général)",l:"Signalisation incendie visible — emplacement extincteurs, boutons d'alarme",p:"eleve"},
+  {id:"SEC20",s:"Incendie (niveau général)",l:"Stockage de matériaux combustibles maîtrisé — pas d'accumulation dangereuse",p:"critique"},
+  {id:"SEC21",s:"Incendie (niveau général)",l:"Sources de chaleur contrôlées — distances de sécurité respectées",p:"eleve"},
+  {id:"SEC22",s:"Incendie (niveau général)",l:"Consignes incendie affichées et connues du personnel",p:"eleve"},
+  {id:"SEC23",s:"Incendie (niveau général)",l:"Exercices d'évacuation incendie réalisés au moins une fois par an",p:"critique"},
+
+  // 4. Installations techniques
+  {id:"SEC24",s:"Installations techniques",l:"Installations électriques en bon état général — pas de dégradation visible",p:"critique"},
+  {id:"SEC25",s:"Installations techniques",l:"Armoires électriques fermées, sécurisées et signalées",p:"critique"},
+  {id:"SEC26",s:"Installations techniques",l:"Câbles en bon état — pas de fils dénudés, écrasés ou surchargés",p:"critique"},
+  {id:"SEC27",s:"Installations techniques",l:"Multiprises utilisées correctement — pas de branchement en cascade",p:"eleve"},
+  {id:"SEC28",s:"Installations techniques",l:"Entretien préventif des installations réalisé et documenté",p:"eleve"},
+  {id:"SEC29",s:"Installations techniques",l:"Locaux techniques sécurisés — accès restreint et signalé",p:"eleve"},
+
+  // 5. Sécurité des occupants
+  {id:"SEC30",s:"Sécurité des occupants",l:"Zones à risque identifiées et signalées par marquage approprié",p:"critique"},
+  {id:"SEC31",s:"Sécurité des occupants",l:"Sols en bon état — pas de trous, déformations ou revêtements décollés",p:"critique"},
+  {id:"SEC32",s:"Sécurité des occupants",l:"Zones glissantes signalées — dispositifs antidérapants en place",p:"eleve"},
+  {id:"SEC33",s:"Sécurité des occupants",l:"Équipements potentiellement dangereux sécurisés et protégés",p:"critique"},
+  {id:"SEC34",s:"Sécurité des occupants",l:"Accès aux zones interdites contrôlés — verrouillage ou barrières",p:"eleve"},
+  {id:"SEC35",s:"Sécurité des occupants",l:"Protection des personnes vulnérables assurée — mesures adaptées",p:"critique"},
+
+  // 6. Hygiène & salubrité
+  {id:"SEC36",s:"Hygiène & salubrité",l:"Locaux propres — nettoyage régulier documenté",p:"eleve"},
+  {id:"SEC37",s:"Hygiène & salubrité",l:"Sanitaires fonctionnels, propres et approvisionnés",p:"eleve"},
+  {id:"SEC38",s:"Hygiène & salubrité",l:"Déchets bien gérés — tri, collecte régulière, contenants adaptés",p:"eleve"},
+  {id:"SEC39",s:"Hygiène & salubrité",l:"Produits dangereux stockés correctement — armoire dédiée, bac de rétention",p:"critique"},
+  {id:"SEC40",s:"Hygiène & salubrité",l:"Ventilation suffisante — renouvellement d'air conforme",p:"eleve"},
+  {id:"SEC41",s:"Hygiène & salubrité",l:"Absence de moisissures, nuisibles ou nuisances olfactives",p:"mineur"},
+
+  // 7. Ergonomie & conditions de travail
+  {id:"SEC42",s:"Ergonomie & conditions de travail",l:"Postes de travail adaptés aux tâches et à la morphologie des travailleurs",p:"eleve"},
+  {id:"SEC43",s:"Ergonomie & conditions de travail",l:"Techniques de manutention correctes — formation dispensée",p:"eleve"},
+  {id:"SEC44",s:"Ergonomie & conditions de travail",l:"Équipements ergonomiques disponibles — sièges, supports écran, repose-pieds",p:"mineur"},
+  {id:"SEC45",s:"Ergonomie & conditions de travail",l:"Éclairage suffisant et adapté aux postes de travail",p:"eleve"},
+  {id:"SEC46",s:"Ergonomie & conditions de travail",l:"Bruit maîtrisé — mesures de réduction en place si nécessaire",p:"eleve"},
+  {id:"SEC47",s:"Ergonomie & conditions de travail",l:"Équipements de travail disponibles et en bon état",p:"mineur"},
+
+  // 8. Produits dangereux & stockage
+  {id:"SEC48",s:"Produits dangereux & stockage",l:"Produits dangereux correctement étiquetés — pictogrammes CLP visibles",p:"critique"},
+  {id:"SEC49",s:"Produits dangereux & stockage",l:"Fiches de données de sécurité (FDS) disponibles et accessibles",p:"critique"},
+  {id:"SEC50",s:"Produits dangereux & stockage",l:"Stockage adapté — armoire ventilée, bac de rétention, local dédié",p:"critique"},
+  {id:"SEC51",s:"Produits dangereux & stockage",l:"Incompatibilités chimiques respectées dans le stockage",p:"critique"},
+  {id:"SEC52",s:"Produits dangereux & stockage",l:"Quantités stockées limitées au strict nécessaire",p:"eleve"},
+  {id:"SEC53",s:"Produits dangereux & stockage",l:"EPI spécifiques disponibles pour la manipulation des produits dangereux",p:"critique"},
+
+  // 9. Accès & sécurité extérieure
+  {id:"SEC54",s:"Accès & sécurité extérieure",l:"Accès au bâtiment sécurisés — contrôle d'accès fonctionnel",p:"eleve"},
+  {id:"SEC55",s:"Accès & sécurité extérieure",l:"Abords du bâtiment sûrs — pas d'obstacle, trou ou danger",p:"eleve"},
+  {id:"SEC56",s:"Accès & sécurité extérieure",l:"Circulation extérieure définie — séparation piétons/véhicules",p:"critique"},
+  {id:"SEC57",s:"Accès & sécurité extérieure",l:"Éclairage extérieur suffisant — parking, accès, cheminements",p:"eleve"},
+  {id:"SEC58",s:"Accès & sécurité extérieure",l:"Zones de livraison sécurisées et balisées",p:"eleve"},
+  {id:"SEC59",s:"Accès & sécurité extérieure",l:"Équipements extérieurs en bon état — clôtures, portails, barrières",p:"mineur"},
+
+  // 10. Risques émergents (batteries, trottinettes)
+  {id:"SEC60",s:"Risques émergents (batteries & mobilité)",l:"Règles d'utilisation existantes pour trottinettes et vélos électriques",p:"eleve"},
+  {id:"SEC61",s:"Risques émergents (batteries & mobilité)",l:"Zones de stationnement prévues et signalées pour engins de mobilité",p:"eleve"},
+  {id:"SEC62",s:"Risques émergents (batteries & mobilité)",l:"Recharge des batteries sécurisée — prise adaptée, surveillance, ventilation",p:"critique"},
+  {id:"SEC63",s:"Risques émergents (batteries & mobilité)",l:"Équipements électriques personnels contrôlés — pas de matériel défectueux",p:"eleve"},
+  {id:"SEC64",s:"Risques émergents (batteries & mobilité)",l:"Risques liés aux batteries lithium maîtrisés — consignes et moyens d'extinction adaptés",p:"critique"},
 ],
 
 // ──────────────────────────────────────────────────────────────
