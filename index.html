@@ -2912,8 +2912,16 @@ function SettingsScreen({user,onLogout,appState,onAppStateUpdate,respsState,site
     setNewSite("");
     if(newSiteRef.current) newSiteRef.current.value="";
   };
-  const removeResp=(i)=>update({resps:resps.filter(function(_,j){return j!==i;})});
-  const removeSite=(i)=>update({sites:sites.filter(function(_,j){return j!==i;})});
+  const removeResp=(i)=>{
+    var nom=resps[i]&&resps[i].nom?resps[i].nom:"cet utilisateur";
+    if(!confirm("Supprimer "+nom+" de l'équipe ?\n\nCette action est irréversible.")) return;
+    update({resps:resps.filter(function(_,j){return j!==i;})});
+  };
+  const removeSite=(i)=>{
+    var site=sites[i]||"ce site";
+    if(!confirm("Supprimer le site \""+site+"\" ?\n\nCette action est irréversible.")) return;
+    update({sites:sites.filter(function(_,j){return j!==i;})});
+  };
   const setPen=(k,v)=>update({penalites:{...penalites,[k]:v===""?"":parseInt(v)||0}});
   const setDel=(k,v)=>update({delais:{...delais,[k]:v===""?"":parseInt(v)||0}});
 
