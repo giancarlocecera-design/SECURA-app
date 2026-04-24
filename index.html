@@ -1799,8 +1799,8 @@ function InspectionDetailScreen({inspection,onBack,onUpdate,resps,sitesState}){
         const sp=secPen(items,sec);
         const open=openSec===sec;
         return (
-          <div key={sec} style={{margin:"10px 14px 0",...S.card(sp>0?`${C.red}22`:C.border)}}>
-            <div onClick={()=>setOpenSec(open?null:sec)} style={{display:"flex",alignItems:"center",gap:10,cursor:"pointer"}}>
+          <div key={sec} id={"sec-"+sec.replace(/\s/g,"_")} style={{margin:"10px 14px 0",...S.card(sp>0?`${C.red}22`:C.border)}}>
+            <div onClick={function(){if(open){setOpenSec(null);}else{setOpenSec(sec);setTimeout(function(){var el=document.getElementById("sec-"+sec.replace(/\s/g,"_"));if(el)el.scrollIntoView({behavior:"smooth",block:"start"});},150);}}} style={{display:"flex",alignItems:"center",gap:10,cursor:"pointer"}}>
               <div style={{flex:1}}>
                 <div style={{fontSize:13,fontWeight:700}}>{sec}</div>
                 <div style={{fontSize:10,color:C.muted,marginTop:2}}>{items.filter(i=>i.s===sec).length} questions · {snc.length} NC · −{sp}pts</div>
@@ -2083,8 +2083,8 @@ function NewInspectionScreen({user,onSave,onBack,resps,sitesState,customTemplate
             const sncLen=secNC(items,sec).length;
             const open=openSec===sec;
             return (
-              <div key={sec} style={{...S.card(sp>0?`${C.red}22`:C.border),marginBottom:10}}>
-                <div onClick={()=>setOpenSec(open?null:sec)} style={{display:"flex",alignItems:"center",gap:10,cursor:"pointer"}}>
+              <div key={sec} id={"sec2-"+sec.replace(/\s/g,"_")} style={{...S.card(sp>0?`${C.red}22`:C.border),marginBottom:10}}>
+                <div onClick={function(){if(open){setOpenSec(null);}else{setOpenSec(sec);setTimeout(function(){var el=document.getElementById("sec2-"+sec.replace(/\s/g,"_"));if(el)el.scrollIntoView({behavior:"smooth",block:"start"});},150);}}} style={{display:"flex",alignItems:"center",gap:10,cursor:"pointer"}}>
                   <div style={{flex:1}}><div style={{fontSize:13,fontWeight:700}}>{sec}</div><div style={{fontSize:10,color:C.muted,marginTop:1}}>{secItems.length} questions · {sncLen} NC · −{sp}pts</div></div>
                   <div style={{fontSize:17,fontWeight:900,color:scoreColor(ss),marginRight:4}}>{ss}</div>
                   <div style={{fontSize:12,color:C.muted}}>{open?"▲":"▼"}</div>
