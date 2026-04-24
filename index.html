@@ -830,7 +830,7 @@ function LoginScreen({onLogin, users}){
   const allUsers=(users&&users.length&&typeof users[0]==="object"&&users[0].email
     ? users
     : USERS).filter(function(u){return u&&u.nom;});
-  const handle=()=>{setLoad(true);setErr("");setTimeout(()=>{const u=allUsers.find(u=>u.email===email&&u.pass===pass);if(u)onLogin(u);else{setErr("Identifiants incorrects.");setLoad(false);}},700);};
+  const handle=()=>{setLoad(true);setErr("");setTimeout(()=>{var em=email.trim().toLowerCase();var pw=pass.trim();const u=allUsers.find(function(u){return u.email&&u.email.trim().toLowerCase()===em&&u.pass&&u.pass.trim()===pw;});if(u)onLogin(u);else{setErr("Identifiants incorrects.");setLoad(false);}},700);};
   return (
     <div style={{minHeight:"100vh",display:"flex",flexDirection:"column",justifyContent:"center",padding:"32px 22px",background:`linear-gradient(165deg,${C.bg} 55%,#0D1825)`}}>
       <div style={{textAlign:"center",marginBottom:32}}>
@@ -841,7 +841,7 @@ function LoginScreen({onLogin, users}){
       <div style={{...S.card(),padding:24,marginBottom:18}}>
         <div style={{fontSize:15,fontWeight:800,marginBottom:18}}>Connexion</div>
         <label style={S.label}>Email</label>
-        <input style={{...S.input,marginBottom:14}} type="email" placeholder="votre@email.be" value={email} onChange={e=>setEmail(e.target.value)} onKeyDown={e=>e.key==="Enter"&&handle()}/>
+        <input style={{...S.input,marginBottom:14}} type="email" placeholder="votre@email.be" value={email} onChange={e=>setEmail(e.target.value)} onKeyDown={e=>e.key==="Enter"&&handle()} autoCapitalize="off" autoCorrect="off" autoComplete="email"/>
         <label style={S.label}>Mot de passe</label>
         <input style={{...S.input,marginBottom:10}} type="password" placeholder="••••••••" value={pass} onChange={e=>setPass(e.target.value)} onKeyDown={e=>e.key==="Enter"&&handle()}/>
         {err&&<div style={{fontSize:12,color:C.red,marginBottom:10,padding:"8px 12px",background:`${C.red}12`,borderRadius:8}}>{err}</div>}
