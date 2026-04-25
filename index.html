@@ -920,6 +920,15 @@ function HelpScreen({onBack,config}){
       "Questions suggérées — exemples de questions courantes pour démarrer",
       "Accès configurable — l'Admin peut activer ou désactiver l'IA par rôle dans Profil → Accès",
       "Clé API — à configurer dans Profil → Système par l'Admin"
+    ]},
+    {icon:"🩹",title:"Accidentologie",sub:"Suivi des accidents du travail",color:C.red,items:[
+      "Déclaration — encodez chaque accident avec date, site, type, cause, gravité et jours d'arrêt",
+      "Types d'accidents — AT avec arrêt, AT sans arrêt, presqu'accident, incident, accident de trajet",
+      "Indicateurs automatiques — Taux de fréquence (Tf) et Taux de gravité (Tg) calculés par site",
+      "Jours sans accident — compteur automatique par site avec classement",
+      "Top causes — identification des causes les plus fréquentes pour cibler la prévention",
+      "Évolution mensuelle — graphique sur 12 mois pour suivre la tendance",
+      "Heures prestées — à configurer par catégorie de personnel dans Profil → Système pour les calculs Tf/Tg"
     ]}
   ];
   return (
@@ -2426,10 +2435,10 @@ function RappelsScreen({actions,resps,config,onConfigUpdate,onBack}){
 // ═══════════════════════════════════════════════════════════════════════
 function PermissionsScreen({config,onConfigUpdate,onBack}){
   var perms=config&&config.permissions?config.permissions:{
-    Inspecteur:{dashboard:true,inspections:true,actions:true,rapports:false,rappels:false,settings:false,ia:false},
-    Responsable:{dashboard:true,inspections:false,actions:true,rapports:false,rappels:false,settings:false,ia:false}
+    Inspecteur:{dashboard:true,inspections:true,actions:true,rapports:false,rappels:false,settings:false,ia:false,accidents:false},
+    Responsable:{dashboard:true,inspections:false,actions:true,rapports:false,rappels:false,settings:false,ia:false,accidents:false}
   };
-  var features=[{k:"dashboard",l:"Tableau de bord",icon:"🏠"},{k:"inspections",l:"Audits",icon:"📋"},{k:"actions",l:"Actions",icon:"⚡"},{k:"rapports",l:"Rapports",icon:"📄"},{k:"rappels",l:"Rappels email",icon:"📧"},{k:"ia",l:"Assistant IA",icon:"🤖"},{k:"settings",l:"Profil & Paramètres",icon:"👤"}];
+  var features=[{k:"dashboard",l:"Tableau de bord",icon:"🏠"},{k:"inspections",l:"Audits",icon:"📋"},{k:"actions",l:"Actions",icon:"⚡"},{k:"rapports",l:"Rapports",icon:"📄"},{k:"rappels",l:"Rappels email",icon:"📧"},{k:"ia",l:"Assistant IA",icon:"🤖"},{k:"accidents",l:"Accidentologie",icon:"🩹"},{k:"settings",l:"Profil & Paramètres",icon:"👤"}];
   var roles=["Inspecteur","Responsable"];
   function toggle(role,feature){var newP=JSON.parse(JSON.stringify(perms));if(!newP[role])newP[role]={};newP[role][feature]=!newP[role][feature];onConfigUpdate(Object.assign({},config,{permissions:newP}));}
   return (
@@ -3229,6 +3238,28 @@ function SettingsScreen({user,onLogout,appState,onAppStateUpdate,respsState,site
               })()}
             </div>
             <div style={{...S.card(),marginBottom:12}}>
+              <div style={{fontSize:13,fontWeight:800,marginBottom:4}}>🏭 Heures prestées par catégorie (annuelles)</div>
+              <div style={{fontSize:11,color:C.muted,marginBottom:10}}>Nécessaire pour calculer le Tf et Tg dans Accidentologie</div>
+              {(function(){
+                var hp=(appState&&appState.heuresPresteesParCat)||{};
+                var categories=["Enseignement","Ouvriers","Employés","Techniciennes de surface","Puéricultrices","Aides-familiales"];
+                return categories.map(function(cat,i){
+                  return (
+                    <div key={i} style={{display:"flex",alignItems:"center",gap:8,marginBottom:6}}>
+                      <span style={{fontSize:11,flex:1,color:C.text,minWidth:0,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{cat}</span>
+                      <input type="text" inputMode="numeric" pattern="[0-9]*" placeholder="0" defaultValue={hp[cat]||""} onBlur={function(e){
+                        var val=parseInt(e.target.value)||0;
+                        var next=Object.assign({},hp);
+                        if(val>0) next[cat]=val; else delete next[cat];
+                        onAppStateUpdate&&onAppStateUpdate({...appState,heuresPresteesParCat:next});
+                      }} style={{...S.input,width:90,padding:"6px 10px",textAlign:"center",fontSize:12,fontWeight:700}}/>
+                      <span style={{fontSize:10,color:C.muted}}>h/an</span>
+                    </div>
+                  );
+                });
+              })()}
+            </div>
+            <div style={{...S.card(),marginBottom:12}}>
               <div style={{fontSize:13,fontWeight:800,marginBottom:4}}>🤖 Clé API IA</div>
               <div style={{fontSize:11,color:C.muted,marginBottom:10}}>Clé Anthropic pour l&#39;assistant IA (Code du bien-être)</div>
               {(function(){
@@ -3453,11 +3484,248 @@ function NavIcon({name, col, size}){
   return icons[name]||null;
 }
 
+// ═══════════════════════════════════════════════════════════════════════
+// ACCIDENTOLOGIE
+// ═══════════════════════════════════════════════════════════════════════
+var ACC_TYPES=["AT avec arrêt","AT sans arrêt","Presqu'accident","Incident","Accident de trajet"];
+var ACC_CAUSES=["Chute de hauteur","Chute de plain-pied","Manutention manuelle","Machine/Outil","Contact chimique","Projection","Choc/Coincement","Électrique","Brûlure","Circulation","Agression","Autre"];
+
+function AccidentScreen({appState,onAppStateUpdate,sitesState,config}){
+  var accidents=appState&&appState.accidents||[];
+  var siteList=(sitesState&&sitesState.length>0)?sitesState:SITES;
+  const [showForm,setShowForm]=useState(false);
+  const [editId,setEditId]=useState(null);
+  const [form,setForm]=useState({date:new Date().toISOString().split("T")[0],site:siteList[0]||"",type:ACC_TYPES[0],cause:ACC_CAUSES[0],joursArret:0,description:"",actionsPrises:"",gravite:"mineur"});
+  const [tab,setTab]=useState("kpi");
+  const [siteFilter,setSiteFilter]=useState("Tous");
+
+  function resetForm(){setForm({date:new Date().toISOString().split("T")[0],site:siteList[0]||"",type:ACC_TYPES[0],cause:ACC_CAUSES[0],joursArret:0,description:"",actionsPrises:"",gravite:"mineur"});setEditId(null);}
+
+  function saveAcc(){
+    var acc={...form,id:editId||Date.now(),joursArret:parseInt(form.joursArret)||0};
+    var next;
+    if(editId){next=accidents.map(function(a){return a.id===editId?acc:a;});}
+    else{next=[acc].concat(accidents);}
+    onAppStateUpdate({...appState,accidents:next});
+    resetForm();setShowForm(false);
+  }
+
+  function deleteAcc(id){
+    if(!confirm("Supprimer cet accident ?\n\nCette action est irréversible.")) return;
+    onAppStateUpdate({...appState,accidents:accidents.filter(function(a){return a.id!==id;})});
+  }
+
+  function editAcc(a){setForm({...a});setEditId(a.id);setShowForm(true);}
+
+  // Filtrage
+  var fAccidents=siteFilter==="Tous"?accidents:accidents.filter(function(a){return a.site===siteFilter;});
+  var sorted=[].concat(fAccidents).sort(function(a,b){return b.date.localeCompare(a.date);});
+
+  // KPIs
+  var today=new Date();today.setHours(0,0,0,0);
+  var totalAT=fAccidents.filter(function(a){return a.type==="AT avec arrêt"||a.type==="AT sans arrêt";}).length;
+  var totalATArret=fAccidents.filter(function(a){return a.type==="AT avec arrêt";}).length;
+  var totalJours=fAccidents.reduce(function(s,a){return s+(parseInt(a.joursArret)||0);},0);
+  var totalPresque=fAccidents.filter(function(a){return a.type==="Presqu'accident";}).length;
+
+  // Jours sans accident par site
+  var joursSansAcc=siteList.map(function(site){
+    var siteAcc=accidents.filter(function(a){return a.site===site&&(a.type==="AT avec arrêt"||a.type==="AT sans arrêt");});
+    if(siteAcc.length===0) return {site:site,jours:null};
+    var lastDate=siteAcc.sort(function(a,b){return b.date.localeCompare(a.date);})[0].date;
+    var p=lastDate.split("-");var ld=new Date(parseInt(p[0]),parseInt(p[1])-1,parseInt(p[2]));ld.setHours(0,0,0,0);
+    return {site:site,jours:Math.floor((today-ld)/86400000)};
+  }).sort(function(a,b){if(a.jours===null) return 1;if(b.jours===null) return -1;return b.jours-a.jours;});
+
+  // Taux de fréquence et gravité (heures globales toutes catégories)
+  var heuresCat=appState&&appState.heuresPresteesParCat||{};
+  var totalHeures=0;
+  Object.values(heuresCat).forEach(function(h){totalHeures+=parseInt(h)||0;});
+  var tf=totalHeures>0?Math.round((totalATArret*1000000/totalHeures)*100)/100:null;
+  var tg=totalHeures>0?Math.round((totalJours*1000/totalHeures)*100)/100:null;
+
+  // Répartition par cause
+  var byCause={};
+  fAccidents.forEach(function(a){if(!byCause[a.cause])byCause[a.cause]=0;byCause[a.cause]++;});
+  var causesSorted=Object.entries(byCause).sort(function(a,b){return b[1]-a[1];}).slice(0,6);
+  var maxCause=causesSorted.length>0?causesSorted[0][1]:1;
+
+  // Évolution mensuelle (12 derniers mois)
+  var months=[];
+  for(var mi=11;mi>=0;mi--){
+    var d=new Date(today.getFullYear(),today.getMonth()-mi,1);
+    var key=d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0");
+    var label=d.toLocaleDateString("fr-BE",{month:"short",year:"2-digit"});
+    var count=fAccidents.filter(function(a){return a.date&&a.date.substring(0,7)===key;}).length;
+    months.push({key:key,label:label,count:count});
+  }
+  var maxMonth=Math.max.apply(null,months.map(function(m){return m.count;}))||1;
+
+  var tabStyle=function(t){return {padding:"6px 14px",borderRadius:99,border:"1px solid",borderColor:tab===t?C.cyan:C.border,background:tab===t?C.cyan+"15":"transparent",color:tab===t?C.cyan:C.muted,fontSize:11,fontWeight:tab===t?800:500,cursor:"pointer"};};
+
+  return (
+    <div style={{paddingBottom:90}}>
+      <div style={{padding:"20px 16px 12px",display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
+        <div><div style={{fontSize:20,fontWeight:900}}>🩹 Accidentologie</div><div style={{fontSize:12,color:C.muted,marginTop:2}}>{accidents.length} accident(s) enregistré(s)</div></div>
+        <button onClick={function(){resetForm();setShowForm(!showForm);}} style={{background:showForm?"transparent":"linear-gradient(135deg,"+C.cyan+",#007799)",border:showForm?"1px solid "+C.border:"none",borderRadius:12,padding:"9px 14px",color:showForm?C.muted:"#000",fontWeight:800,fontSize:12,cursor:"pointer"}}>{showForm?"✕ Annuler":"+ Déclarer"}</button>
+      </div>
+
+      {/* Filtre par site */}
+      <div style={{padding:"0 14px 10px",display:"flex",gap:6,overflowX:"auto",WebkitOverflowScrolling:"touch"}}>
+        {["Tous"].concat(siteList).map(function(s){var active=siteFilter===s;return <button key={s} onClick={function(){setSiteFilter(s);}} style={{flexShrink:0,padding:"5px 12px",borderRadius:99,border:"1px solid",borderColor:active?C.cyan:C.border,background:active?C.cyan+"15":"transparent",color:active?C.cyan:C.muted,fontSize:10,fontWeight:active?800:500,cursor:"pointer"}}>{s==="Tous"?"🏢 Tous":s}</button>;})}
+      </div>
+
+      {/* Formulaire */}
+      {showForm&&(
+        <div style={{margin:"0 14px 14px",...S.card(C.cyan+"22")}}>
+          <div style={{fontSize:14,fontWeight:800,marginBottom:12,color:C.cyan}}>{editId?"✏️ Modifier":"📝 Déclarer un accident"}</div>
+          <label style={S.label}>Date</label>
+          <input type="date" value={form.date} onChange={function(e){setForm({...form,date:e.target.value});}} style={{...S.input,marginBottom:10}}/>
+          <label style={S.label}>Site</label>
+          <select value={form.site} onChange={function(e){setForm({...form,site:e.target.value});}} style={{...S.input,marginBottom:10}}>{siteList.map(function(s){return <option key={s} value={s}>{s}</option>;})}</select>
+          <label style={S.label}>Type</label>
+          <select value={form.type} onChange={function(e){setForm({...form,type:e.target.value});}} style={{...S.input,marginBottom:10}}>{ACC_TYPES.map(function(t){return <option key={t} value={t}>{t}</option>;})}</select>
+          <label style={S.label}>Cause</label>
+          <select value={form.cause} onChange={function(e){setForm({...form,cause:e.target.value});}} style={{...S.input,marginBottom:10}}>{ACC_CAUSES.map(function(c){return <option key={c} value={c}>{c}</option>;})}</select>
+          <label style={S.label}>Gravité</label>
+          <div style={{display:"flex",gap:6,marginBottom:10}}>
+            {[["mineur","Mineur",C.amber],["eleve","Élevé",C.orange],["critique","Grave",C.red]].map(function(g){var active=form.gravite===g[0];return <button key={g[0]} onClick={function(){setForm({...form,gravite:g[0]});}} style={{flex:1,padding:"8px",borderRadius:8,border:"1px solid "+(active?g[2]:C.border),background:active?g[2]+"18":"transparent",color:active?g[2]:C.muted,fontSize:12,fontWeight:active?800:400,cursor:"pointer"}}>{g[1]}</button>;})}
+          </div>
+          <label style={S.label}>Jours d&#39;arrêt</label>
+          <input type="number" min="0" value={form.joursArret} onChange={function(e){setForm({...form,joursArret:e.target.value});}} style={{...S.input,marginBottom:10}}/>
+          <label style={S.label}>Description</label>
+          <textarea value={form.description} onChange={function(e){setForm({...form,description:e.target.value});}} placeholder="Circonstances de l'accident..." style={{...S.input,minHeight:60,resize:"vertical",marginBottom:10}}/>
+          <label style={S.label}>Actions correctives prises</label>
+          <textarea value={form.actionsPrises} onChange={function(e){setForm({...form,actionsPrises:e.target.value});}} placeholder="Mesures prises suite à l'accident..." style={{...S.input,minHeight:50,resize:"vertical",marginBottom:14}}/>
+          <button onClick={saveAcc} style={{...S.btn(C.cyan)}}>{editId?"💾 Modifier":"+ Enregistrer l'accident"}</button>
+        </div>
+      )}
+
+      {/* Tabs */}
+      <div style={{padding:"0 14px 12px",display:"flex",gap:6}}>
+        <button style={tabStyle("kpi")} onClick={function(){setTab("kpi");}}>📊 Indicateurs</button>
+        <button style={tabStyle("liste")} onClick={function(){setTab("liste");}}>📋 Liste ({sorted.length})</button>
+        <button style={tabStyle("evolution")} onClick={function(){setTab("evolution");}}>📈 Évolution</button>
+      </div>
+
+      {/* KPI */}
+      {tab==="kpi"&&(
+        <div style={{padding:"0 14px"}}>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:14}}>
+            <div style={{...S.card(),textAlign:"center"}}><div style={{fontSize:28,fontWeight:900,color:C.red}}>{totalAT}</div><div style={{fontSize:10,color:C.muted}}>Accidents du travail</div></div>
+            <div style={{...S.card(),textAlign:"center"}}><div style={{fontSize:28,fontWeight:900,color:C.orange}}>{totalJours}</div><div style={{fontSize:10,color:C.muted}}>Jours d&#39;arrêt</div></div>
+            <div style={{...S.card(),textAlign:"center"}}><div style={{fontSize:28,fontWeight:900,color:C.amber}}>{totalPresque}</div><div style={{fontSize:10,color:C.muted}}>Presqu&#39;accidents</div></div>
+            <div style={{...S.card(),textAlign:"center"}}><div style={{fontSize:28,fontWeight:900,color:C.cyan}}>{tf!==null?tf:"—"}</div><div style={{fontSize:10,color:C.muted}}>Taux fréquence (Tf)</div></div>
+          </div>
+          {tf===null&&<div style={{padding:"8px 12px",background:C.orange+"12",border:"1px solid "+C.orange+"33",borderRadius:10,marginBottom:14,fontSize:11,color:C.orange}}>⚠️ Configurez les heures prestées par catégorie dans Profil → Système pour calculer le Tf et Tg</div>}
+
+          {/* Jours sans accident par site */}
+          <div style={{...S.card(),marginBottom:14}}>
+            <div style={{fontSize:14,fontWeight:800,marginBottom:10}}>🏆 Jours sans accident</div>
+            {joursSansAcc.map(function(s,i){
+              var col=s.jours===null?C.green:s.jours>365?C.green:s.jours>90?C.cyan:s.jours>30?C.amber:C.red;
+              return (
+                <div key={i} style={{display:"flex",alignItems:"center",gap:10,padding:"8px 0",borderBottom:i<joursSansAcc.length-1?"1px solid "+C.dim:"none"}}>
+                  <div style={{width:38,height:38,borderRadius:10,background:col+"15",border:"1px solid "+col+"33",display:"flex",alignItems:"center",justifyContent:"center",fontSize:13,fontWeight:900,color:col,flexShrink:0}}>{s.jours===null?"∞":s.jours}</div>
+                  <div style={{flex:1}}><div style={{fontSize:13,fontWeight:700}}>{s.site}</div><div style={{fontSize:10,color:C.muted}}>{s.jours===null?"Aucun accident enregistré":"jours sans AT"}</div></div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Causes */}
+          {causesSorted.length>0&&(
+            <div style={{...S.card(),marginBottom:14}}>
+              <div style={{fontSize:14,fontWeight:800,marginBottom:10}}>🔍 Top causes</div>
+              {causesSorted.map(function(c,i){var pct=Math.round(c[1]/maxCause*100);return (
+                <div key={i} style={{marginBottom:8}}>
+                  <div style={{display:"flex",justifyContent:"space-between",marginBottom:3}}><span style={{fontSize:12,fontWeight:600}}>{c[0]}</span><span style={{fontSize:12,fontWeight:800,color:C.red}}>{c[1]}</span></div>
+                  <div style={{background:C.dim,borderRadius:99,height:6,overflow:"hidden"}}><div style={{width:pct+"%",height:"100%",background:C.red,borderRadius:99,transition:"width .6s"}}/></div>
+                </div>
+              );})}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Liste */}
+      {tab==="liste"&&(
+        <div style={{padding:"0 14px"}}>
+          {sorted.length===0&&<div style={{textAlign:"center",padding:"40px 20px",color:C.muted}}><div style={{fontSize:36,marginBottom:12}}>✅</div><div style={{fontSize:14,fontWeight:700}}>Aucun accident enregistré</div></div>}
+          {sorted.map(function(a,i){
+            var col=a.gravite==="critique"?C.red:a.gravite==="eleve"?C.orange:C.amber;
+            var typeIcon=a.type==="AT avec arrêt"?"🚑":a.type==="AT sans arrêt"?"🩹":a.type==="Presqu'accident"?"⚠️":"📋";
+            return (
+              <div key={a.id} style={{...S.card(),marginBottom:10}}>
+                <div style={{display:"flex",alignItems:"flex-start",gap:10}}>
+                  <div style={{width:38,height:38,borderRadius:10,background:col+"15",border:"1px solid "+col+"33",display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,flexShrink:0}}>{typeIcon}</div>
+                  <div style={{flex:1,minWidth:0}}>
+                    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:4}}>
+                      <span style={{fontSize:13,fontWeight:800}}>{a.type}</span>
+                      <span style={{fontSize:10,color:C.muted}}>{fmt(a.date)}</span>
+                    </div>
+                    <div style={{fontSize:11,color:C.muted,marginBottom:4}}>📍 {a.site} · {a.cause}</div>
+                    {a.description&&<div style={{fontSize:12,lineHeight:1.4,marginBottom:4}}>{a.description}</div>}
+                    <div style={{display:"flex",gap:6,flexWrap:"wrap",alignItems:"center"}}>
+                      <span style={{fontSize:9,padding:"2px 7px",borderRadius:5,background:col+"18",color:col,fontWeight:800}}>{a.gravite==="critique"?"GRAVE":a.gravite==="eleve"?"ÉLEVÉ":"MINEUR"}</span>
+                      {a.joursArret>0&&<span style={{fontSize:9,padding:"2px 7px",borderRadius:5,background:C.red+"18",color:C.red,fontWeight:800}}>{a.joursArret}j arrêt</span>}
+                      {a.actionsPrises&&<span style={{fontSize:9,padding:"2px 7px",borderRadius:5,background:C.green+"18",color:C.green,fontWeight:800}}>Actions prises</span>}
+                    </div>
+                  </div>
+                </div>
+                <div style={{display:"flex",gap:6,marginTop:10,justifyContent:"flex-end"}}>
+                  <button onClick={function(){editAcc(a);}} style={{background:"transparent",border:"1px solid "+C.cyan+"44",borderRadius:8,padding:"5px 12px",color:C.cyan,cursor:"pointer",fontSize:10,fontWeight:700}}>✏️ Modifier</button>
+                  <button onClick={function(){deleteAcc(a.id);}} style={{background:"transparent",border:"1px solid "+C.red+"44",borderRadius:8,padding:"5px 12px",color:C.red,cursor:"pointer",fontSize:10,fontWeight:700}}>🗑️</button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Évolution */}
+      {tab==="evolution"&&(
+        <div style={{padding:"0 14px"}}>
+          <div style={{...S.card(),marginBottom:14}}>
+            <div style={{fontSize:14,fontWeight:800,marginBottom:12}}>📈 Évolution sur 12 mois</div>
+            <div style={{display:"flex",alignItems:"flex-end",gap:4,height:120}}>
+              {months.map(function(m,i){var h=maxMonth>0?Math.max(m.count/maxMonth*100,4):4;return (
+                <div key={i} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:4}}>
+                  <div style={{fontSize:9,fontWeight:800,color:m.count>0?C.red:C.muted}}>{m.count||""}</div>
+                  <div style={{width:"100%",height:h+"%",background:m.count>0?C.red:C.dim,borderRadius:4,minHeight:3,transition:"height .6s"}}/>
+                  <div style={{fontSize:7,color:C.muted,transform:"rotate(-45deg)",whiteSpace:"nowrap"}}>{m.label}</div>
+                </div>
+              );})}
+            </div>
+          </div>
+          <div style={{...S.card(),marginBottom:14}}>
+            <div style={{fontSize:14,fontWeight:800,marginBottom:6}}>📊 Indicateurs annuels</div>
+            <div style={{fontSize:12,color:C.muted,marginBottom:12}}>Basés sur les heures prestées configurées</div>
+            <div style={{display:"flex",gap:12}}>
+              <div style={{flex:1,textAlign:"center",padding:"14px",background:C.surface,borderRadius:10,border:"1px solid "+C.border}}>
+                <div style={{fontSize:24,fontWeight:900,color:tf!==null?C.red:C.muted}}>{tf!==null?tf:"—"}</div>
+                <div style={{fontSize:10,color:C.muted,marginTop:4}}>Taux de fréquence</div>
+                <div style={{fontSize:8,color:C.muted}}>AT×1M / heures</div>
+              </div>
+              <div style={{flex:1,textAlign:"center",padding:"14px",background:C.surface,borderRadius:10,border:"1px solid "+C.border}}>
+                <div style={{fontSize:24,fontWeight:900,color:tg!==null?C.orange:C.muted}}>{tg!==null?tg:"—"}</div>
+                <div style={{fontSize:10,color:C.muted,marginTop:4}}>Taux de gravité</div>
+                <div style={{fontSize:8,color:C.muted}}>Jours×1K / heures</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function BottomNav({active,onChange,badge,user,config}){
   var allTabs=[
     {k:"dashboard",  l:"Accueil",  f:"dashboard"},
     {k:"inspections",l:"Audits",   f:"inspections"},
     {k:"actions",    l:"Actions",  f:"actions",badge:badge},
+    {k:"accidents",  l:"Accidents",f:"accidents"},
     {k:"rapports",   l:"Rapports", f:"rapports"},
     {k:"settings",   l:"Profil",   f:"settings"},
   ];
@@ -3632,11 +3900,11 @@ function App(){
     techMode:false,
     seuilSites:{vert:90,jaune:120,rouge:365},
     permissions:{
-      Inspecteur:{dashboard:true,inspections:true,actions:true,rapports:false,rappels:false,settings:false,ia:false},
-      Responsable:{dashboard:true,inspections:false,actions:true,rapports:false,rappels:false,settings:false,ia:false}
+      Inspecteur:{dashboard:true,inspections:true,actions:true,rapports:false,rappels:false,settings:false,ia:false,accidents:false},
+      Responsable:{dashboard:true,inspections:false,actions:true,rapports:false,rappels:false,settings:false,ia:false,accidents:false}
     },
   });
-  const [appState,setAppState]=useState({sites:SITES_DEFAULT,resps:RESPONSABLES_DEFAULT,penalites:{critique:5,eleve:3,mineur:1},delais:{critique:0,eleve:60,mineur:120},customTemplates:{},siteAddresses:{}});
+  const [appState,setAppState]=useState({sites:SITES_DEFAULT,resps:RESPONSABLES_DEFAULT,penalites:{critique:5,eleve:3,mineur:1},delais:{critique:0,eleve:60,mineur:120},customTemplates:{},siteAddresses:{},accidents:LS.load("accidents")||[],heuresPresteesParCat:LS.load("heuresPresteesParCat")||{}});
   const [respsState,setRespsState]=useState([...RESPONSABLES_DEFAULT]);
   const [sitesState,setSitesState]=useState([...SITES_DEFAULT]);
   async function handleAppStateUpdate(s){
@@ -3658,6 +3926,9 @@ function App(){
       payload["customtemplates"]=merged.customTemplates;
     }
     try{ await supa.upsert("app_config",payload); }catch(e){console.error("appState save error:",e);}
+    // Save accidents separately in localStorage (no Supabase column yet)
+    if(merged.accidents) LS.save("accidents",merged.accidents);
+    if(merged.heuresPresteesParCat) LS.save("heuresPresteesParCat",merged.heuresPresteesParCat);
     // Also save to localStorage as backup
     LS.save("appState", merged);
     LS.save("customTemplates", merged.customTemplates||{});
@@ -3921,6 +4192,7 @@ function App(){
         {screen==="dashboard"   &&<DashboardScreen user={user} inspections={inspections} actions={actions} onNav={nav} config={config} sitesState={sitesState} appState={appState}/>}
         {screen==="inspections" &&<InspectionsScreen inspections={inspections} onOpen={openDetail} onNav={nav} onDelete={deleteIns} user={user} config={config}/>}
         {screen==="actions"     &&<ActionsScreen actions={actions} onUpdate={updateAct} resps={respsState} config={config} onConfigUpdate={saveConfig} user={user}/>}
+        {screen==="accidents"   &&<AccidentScreen appState={appState} onAppStateUpdate={handleAppStateUpdate} sitesState={sitesState} config={config}/>}
         {screen==="rapports"    &&<RapportsScreen inspections={inspections} onDelete={deleteIns} config={config}/>}
         {screen==="settings"    &&<SettingsScreen user={user} onLogout={()=>{setUser(null);setScreen("dashboard");}} config={config} onConfigUpdate={saveConfig} appState={appState} respsState={respsState} sitesState={sitesState} onAppStateUpdate={handleAppStateUpdate}/>}
       </div>
