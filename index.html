@@ -3489,17 +3489,18 @@ function NavIcon({name, col, size}){
 // ═══════════════════════════════════════════════════════════════════════
 var ACC_TYPES=["AT avec arrêt","AT sans arrêt","Presqu'accident","Incident","Accident de trajet"];
 var ACC_CAUSES=["Chute de hauteur","Chute de plain-pied","Manutention manuelle","Machine/Outil","Contact chimique","Projection","Choc/Coincement","Électrique","Brûlure","Circulation","Agression","Autre"];
+var ACC_STATUTS=["Enseignement","Ouvriers","Employés","Techniciennes de surface","Puéricultrices","Aides-familiales","Autre"];
 
 function AccidentScreen({appState,onAppStateUpdate,sitesState,config}){
   var accidents=appState&&appState.accidents||[];
   var siteList=(sitesState&&sitesState.length>0)?sitesState:SITES;
   const [showForm,setShowForm]=useState(false);
   const [editId,setEditId]=useState(null);
-  const [form,setForm]=useState({date:new Date().toISOString().split("T")[0],site:siteList[0]||"",type:ACC_TYPES[0],cause:ACC_CAUSES[0],joursArret:0,description:"",actionsPrises:"",gravite:"mineur"});
+  const [form,setForm]=useState({date:new Date().toISOString().split("T")[0],site:siteList[0]||"",type:ACC_TYPES[0],cause:ACC_CAUSES[0],statut:ACC_STATUTS[0],joursArret:0,description:"",actionsPrises:"",gravite:"mineur"});
   const [tab,setTab]=useState("kpi");
   const [siteFilter,setSiteFilter]=useState("Tous");
 
-  function resetForm(){setForm({date:new Date().toISOString().split("T")[0],site:siteList[0]||"",type:ACC_TYPES[0],cause:ACC_CAUSES[0],joursArret:0,description:"",actionsPrises:"",gravite:"mineur"});setEditId(null);}
+  function resetForm(){setForm({date:new Date().toISOString().split("T")[0],site:siteList[0]||"",type:ACC_TYPES[0],cause:ACC_CAUSES[0],statut:ACC_STATUTS[0],joursArret:0,description:"",actionsPrises:"",gravite:"mineur"});setEditId(null);}
 
   function saveAcc(){
     var acc={...form,id:editId||Date.now(),joursArret:parseInt(form.joursArret)||0};
@@ -3585,6 +3586,8 @@ function AccidentScreen({appState,onAppStateUpdate,sitesState,config}){
           <select value={form.site} onChange={function(e){setForm({...form,site:e.target.value});}} style={{...S.input,marginBottom:10}}>{siteList.map(function(s){return <option key={s} value={s}>{s}</option>;})}</select>
           <label style={S.label}>Type</label>
           <select value={form.type} onChange={function(e){setForm({...form,type:e.target.value});}} style={{...S.input,marginBottom:10}}>{ACC_TYPES.map(function(t){return <option key={t} value={t}>{t}</option>;})}</select>
+          <label style={S.label}>Statut / Fonction</label>
+          <select value={form.statut} onChange={function(e){setForm({...form,statut:e.target.value});}} style={{...S.input,marginBottom:10}}>{ACC_STATUTS.map(function(s){return <option key={s} value={s}>{s}</option>;})}</select>
           <label style={S.label}>Cause</label>
           <select value={form.cause} onChange={function(e){setForm({...form,cause:e.target.value});}} style={{...S.input,marginBottom:10}}>{ACC_CAUSES.map(function(c){return <option key={c} value={c}>{c}</option>;})}</select>
           <label style={S.label}>Gravité</label>
@@ -3645,6 +3648,43 @@ function AccidentScreen({appState,onAppStateUpdate,sitesState,config}){
               );})}
             </div>
           )}
+
+          {/* Stats par statut/fonction */}
+          {(function(){
+            var byStatut={};
+            fAccidents.forEach(function(a){var s=a.statut||"Non renseigné";if(!byStatut[s])byStatut[s]={total:0,atArret:0,jours:0};byStatut[s].total++;if(a.type==="AT avec arrêt")byStatut[s].atArret++;byStatut[s].jours+=parseInt(a.joursArret)||0;});
+            var statutEntries=Object.entries(byStatut).sort(function(a,b){return b[1].total-a[1].total;});
+            if(statutEntries.length===0) return null;
+            var maxStat=statutEntries[0][1].total;
+            return (
+              <div style={{...S.card(),marginBottom:14}}>
+                <div style={{fontSize:14,fontWeight:800,marginBottom:4}}>👤 Accidents par fonction</div>
+                <div style={{fontSize:11,color:C.muted,marginBottom:12}}>Répartition et Tf par catégorie de personnel</div>
+                {statutEntries.map(function(entry,i){
+                  var s=entry[0],d=entry[1];
+                  var hCat=parseInt(heuresCat[s])||0;
+                  var tfCat=hCat>0?Math.round((d.atArret*1000000/hCat)*100)/100:null;
+                  var pct=Math.round(d.total/maxStat*100);
+                  return (
+                    <div key={i} style={{marginBottom:10,padding:"10px 12px",borderRadius:10,background:C.surface,border:"1px solid "+C.border}}>
+                      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:6}}>
+                        <span style={{fontSize:13,fontWeight:800}}>{s}</span>
+                        <span style={{fontSize:16,fontWeight:900,color:C.red}}>{d.total}</span>
+                      </div>
+                      <div style={{background:C.dim,borderRadius:99,height:5,overflow:"hidden",marginBottom:6}}>
+                        <div style={{width:pct+"%",height:"100%",background:C.orange,borderRadius:99,transition:"width .6s"}}/>
+                      </div>
+                      <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+                        <span style={{fontSize:10,color:C.muted}}>AT arrêt: <strong style={{color:C.red}}>{d.atArret}</strong></span>
+                        <span style={{fontSize:10,color:C.muted}}>Jours: <strong style={{color:C.orange}}>{d.jours}</strong></span>
+                        <span style={{fontSize:10,color:C.muted}}>Tf: <strong style={{color:tfCat!==null?C.cyan:C.muted}}>{tfCat!==null?tfCat:"—"}</strong></span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            );
+          })()}
         </div>
       )}
 
@@ -3664,7 +3704,7 @@ function AccidentScreen({appState,onAppStateUpdate,sitesState,config}){
                       <span style={{fontSize:13,fontWeight:800}}>{a.type}</span>
                       <span style={{fontSize:10,color:C.muted}}>{fmt(a.date)}</span>
                     </div>
-                    <div style={{fontSize:11,color:C.muted,marginBottom:4}}>📍 {a.site} · {a.cause}</div>
+                    <div style={{fontSize:11,color:C.muted,marginBottom:4}}>📍 {a.site} · {a.cause}{a.statut?" · 👤 "+a.statut:""}</div>
                     {a.description&&<div style={{fontSize:12,lineHeight:1.4,marginBottom:4}}>{a.description}</div>}
                     <div style={{display:"flex",gap:6,flexWrap:"wrap",alignItems:"center"}}>
                       <span style={{fontSize:9,padding:"2px 7px",borderRadius:5,background:col+"18",color:col,fontWeight:800}}>{a.gravite==="critique"?"GRAVE":a.gravite==="eleve"?"ÉLEVÉ":"MINEUR"}</span>
