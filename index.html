@@ -3898,6 +3898,8 @@ function App(){
               delais:c.delais||prev.delais,
               customTemplates:c["customtemplates"]||c["custom_templates"]||c.customTemplates||LS.load("customTemplates")||prev.customTemplates||{},
               siteAddresses:c["siteaddresses"]||c.siteAddresses||prev.siteAddresses||{},
+              accidents:c.accidents&&c.accidents.length?c.accidents:LS.load("accidents")||prev.accidents||[],
+              heuresPresteesParCat:c["heuresprestees"]||c.heuresPresteesParCat||LS.load("heuresPresteesParCat")||prev.heuresPresteesParCat||{},
             };
           });
           LS.save("config", cfg[0]);
@@ -3970,9 +3972,15 @@ function App(){
       payload["customtemplates"]=merged.customTemplates;
     }
     try{ await supa.upsert("app_config",payload); }catch(e){console.error("appState save error:",e);}
-    // Save accidents separately in localStorage (no Supabase column yet)
-    if(merged.accidents) LS.save("accidents",merged.accidents);
-    if(merged.heuresPresteesParCat) LS.save("heuresPresteesParCat",merged.heuresPresteesParCat);
+    // Save accidents and heures to Supabase
+    if(merged.accidents){
+      LS.save("accidents",merged.accidents);
+      try{await supa.upsert("app_config",{id:"default",accidents:merged.accidents});}catch(e){console.error("accidents save:",e);}
+    }
+    if(merged.heuresPresteesParCat){
+      LS.save("heuresPresteesParCat",merged.heuresPresteesParCat);
+      try{await supa.upsert("app_config",{id:"default",heuresprestees:merged.heuresPresteesParCat});}catch(e){console.error("heures save:",e);}
+    }
     // Also save to localStorage as backup
     LS.save("appState", merged);
     LS.save("customTemplates", merged.customTemplates||{});
