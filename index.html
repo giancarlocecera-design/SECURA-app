@@ -1636,8 +1636,8 @@ function InspectionsScreen({inspections,onOpen,onNav,onDelete,user,config}){
               <div style={{display:"flex",justifyContent:"space-between",marginTop:8,alignItems:"center"}}>
                 <span style={{fontSize:10,color:C.muted}}>👤 {ins.inspecteur} · {fmt(ins.date)}</span>
                 <div style={{display:"flex",gap:4}}>
-                  {ncC>0&&<Tag label={`−${ncC*10}c`} color={C.red} small/>}
-                  {ncE>0&&<Tag label={`−${ncE*5}é`} color={C.orange} small/>}
+                  {ncC>0&&<Tag label={`−${ncC*PENALITE.critique}c`} color={C.red} small/>}
+                  {ncE>0&&<Tag label={`−${ncE*PENALITE.eleve}é`} color={C.orange} small/>}
                   {ncM>0&&<Tag label={`−${ncM}m`} color={C.amber} small/>}
                 </div>
               </div>
@@ -1887,9 +1887,9 @@ function InspectionDetailScreen({inspection,onBack,onUpdate,resps,sitesState}){
       {/* Légende */}
       <div style={{margin:"10px 14px 0",padding:"10px 12px",background:C.surface,borderRadius:12,display:"flex",gap:10,flexWrap:"wrap"}}>
         <div style={{fontSize:10,color:C.muted,fontWeight:700,width:"100%"}}>PÉNALITÉS · Appuyez sur ✓/✗ pour basculer · 📷 photo par question</div>
-        {[["critique","CRITIQUE",10],["eleve","ÉLEVÉ",5],["mineur","MINEUR",1]].map(function(arr){
-          var p=arr[0],l=arr[1],v=arr[2];
-          return <div key={p} style={{display:"flex",alignItems:"center",gap:4}}><div style={{width:8,height:8,borderRadius:2,background:poidsColor(p)}}/><span style={{fontSize:10,color:C.muted}}>{l} = -{v}pt</span></div>;
+        {[["critique","CRITIQUE"],["eleve","ÉLEVÉ"],["mineur","MINEUR"]].map(function(arr){
+          var p=arr[0],l=arr[1],v=PENALITE[p]||0;
+          return <div key={p} style={{display:"flex",alignItems:"center",gap:4}}><div style={{width:8,height:8,borderRadius:2,background:poidsColor(p)}}/><span style={{fontSize:10,color:C.muted}}>{l} = -{v}pt{v>1?"s":""}</span></div>;
         })}
       </div>
 
@@ -2083,7 +2083,7 @@ function NewInspectionScreen({user,onSave,onBack,resps,sitesState,customTemplate
   const qCrit=(CHECKLISTS[form.categorie]&&CHECKLISTS[form.categorie].filter(q=>q.p==="critique").length)||0||0;
   const qElev=(CHECKLISTS[form.categorie]&&CHECKLISTS[form.categorie].filter(q=>q.p==="eleve").length)||0||0;
   const qMin=(CHECKLISTS[form.categorie]&&CHECKLISTS[form.categorie].filter(q=>q.p==="mineur").length)||0||0;
-  const maxPen=qCrit*10+qElev*5+qMin;
+  const maxPen=qCrit*PENALITE.critique+qElev*PENALITE.eleve+qMin*PENALITE.mineur;
 
   const StepDot=({n})=><div style={{width:28,height:28,borderRadius:99,background:step>=n?C.cyan:C.dim,color:step>=n?"#000":C.muted,display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,fontWeight:900}}>{n}</div>;
 
@@ -2255,9 +2255,9 @@ function NewInspectionScreen({user,onSave,onBack,resps,sitesState,customTemplate
               ["Titre",form.titre],["Date",form.date||"—"],["Site",form.site],["Adresse",form.adresse||"—"],["Accompagnateurs",(form.accompagnateurs&&form.accompagnateurs.length>0)?form.accompagnateurs.join(", "):"—"],
               ["Catégorie", ((CAT_META[form.categorie]&&CAT_META[form.categorie].icon)||"")+" "+form.categorie],
               ["Score final", score+"/100"],["Pénalité totale", "-"+penTotal+"pts"],
-              ["NC Critiques", ncItems.filter(function(i){return i.poids==="critique";}).length+" ("+ncItems.filter(function(i){return i.poids==="critique";}).length*10+"pts)"],
-              ["NC Élevées", ncItems.filter(function(i){return i.poids==="eleve";}).length+" ("+ncItems.filter(function(i){return i.poids==="eleve";}).length*5+"pts)"],
-              ["NC Mineures", ncItems.filter(function(i){return i.poids==="mineur";}).length+" ("+ncItems.filter(function(i){return i.poids==="mineur";}).length+"pts)"],
+              ["NC Critiques", ncItems.filter(function(i){return i.poids==="critique";}).length+" ("+ncItems.filter(function(i){return i.poids==="critique";}).length*PENALITE.critique+"pts)"],
+              ["NC Élevées", ncItems.filter(function(i){return i.poids==="eleve";}).length+" ("+ncItems.filter(function(i){return i.poids==="eleve";}).length*PENALITE.eleve+"pts)"],
+              ["NC Mineures", ncItems.filter(function(i){return i.poids==="mineur";}).length+" ("+ncItems.filter(function(i){return i.poids==="mineur";}).length*PENALITE.mineur+"pts)"],
               ["Photos jointes",totalPhotos],["Inspecteur",user.nom]
             ].map(function(arr){
               var k=arr[0]; var v=arr[1];
