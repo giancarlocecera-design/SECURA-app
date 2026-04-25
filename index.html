@@ -3609,9 +3609,9 @@ function AccidentScreen({appState,onAppStateUpdate,sitesState,config}){
 
       {/* Tabs */}
       <div style={{padding:"0 14px 12px",display:"flex",gap:6}}>
-        <button style={tabStyle("kpi")} onClick={function(){setTab("kpi");}}>📊 Indicateurs</button>
-        <button style={tabStyle("liste")} onClick={function(){setTab("liste");}}>📋 Liste ({sorted.length})</button>
-        <button style={tabStyle("evolution")} onClick={function(){setTab("evolution");}}>📈 Évolution</button>
+        <button style={{...tabStyle("kpi"),flex:1,textAlign:"center"}} onClick={function(){setTab("kpi");}}>Indicateurs</button>
+        <button style={{...tabStyle("liste"),flex:1,textAlign:"center"}} onClick={function(){setTab("liste");}}>Liste ({sorted.length})</button>
+        <button style={{...tabStyle("evolution"),flex:1,textAlign:"center"}} onClick={function(){setTab("evolution");}}>Évolution</button>
       </div>
 
       {/* KPI */}
