@@ -3479,6 +3479,7 @@ function NavIcon({name, col, size}){
     inspections: <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>,
     actions: <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>,
     rapports: <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>,
+    accidents: <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="4" r="2.5"/><path d="M12 6.5V12"/><path d="M8 22V14a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v8"/><path d="M9 12l-3 4"/><path d="M15 12l2.5 1.5"/><path d="M14.5 13.5l1 3"/></svg>,
     settings: <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>,
   };
   return icons[name]||null;
@@ -3496,11 +3497,11 @@ function AccidentScreen({appState,onAppStateUpdate,sitesState,config}){
   var siteList=(sitesState&&sitesState.length>0)?sitesState:SITES;
   const [showForm,setShowForm]=useState(false);
   const [editId,setEditId]=useState(null);
-  const [form,setForm]=useState({date:new Date().toISOString().split("T")[0],site:siteList[0]||"",type:ACC_TYPES[0],cause:ACC_CAUSES[0],statut:ACC_STATUTS[0],joursArret:0,description:"",actionsPrises:"",gravite:"mineur"});
+  const [form,setForm]=useState({date:new Date().toISOString().split("T")[0],site:siteList[0]||"",type:ACC_TYPES[0],cause:ACC_CAUSES[0],statut:ACC_STATUTS[0],victime:"",joursArret:0,description:"",actionsPrises:"",gravite:"mineur"});
   const [tab,setTab]=useState("kpi");
   const [siteFilter,setSiteFilter]=useState("Tous");
 
-  function resetForm(){setForm({date:new Date().toISOString().split("T")[0],site:siteList[0]||"",type:ACC_TYPES[0],cause:ACC_CAUSES[0],statut:ACC_STATUTS[0],joursArret:0,description:"",actionsPrises:"",gravite:"mineur"});setEditId(null);}
+  function resetForm(){setForm({date:new Date().toISOString().split("T")[0],site:siteList[0]||"",type:ACC_TYPES[0],cause:ACC_CAUSES[0],statut:ACC_STATUTS[0],victime:"",joursArret:0,description:"",actionsPrises:"",gravite:"mineur"});setEditId(null);}
 
   function saveAcc(){
     var acc={...form,id:editId||Date.now(),joursArret:parseInt(form.joursArret)||0};
@@ -3582,6 +3583,8 @@ function AccidentScreen({appState,onAppStateUpdate,sitesState,config}){
           <div style={{fontSize:14,fontWeight:800,marginBottom:12,color:C.cyan}}>{editId?"✏️ Modifier":"📝 Déclarer un accident"}</div>
           <label style={S.label}>Date</label>
           <input type="date" value={form.date} onChange={function(e){setForm({...form,date:e.target.value});}} style={{...S.input,marginBottom:10}}/>
+          <label style={S.label}>Nom et prénom de la victime</label>
+          <input type="text" value={form.victime} onChange={function(e){setForm({...form,victime:e.target.value});}} placeholder="Ex : Dupont Jean" style={{...S.input,marginBottom:10}}/>
           <label style={S.label}>Site</label>
           <select value={form.site} onChange={function(e){setForm({...form,site:e.target.value});}} style={{...S.input,marginBottom:10}}>{siteList.map(function(s){return <option key={s} value={s}>{s}</option>;})}</select>
           <label style={S.label}>Type</label>
@@ -3704,7 +3707,8 @@ function AccidentScreen({appState,onAppStateUpdate,sitesState,config}){
                       <span style={{fontSize:13,fontWeight:800}}>{a.type}</span>
                       <span style={{fontSize:10,color:C.muted}}>{fmt(a.date)}</span>
                     </div>
-                    <div style={{fontSize:11,color:C.muted,marginBottom:4}}>📍 {a.site} · {a.cause}{a.statut?" · 👤 "+a.statut:""}</div>
+                    {a.victime&&<div style={{fontSize:12,fontWeight:600,marginBottom:3,color:C.text}}>👤 {a.victime}</div>}
+                    <div style={{fontSize:11,color:C.muted,marginBottom:4}}>📍 {a.site} · {a.cause}{a.statut?" · "+a.statut:""}</div>
                     {a.description&&<div style={{fontSize:12,lineHeight:1.4,marginBottom:4}}>{a.description}</div>}
                     <div style={{display:"flex",gap:6,flexWrap:"wrap",alignItems:"center"}}>
                       <span style={{fontSize:9,padding:"2px 7px",borderRadius:5,background:col+"18",color:col,fontWeight:800}}>{a.gravite==="critique"?"GRAVE":a.gravite==="eleve"?"ÉLEVÉ":"MINEUR"}</span>
