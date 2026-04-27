@@ -2679,6 +2679,30 @@ function QRCodeDisplay({text, size}){
   );
 }
 
+
+  function generatePDF(html,filename,action){
+    var iframe=document.createElement("iframe");
+    iframe.style.cssText="position:fixed;left:-9999px;top:0;width:800px;height:1200px;border:none";
+    document.body.appendChild(iframe);
+    iframe.contentDocument.open();
+    iframe.contentDocument.write(html);
+    iframe.contentDocument.close();
+    setTimeout(function(){
+      html2pdf().set({margin:0.3,filename:filename||"rapport.pdf",image:{type:"jpeg",quality:0.98},html2canvas:{scale:2,useCORS:true},jsPDF:{unit:"in",format:"a4",orientation:"portrait"}}).from(iframe.contentDocument.body).outputPdf("blob").then(function(blob){
+        document.body.removeChild(iframe);
+        if(action==="share"&&navigator.share){
+          var file=new File([blob],filename||"rapport.pdf",{type:"application/pdf"});
+          navigator.share({title:"Rapport SECURA",files:[file]}).catch(function(){});
+        }else{
+          var url=URL.createObjectURL(blob);
+          var a=document.createElement("a");
+          a.href=url;a.download=filename||"rapport.pdf";a.click();
+          setTimeout(function(){URL.revokeObjectURL(url);},5000);
+        }
+      }).catch(function(e){document.body.removeChild(iframe);console.error("PDF error:",e);});
+    },600);
+  }
+
 function RapportsScreen({inspections,onDelete,config}){
   const [sel,setSel]=useState(null);
   const [printing,setPrinting]=useState(false);
@@ -2871,36 +2895,14 @@ function RapportsScreen({inspections,onDelete,config}){
           <div style={{display:"flex",alignItems:"center",gap:8,padding:"12px 14px",background:"#0A0C13",borderBottom:"1px solid #1E2433",flexShrink:0,flexWrap:"wrap"}}>
             <button onClick={function(){setReportHTML(null);}} style={{background:"transparent",border:"1px solid "+C.cyan+"44",borderRadius:10,padding:"7px 12px",color:C.cyan,cursor:"pointer",fontSize:12,fontWeight:700}}>← Fermer</button>
             <div style={{flex:1,fontSize:13,fontWeight:700,color:"#fff",minWidth:60}}>Rapport</div>
-            <button onClick={function(){
-              var container=document.createElement("div");
-              container.style.cssText="position:fixed;left:0;top:0;width:800px;background:#fff;z-index:9999;padding:0";
-              var match=reportHTML.match(/<style>([\s\S]*?)<\/style>/);
-              if(match){var st=document.createElement("style");st.textContent=match[1];container.appendChild(st);}
-              var bodyMatch=reportHTML.match(/<body[^>]*>([\s\S]*?)<\/body>/);
-              if(bodyMatch){container.insertAdjacentHTML("beforeend",bodyMatch[1]);}else{container.innerHTML=reportHTML;}
-              document.body.appendChild(container);
-              html2pdf().set({margin:0.3,filename:"rapport-secura.pdf",image:{type:"jpeg",quality:0.98},html2canvas:{scale:2,useCORS:true},jsPDF:{unit:"in",format:"a4",orientation:"portrait"}}).from(container).save().then(function(){document.body.removeChild(container);});
-            }} style={{background:"linear-gradient(135deg,"+C.cyan+",#007799)",border:"none",borderRadius:8,padding:"7px 12px",color:"#000",cursor:"pointer",fontSize:11,fontWeight:800,display:"flex",alignItems:"center",gap:5}}>📥 PDF</button>
+            <button onClick={function(){generatePDF(reportHTML,"rapport-secura.pdf","download");}} style={{background:"linear-gradient(135deg,"+C.cyan+",#007799)",border:"none",borderRadius:8,padding:"7px 12px",color:"#000",cursor:"pointer",fontSize:11,fontWeight:800,display:"flex",alignItems:"center",gap:5}}>📥 PDF</button>
             <button onClick={function(){
               var w=window.open("","_blank","width=800,height=900");
               if(!w){alert("Autorisez les popups pour imprimer.");return;}
               w.document.write(reportHTML);w.document.close();
               w.onload=function(){setTimeout(function(){w.print();w.onafterprint=function(){w.close();};setTimeout(function(){w.close();},3000);},500);};
             }} style={{background:"transparent",border:"1px solid "+C.green+"66",borderRadius:8,padding:"7px 12px",color:C.green,cursor:"pointer",fontSize:11,fontWeight:800,display:"flex",alignItems:"center",gap:5}}>🖨️ Imprimer</button>
-            {navigator.share&&<button onClick={function(){
-              var container=document.createElement("div");
-              container.style.cssText="position:fixed;left:0;top:0;width:800px;background:#fff;z-index:9999;padding:0";
-              var match=reportHTML.match(/<style>([\s\S]*?)<\/style>/);
-              if(match){var st=document.createElement("style");st.textContent=match[1];container.appendChild(st);}
-              var bodyMatch=reportHTML.match(/<body[^>]*>([\s\S]*?)<\/body>/);
-              if(bodyMatch){container.insertAdjacentHTML("beforeend",bodyMatch[1]);}else{container.innerHTML=reportHTML;}
-              document.body.appendChild(container);
-              html2pdf().set({margin:0.3,image:{type:"jpeg",quality:0.98},html2canvas:{scale:2,useCORS:true},jsPDF:{unit:"in",format:"a4",orientation:"portrait"}}).from(container).outputPdf("blob").then(function(blob){
-                document.body.removeChild(container);
-                var file=new File([blob],"rapport-secura.pdf",{type:"application/pdf"});
-                navigator.share({title:"Rapport SECURA",files:[file]}).catch(function(){});
-              });
-            }} style={{background:"transparent",border:"1px solid "+C.purple+"66",borderRadius:8,padding:"7px 12px",color:C.purple,cursor:"pointer",fontSize:11,fontWeight:800,display:"flex",alignItems:"center",gap:5}}>📤 Partager</button>}
+            {navigator.share&&<button onClick={function(){generatePDF(reportHTML,"rapport-secura.pdf","share");}} style={{background:"transparent",border:"1px solid "+C.purple+"66",borderRadius:8,padding:"7px 12px",color:C.purple,cursor:"pointer",fontSize:11,fontWeight:800,display:"flex",alignItems:"center",gap:5}}>📤 Partager</button>}
           </div>
           <iframe id="secura-report-frame" srcDoc={reportHTML} style={{flex:1,border:"none",width:"100%"}} title="Rapport"/>
         </div>
@@ -3686,16 +3688,7 @@ function AccidentScreen({appState,onAppStateUpdate,sitesState,config}){
           <div style={{display:"flex",alignItems:"center",gap:8,padding:"12px 14px",background:"#0A0C13",borderBottom:"1px solid #1E2433",flexShrink:0,flexWrap:"wrap"}}>
             <button onClick={function(){setReportHTML(null);}} style={{background:"transparent",border:"1px solid "+C.cyan+"44",borderRadius:10,padding:"7px 12px",color:C.cyan,cursor:"pointer",fontSize:12,fontWeight:700}}>← Fermer</button>
             <div style={{flex:1,fontSize:13,fontWeight:700,color:"#fff",minWidth:60}}>Rapport</div>
-            <button onClick={function(){
-              var container=document.createElement("div");
-              container.style.cssText="position:fixed;left:0;top:0;width:800px;background:#fff;z-index:9999;padding:0";
-              var match=reportHTML.match(/<style>([\s\S]*?)<\/style>/);
-              if(match){var st=document.createElement("style");st.textContent=match[1];container.appendChild(st);}
-              var bodyMatch=reportHTML.match(/<body[^>]*>([\s\S]*?)<\/body>/);
-              if(bodyMatch){container.insertAdjacentHTML("beforeend",bodyMatch[1]);}else{container.innerHTML=reportHTML;}
-              document.body.appendChild(container);
-              html2pdf().set({margin:0.3,filename:"rapport-accidentologie.pdf",image:{type:"jpeg",quality:0.98},html2canvas:{scale:2,useCORS:true},jsPDF:{unit:"in",format:"a4",orientation:"portrait"}}).from(container).save().then(function(){document.body.removeChild(container);});
-            }} style={{background:"linear-gradient(135deg,"+C.cyan+",#007799)",border:"none",borderRadius:8,padding:"7px 12px",color:"#000",cursor:"pointer",fontSize:11,fontWeight:800}}>📥 PDF</button>
+            <button onClick={function(){generatePDF(reportHTML,"rapport-accidentologie.pdf","download");}} style={{background:"linear-gradient(135deg,"+C.cyan+",#007799)",border:"none",borderRadius:8,padding:"7px 12px",color:"#000",cursor:"pointer",fontSize:11,fontWeight:800}}>📥 PDF</button>
             <button onClick={function(){
               var w=window.open("","_blank","width=800,height=900");
               if(!w){alert("Autorisez les popups pour imprimer.");return;}
