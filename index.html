@@ -2478,15 +2478,16 @@ function PermissionsScreen({config,onConfigUpdate,onBack}){
 }
 function ActionsScreen({actions,onUpdate,resps,config,onConfigUpdate,user}){
   const respList=(resps&&resps.length?resps:RESPONSABLES).map(function(r){return typeof r==="object"?r.nom:r;});
-  const [filter,setFilter]=useState("Tout");
   const [editRespId,setEditRespId]=useState(null);
   const [showRappels,setShowRappels]=useState(false);
+  const [siteFilter,setSiteFilter]=useState("Tous");
   if(showRappels) return <RappelsScreen actions={actions} resps={resps} config={config} onConfigUpdate={onConfigUpdate} onBack={function(){setShowRappels(false);}} />;
-  const sorted=[...actions].sort((a,b)=>{
+  var siteList=[];actions.forEach(function(a){if(a.site&&siteList.indexOf(a.site)===-1)siteList.push(a.site);});
+  const sorted=[...actions].filter(function(a){return a.statut==="En cours";}).sort((a,b)=>{
     if(a.echeance&&b.echeance) return a.echeance.localeCompare(b.echeance);
     if(a.echeance) return -1; if(b.echeance) return 1; return 0;
   });
-  const filtered=filter==="Tout"?sorted:sorted.filter(a=>a.statut===filter);
+  const filtered=siteFilter==="Tous"?sorted:sorted.filter(function(a){return a.site===siteFilter;});
   const cycle=(a)=>{ onUpdate({...a,statut:a.statut==="Clôturée"?"En cours":"Clôturée"}); };
   const colPrio=(p)=>p==="CRITIQUE"?C.red:p==="ÉLEVÉE"?C.orange:C.amber;
   const daysLeft=(echeance)=>{
@@ -2500,8 +2501,12 @@ function ActionsScreen({actions,onUpdate,resps,config,onConfigUpdate,user}){
         <div><div style={{fontSize:20,fontWeight:900}}>Actions urgentes</div><div style={{fontSize:12,color:C.muted,marginTop:2}}>{actions.filter(a=>a.statut!=="Clôturée").length} en cours</div></div>
         {hasAccess(user,config,"rappels")&&<button onClick={function(){setShowRappels(true);}} style={{background:"linear-gradient(135deg,"+C.cyan+",#007799)",border:"none",borderRadius:14,padding:"10px 16px",color:"#000",fontWeight:900,fontSize:13,cursor:"pointer",flexShrink:0,display:"flex",alignItems:"center",gap:7,boxShadow:"0 0 16px "+C.cyan+"55"}}><span style={{fontSize:18}}>📧</span><span>Rappels</span></button>}
       </div>
-      <div style={{padding:"0 14px 12px",display:"flex",gap:6,overflowX:"auto",WebkitOverflowScrolling:"touch"}}>
-        {["En cours","À faire","Tout"].map(function(s){return <button key={s} onClick={function(){setFilter(s);}} style={{flexShrink:0,padding:"5px 11px",borderRadius:99,border:"1px solid",borderColor:filter===s?C.cyan:C.border,background:filter===s?C.cyan+"15":"transparent",color:filter===s?C.cyan:C.muted,fontSize:11,fontWeight:700,cursor:"pointer"}}>{s}</button>;})}
+      <div style={{padding:"0 14px 12px",display:"flex",gap:8,alignItems:"center"}}>
+        <span style={{fontSize:11,color:C.muted,flexShrink:0}}>📍 Site :</span>
+        <select value={siteFilter} onChange={function(e){setSiteFilter(e.target.value);}} style={{...S.input,flex:1,padding:"7px 12px",fontSize:12,borderRadius:10}}>
+          <option value="Tous">Tous les sites</option>
+          {siteList.map(function(s){return <option key={s} value={s}>{s}</option>;})}
+        </select>
       </div>
       <div style={{padding:"0 14px"}}>
         {filtered.map((a,i)=>{
