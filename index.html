@@ -2869,11 +2869,10 @@ function RapportsScreen({inspections,onDelete,config}){
             var p=it.poids||it.p||"mineur";
             var col=p==="critique"?"#FF1744":p==="eleve"?"#FF6D00":"#FFB300";
             var resp=it.resp||"Non assigné";
-            var delai=DELAIS[p]||0;
-            var echeance=delai>0?(function(){var d=new Date(ins.date);d.setDate(d.getDate()+delai);return d.toLocaleDateString("fr-BE",{day:"2-digit",month:"2-digit",year:"numeric"})})():"Immédiat";
+            var echeance=it.comment||"—";
             return "<tr><td>"+(idx+1)+"</td><td>"+it.l+"</td><td style='color:"+col+";font-weight:700'>"+poidsLabel(p)+"</td><td style='font-weight:700'>"+resp+"</td><td>"+echeance+"</td></tr>";
           }).join("");
-          return "<h2 class='actions'>Recapitulatif des actions correctives ("+actItems.length+")</h2><table class='act-table'><tr><th>#</th><th>Action</th><th>Criticite</th><th>Responsable</th><th>Echeance</th></tr>"+actRows+"</table>";
+          return "<h2 class='actions'>Recapitulatif des actions correctives ("+actItems.length+")</h2><table class='act-table'><tr><th>#</th><th>Action</th><th>Criticite</th><th>Responsable</th><th>Remarques</th></tr>"+actRows+"</table>";
         })()
         +"<div class='footer'><div class='footer-left'><div class='footer-brand'>"+appName+"</div><div>Rapport genere le "+new Date().toLocaleDateString("fr-BE",{day:"2-digit",month:"long",year:"numeric"})+"</div></div><div class='footer-right'><div>Document confidentiel</div><div>"+refNum+"</div></div></div>"
         +"</div></body></html>";
