@@ -3530,6 +3530,50 @@ function AccidentScreen({appState,onAppStateUpdate,sitesState,config}){
   const [form,setForm]=useState({date:new Date().toISOString().split("T")[0],site:siteList[0]||"",type:ACC_TYPES[0],cause:ACC_CAUSES[0],statut:ACC_STATUTS[0],victime:"",joursArret:0,description:"",actionsPrises:"",gravite:"mineur"});
   const [tab,setTab]=useState("kpi");
   const [siteFilter,setSiteFilter]=useState("Tous");
+  const [reportHTML,setReportHTML]=useState(null);
+  var appName=(config&&config.appName)||"SECURA";
+
+  function exportFiche(a){
+    var col=a.gravite==="critique"?"#FF1744":a.gravite==="eleve"?"#FF6D00":"#FFB300";
+    var gravLabel=a.gravite==="critique"?"GRAVE":a.gravite==="eleve"?"ÉLEVÉ":"MINEUR";
+    var html="<!DOCTYPE html><html><head><meta charset='utf-8'><title>Fiche Accident</title><style>"
+      +"body{font-family:Segoe UI,Arial,sans-serif;padding:0;font-size:12px;color:#1a1a2e}"
+      +".page{max-width:700px;margin:0 auto;padding:24px 32px}"
+      +".hdr{background:linear-gradient(135deg,#07090F,#1a0508);color:#fff;padding:20px 32px;display:flex;justify-content:space-between;align-items:center}"
+      +".hdr h1{font-size:18px;letter-spacing:3px;color:#FF1744;margin:0}.hdr .sub{font-size:11px;color:#aa8888;margin-top:3px}"
+      +".hdr .ref{font-size:10px;color:#aab;text-align:right}"
+      +".meta{display:grid;grid-template-columns:1fr 1fr;gap:12px;background:#f5f8fc;padding:18px;border-radius:10px;margin:20px 0;border:1px solid #e0e8f0}"
+      +".meta .item .label{font-size:9px;text-transform:uppercase;letter-spacing:1.5px;color:#888;margin-bottom:3px}"
+      +".meta .item .value{font-size:13px;font-weight:700}"
+      +".grav-box{text-align:center;margin:20px 0}"
+      +".grav{display:inline-block;padding:8px 24px;border-radius:10px;font-size:16px;font-weight:900}"
+      +".section{margin:20px 0}"
+      +".section h2{font-size:13px;font-weight:800;padding:8px 14px;border-radius:6px;margin-bottom:8px}"
+      +".section h2.desc{border-left:4px solid #00E5FF;background:#f0f8ff;color:#003366}"
+      +".section h2.actions{border-left:4px solid #00C853;background:#f0fff4;color:#006622}"
+      +".section .content{padding:12px 16px;background:#fafbfc;border:1px solid #e0e8f0;border-radius:8px;line-height:1.7;font-size:12px;min-height:50px}"
+      +".footer{margin-top:30px;padding:14px 0;border-top:2px solid #07090F;display:flex;justify-content:space-between;font-size:10px;color:#888}"
+      +"@media print{.hdr,.grav{-webkit-print-color-adjust:exact;print-color-adjust:exact}}"
+      +"</style></head><body>"
+      +"<div class='hdr'><div><h1>"+appName+"</h1><div class='sub'>FICHE D'ACCIDENT DU TRAVAIL</div></div><div class='ref'>REF : ACC-"+String(a.id).slice(-6)+"<br/>"+new Date().toLocaleDateString("fr-BE",{day:"2-digit",month:"long",year:"numeric"})+"</div></div>"
+      +"<div class='page'>"
+      +"<div class='meta'>"
+      +"<div class='item'><div class='label'>Date de l'accident</div><div class='value'>"+fmt(a.date)+"</div></div>"
+      +"<div class='item'><div class='label'>Site</div><div class='value'>"+(a.site||"—")+"</div></div>"
+      +"<div class='item'><div class='label'>Victime</div><div class='value'>"+(a.victime||"—")+"</div></div>"
+      +"<div class='item'><div class='label'>Fonction / Statut</div><div class='value'>"+(a.statut||"—")+"</div></div>"
+      +"<div class='item'><div class='label'>Type d'accident</div><div class='value'>"+a.type+"</div></div>"
+      +"<div class='item'><div class='label'>Cause</div><div class='value'>"+a.cause+"</div></div>"
+      +"<div class='item'><div class='label'>Jours d'arret</div><div class='value' style='color:#FF1744;font-size:16px'>"+(a.joursArret||0)+" jour(s)</div></div>"
+      +"<div class='item'><div class='label'>Gravite</div><div class='value' style='color:"+col+";font-size:16px'>"+gravLabel+"</div></div>"
+      +"</div>"
+      +"<div class='grav-box'><span class='grav' style='background:"+col+"18;color:"+col+";border:2px solid "+col+"'>"+gravLabel+" — "+(a.joursArret||0)+" jour(s) d'arret</span></div>"
+      +"<div class='section'><h2 class='desc'>Description de l'accident</h2><div class='content'>"+(a.description||"Aucune description renseignee.")+"</div></div>"
+      +"<div class='section'><h2 class='actions'>Actions correctives prises</h2><div class='content'>"+(a.actionsPrises||"Aucune action renseignee.")+"</div></div>"
+      +"<div class='footer'><div><strong>"+appName+"</strong> · Fiche generee le "+new Date().toLocaleDateString("fr-BE",{day:"2-digit",month:"long",year:"numeric"})+"</div><div>Document confidentiel</div></div>"
+      +"</div></body></html>";
+    setReportHTML(html);
+  }
 
   function resetForm(){setForm({date:new Date().toISOString().split("T")[0],site:siteList[0]||"",type:ACC_TYPES[0],cause:ACC_CAUSES[0],statut:ACC_STATUTS[0],victime:"",joursArret:0,description:"",actionsPrises:"",gravite:"mineur"});setEditId(null);}
 
@@ -3597,6 +3641,21 @@ function AccidentScreen({appState,onAppStateUpdate,sitesState,config}){
 
   return (
     <div style={{paddingBottom:90}}>
+      {reportHTML&&(
+        <div style={{position:"fixed",inset:0,zIndex:300,background:"#fff",display:"flex",flexDirection:"column"}}>
+          <div style={{display:"flex",alignItems:"center",gap:8,padding:"12px 14px",background:"#0A0C13",borderBottom:"1px solid #1E2433",flexShrink:0}}>
+            <button onClick={function(){setReportHTML(null);}} style={{background:"transparent",border:"1px solid "+C.cyan+"44",borderRadius:10,padding:"7px 12px",color:C.cyan,cursor:"pointer",fontSize:12,fontWeight:700}}>← Fermer</button>
+            <div style={{flex:1,fontSize:13,fontWeight:700,color:"#fff"}}>Fiche accident</div>
+            <button onClick={function(){
+              var w=window.open("","_blank");
+              if(!w)return;
+              w.document.write(reportHTML+"<script src='https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js'><\/script><script>window.onload=function(){setTimeout(function(){html2pdf().set({margin:0.3,filename:'fiche-accident.pdf',image:{type:'jpeg',quality:0.98},html2canvas:{scale:2,useCORS:true},jsPDF:{unit:'in',format:'a4',orientation:'portrait'}}).from(document.body).save().then(function(){setTimeout(function(){window.close();},2000);});},800);}<\/script>");
+              w.document.close();
+            }} style={{background:"linear-gradient(135deg,"+C.cyan+",#007799)",border:"none",borderRadius:8,padding:"7px 12px",color:"#000",cursor:"pointer",fontSize:11,fontWeight:800}}>📥 PDF</button>
+          </div>
+          <iframe srcDoc={reportHTML} style={{flex:1,border:"none",width:"100%"}} title="Fiche accident"/>
+        </div>
+      )}
       <div style={{padding:"20px 16px 12px",display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
         <div><div style={{fontSize:20,fontWeight:900}}>🩹 Accidentologie</div><div style={{fontSize:12,color:C.muted,marginTop:2}}>{accidents.length} accident(s) enregistré(s)</div></div>
         <button onClick={function(){resetForm();setShowForm(!showForm);}} style={{background:showForm?"transparent":"linear-gradient(135deg,"+C.cyan+",#007799)",border:showForm?"1px solid "+C.border:"none",borderRadius:12,padding:"9px 14px",color:showForm?C.muted:"#000",fontWeight:800,fontSize:12,cursor:"pointer"}}>{showForm?"✕ Annuler":"+ Déclarer"}</button>
@@ -3748,6 +3807,7 @@ function AccidentScreen({appState,onAppStateUpdate,sitesState,config}){
                   </div>
                 </div>
                 <div style={{display:"flex",gap:6,marginTop:10,justifyContent:"flex-end"}}>
+                  <button onClick={function(){exportFiche(a);}} style={{background:"transparent",border:"1px solid "+C.purple+"44",borderRadius:8,padding:"5px 12px",color:C.purple,cursor:"pointer",fontSize:10,fontWeight:700}}>📄 Fiche</button>
                   <button onClick={function(){editAcc(a);}} style={{background:"transparent",border:"1px solid "+C.cyan+"44",borderRadius:8,padding:"5px 12px",color:C.cyan,cursor:"pointer",fontSize:10,fontWeight:700}}>✏️ Modifier</button>
                   <button onClick={function(){deleteAcc(a.id);}} style={{background:"transparent",border:"1px solid "+C.red+"44",borderRadius:8,padding:"5px 12px",color:C.red,cursor:"pointer",fontSize:10,fontWeight:700}}>🗑️</button>
                 </div>
