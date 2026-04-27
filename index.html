@@ -1142,6 +1142,7 @@ function DashboardScreen({user,inspections,actions,onNav,config,sitesState,appSt
           <div style={{fontSize:20,fontWeight:900,marginTop:3}}>{(config&&config.appName)||"SECURA"}</div>
         </div>
         <div style={{display:"flex",gap:8,alignItems:"center"}}>
+          <button onClick={function(){location.reload();}} style={{width:36,height:36,borderRadius:11,background:C.green+"15",border:"1px solid "+C.green+"44",display:"flex",alignItems:"center",justifyContent:"center",fontSize:15,cursor:"pointer",color:C.green}}>↻</button>
           {hasAccess(user,config,"ia")&&<button onClick={function(){setShowAI(true);}} style={{width:36,height:36,borderRadius:11,background:C.purple+"15",border:"1px solid "+C.purple+"44",display:"flex",alignItems:"center",justifyContent:"center",fontSize:15,cursor:"pointer",color:C.purple,fontWeight:900}}>🤖</button>}
           <button onClick={function(){setShowHelp(true);}} style={{width:36,height:36,borderRadius:11,background:C.cyan+"15",border:"1px solid "+C.cyan+"44",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,cursor:"pointer",color:C.cyan,fontWeight:900}}>?</button>
           <div style={{width:36,height:36,borderRadius:11,background:C.cyan+"18",border:"1px solid "+C.cyan+"33",display:"flex",alignItems:"center",justifyContent:"center",fontSize:14,fontWeight:900,color:C.cyan}}>{user.avatar}</div>
