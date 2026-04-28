@@ -3713,11 +3713,13 @@ function AccidentScreen({appState,onAppStateUpdate,sitesState,config}){
       {/* KPI */}
       {tab==="kpi"&&(
         <div style={{padding:"0 14px"}}>
-          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:10,marginBottom:14}}>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:14}}>
             <div style={{...S.card(),textAlign:"center"}}><div style={{fontSize:28,fontWeight:900,color:C.red}}>{totalAT}</div><div style={{fontSize:10,color:C.muted}}>Accidents du travail</div></div>
             <div style={{...S.card(),textAlign:"center"}}><div style={{fontSize:28,fontWeight:900,color:C.orange}}>{totalJours}</div><div style={{fontSize:10,color:C.muted}}>Jours d&#39;arrêt</div></div>
             <div style={{...S.card(),textAlign:"center"}}><div style={{fontSize:28,fontWeight:900,color:C.amber}}>{totalPresque}</div><div style={{fontSize:10,color:C.muted}}>Presqu&#39;accidents</div></div>
+            <div style={{...S.card(),textAlign:"center"}}><div style={{fontSize:28,fontWeight:900,color:C.cyan}}>{tf!==null?tf:"—"}</div><div style={{fontSize:10,color:C.muted}}>Taux fréquence (Tf)</div></div>
           </div>
+          {tf===null&&<div style={{padding:"8px 12px",background:C.orange+"12",border:"1px solid "+C.orange+"33",borderRadius:10,marginBottom:14,fontSize:11,color:C.orange}}>⚠️ Configurez les heures prestées par catégorie dans Profil → Système pour calculer le Tf et Tg</div>}
 
           {/* Jours sans accident par site */}
           <div style={{...S.card(),marginBottom:14}}>
@@ -3733,55 +3735,6 @@ function AccidentScreen({appState,onAppStateUpdate,sitesState,config}){
             })}
           </div>
 
-          {/* Causes */}
-          {causesSorted.length>0&&(
-            <div style={{...S.card(),marginBottom:14}}>
-              <div style={{fontSize:14,fontWeight:800,marginBottom:10}}>🔍 Top causes</div>
-              {causesSorted.map(function(c,i){var pct=Math.round(c[1]/maxCause*100);return (
-                <div key={i} style={{marginBottom:8}}>
-                  <div style={{display:"flex",justifyContent:"space-between",marginBottom:3}}><span style={{fontSize:12,fontWeight:600}}>{c[0]}</span><span style={{fontSize:12,fontWeight:800,color:C.red}}>{c[1]}</span></div>
-                  <div style={{background:C.dim,borderRadius:99,height:6,overflow:"hidden"}}><div style={{width:pct+"%",height:"100%",background:C.red,borderRadius:99,transition:"width .6s"}}/></div>
-                </div>
-              );})}
-            </div>
-          )}
-
-          {/* Stats par statut/fonction */}
-          {(function(){
-            var byStatut={};
-            fAccidents.forEach(function(a){var s=a.statut||"Non renseigné";if(!byStatut[s])byStatut[s]={total:0,atArret:0,jours:0};byStatut[s].total++;if(a.type==="AT avec arrêt")byStatut[s].atArret++;byStatut[s].jours+=parseInt(a.joursArret)||0;});
-            var statutEntries=Object.entries(byStatut).sort(function(a,b){return b[1].total-a[1].total;});
-            if(statutEntries.length===0) return null;
-            var maxStat=statutEntries[0][1].total;
-            return (
-              <div style={{...S.card(),marginBottom:14}}>
-                <div style={{fontSize:14,fontWeight:800,marginBottom:4}}>👤 Accidents par fonction</div>
-                <div style={{fontSize:11,color:C.muted,marginBottom:12}}>Répartition et Tf par catégorie de personnel</div>
-                {statutEntries.map(function(entry,i){
-                  var s=entry[0],d=entry[1];
-                  var hCat=parseInt(heuresCat[s])||0;
-                  var tfCat=hCat>0?Math.round((d.atArret*1000000/hCat)*100)/100:null;
-                  var pct=Math.round(d.total/maxStat*100);
-                  return (
-                    <div key={i} style={{marginBottom:10,padding:"10px 12px",borderRadius:10,background:C.surface,border:"1px solid "+C.border}}>
-                      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:6}}>
-                        <span style={{fontSize:13,fontWeight:800}}>{s}</span>
-                        <span style={{fontSize:16,fontWeight:900,color:C.red}}>{d.total}</span>
-                      </div>
-                      <div style={{background:C.dim,borderRadius:99,height:5,overflow:"hidden",marginBottom:6}}>
-                        <div style={{width:pct+"%",height:"100%",background:C.orange,borderRadius:99,transition:"width .6s"}}/>
-                      </div>
-                      <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
-                        <span style={{fontSize:10,color:C.muted}}>AT arrêt: <strong style={{color:C.red}}>{d.atArret}</strong></span>
-                        <span style={{fontSize:10,color:C.muted}}>Jours: <strong style={{color:C.orange}}>{d.jours}</strong></span>
-                        <span style={{fontSize:10,color:C.muted}}>Tf: <strong style={{color:tfCat!==null?C.cyan:C.muted}}>{tfCat!==null?tfCat:"—"}</strong></span>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            );
-          })()}
         </div>
       )}
 
