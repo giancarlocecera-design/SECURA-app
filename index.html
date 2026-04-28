@@ -3944,31 +3944,8 @@ function App(){
 
   // ── Supabase: load on mount ──────────────────────────────────
   React.useEffect(function(){
-    var timeout=setTimeout(function(){
-      console.warn("Supabase timeout — using localStorage");
-      var localIns=LS.load("inspections");
-      var localActs=LS.load("actions");
-      var localCfg=LS.load("config");
-      if(localIns&&localIns.length) setInspections(localIns.map(function(i){return {...i,items:i.items||[]};}));
-      if(localActs&&localActs.length){
-        var deletedIds2=LS.load("deletedActionIds")||[];
-        setActions(localActs.filter(function(a){return a.statut!=="Clôturée"&&deletedIds2.indexOf(String(a.id))===-1;}));
-      }
-      if(localCfg){
-        if(localCfg.resps&&localCfg.resps.length) setRespsState(localCfg.resps);
-        if(localCfg.sites&&localCfg.sites.length) setSitesState(localCfg.sites);
-        if(localCfg.config&&Object.keys(localCfg.config).length) setConfig(localCfg.config);
-      }
-      var localAccidents=LS.load("accidents");
-      var localHeures=LS.load("heuresPresteesParCat");
-      if(localAccidents||localHeures){
-        setAppState(function(prev){return {...prev,accidents:localAccidents||prev.accidents,heuresPresteesParCat:localHeures||prev.heuresPresteesParCat};});
-      }
-      setDbReady(true);
-    },5000);
     async function loadFromDB(){
       try{
-        // Try Supabase first
         const [ins, acts, cfg] = await Promise.all([
           supa.get("inspections",{order:"updated_at.desc"}),
           supa.get("actions",{order:"echeance.asc"}),
@@ -3986,14 +3963,12 @@ function App(){
         }
         var deletedIds=LS.load("deletedActionIds")||[];
         if(acts&&acts.length){
-          // Supabase has actions - use them, filter deleted ones
           var activeActs=acts.filter(function(a){
             return a.statut!=="Clôturée" && deletedIds.indexOf(String(a.id))===-1;
           });
           setActions(activeActs);
           LS.save("actions", activeActs);
         } else {
-          // Supabase empty - use localStorage but still filter deleted
           var localActsFallback=LS.load("actions")||[];
           var activeLocal=localActsFallback.filter(function(a){
             return a.statut!=="Clôturée" && deletedIds.indexOf(String(a.id))===-1;
@@ -4007,7 +3982,6 @@ function App(){
           if(c.config&&Object.keys(c.config).length) setConfig(c.config);
           if(c.penalites){ PENALITE.critique=c.penalites.critique; PENALITE.eleve=c.penalites.eleve; PENALITE.mineur=c.penalites.mineur; }
           if(c.delais){ DELAIS.critique=c.delais.critique; DELAIS.eleve=c.delais.eleve; DELAIS.mineur=c.delais.mineur; }
-          // Load appState with all fields
           setAppState(function(prev){
             return {
               ...prev,
@@ -4025,9 +3999,7 @@ function App(){
           LS.save("appState", c);
         }
         setDbReady(true);
-        clearTimeout(timeout);
       }catch(e){
-        clearTimeout(timeout);
         console.error("DB load error — loading from localStorage:",e);
         // Fallback to localStorage
         var localIns=LS.load("inspections");
@@ -4046,6 +4018,11 @@ function App(){
           if(c.resps&&c.resps.length) setRespsState(c.resps);
           if(c.sites&&c.sites.length) setSitesState(c.sites);
           if(c.config&&Object.keys(c.config).length) setConfig(c.config);
+        }
+        var localAccidents=LS.load("accidents");
+        var localHeures=LS.load("heuresPresteesParCat");
+        if(localAccidents||localHeures){
+          setAppState(function(prev){return {...prev,accidents:localAccidents||prev.accidents,heuresPresteesParCat:localHeures||prev.heuresPresteesParCat};});
         }
         setDbReady(true);
         setSyncMsg("📵 Chargement local — reconnectez-vous pour synchroniser");
