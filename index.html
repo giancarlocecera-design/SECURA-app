@@ -63,6 +63,7 @@ const supa = {
     if(opts&&opts.eq) url += "&"+opts.eq.col+"=eq."+opts.eq.val;
     if(opts&&opts.order) url += "&order="+opts.order;
     const r = await fetch(url,{headers:{"apikey":SUPA_KEY,"Authorization":"Bearer "+SUPA_KEY}});
+    if(!r.ok){console.error("Supabase GET error:",table,r.status);return null;}
     return r.json();
   },
   async upsert(table, data){
@@ -3980,6 +3981,7 @@ function App(){
           supa.get("actions",{order:"echeance.asc"}),
           supa.get("app_config",{eq:{col:"id",val:"default"}}),
         ]);
+        // Inspections: Supabase ou localStorage
         if(ins&&ins.length){
           setInspections(ins.map(function(i){
             return {...i,
@@ -3989,6 +3991,9 @@ function App(){
             };
           }));
           LS.save("inspections", ins);
+        } else {
+          var localInsFb=LS.load("inspections");
+          if(localInsFb&&localInsFb.length) setInspections(localInsFb.map(function(i){return {...i,items:i.items||[]};}));
         }
         var deletedIds=LS.load("deletedActionIds")||[];
         if(acts&&acts.length){
@@ -4026,6 +4031,16 @@ function App(){
           });
           LS.save("config", cfg[0]);
           LS.save("appState", c);
+        } else {
+          var localCfgFb=LS.load("config");
+          if(localCfgFb){
+            if(localCfgFb.resps&&localCfgFb.resps.length) setRespsState(localCfgFb.resps);
+            if(localCfgFb.sites&&localCfgFb.sites.length) setSitesState(localCfgFb.sites);
+            if(localCfgFb.config&&Object.keys(localCfgFb.config).length) setConfig(localCfgFb.config);
+          }
+          var localAcc=LS.load("accidents");
+          var localH=LS.load("heuresPresteesParCat");
+          if(localAcc||localH){setAppState(function(prev){return {...prev,accidents:localAcc||prev.accidents,heuresPresteesParCat:localH||prev.heuresPresteesParCat};});}
         }
         setDbReady(true);
       }catch(e){
