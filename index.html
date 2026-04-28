@@ -3522,13 +3522,14 @@ function NavIcon({name, col, size}){
 var ACC_TYPES=["AT avec arrêt","AT sans arrêt","Presqu'accident","Incident","Accident de trajet"];
 var ACC_CAUSES=["Chute de hauteur","Chute de plain-pied","Manutention manuelle","Machine/Outil","Contact chimique","Projection","Choc/Coincement","Électrique","Brûlure","Circulation","Agression","Autre"];
 var ACC_STATUTS=["Enseignement","Ouvriers","Employés","Techniciennes de surface","Puéricultrices","Aides-familiales","Autre"];
+var ACC_PARTIES=["Tête","Yeux","Oreilles","Visage","Cou","Épaule gauche","Épaule droite","Bras gauche","Bras droit","Coude gauche","Coude droit","Avant-bras gauche","Avant-bras droit","Poignet gauche","Poignet droit","Main gauche","Main droite","Doigt(s) main gauche","Doigt(s) main droite","Thorax","Abdomen","Dos (lombaires)","Dos (dorsales)","Dos (cervicales)","Bassin","Hanche gauche","Hanche droite","Cuisse gauche","Cuisse droite","Genou gauche","Genou droit","Jambe gauche","Jambe droite","Cheville gauche","Cheville droite","Pied gauche","Pied droit","Orteil(s)","Organes internes","Lésions multiples","Corps entier","Autre"];
 
 function AccidentScreen({appState,onAppStateUpdate,sitesState,config}){
   var accidents=appState&&appState.accidents||[];
   var siteList=(sitesState&&sitesState.length>0)?sitesState:SITES;
   const [showForm,setShowForm]=useState(false);
   const [editId,setEditId]=useState(null);
-  const [form,setForm]=useState({date:new Date().toISOString().split("T")[0],dateReception:"",site:siteList[0]||"",type:ACC_TYPES[0],cause:ACC_CAUSES[0],statut:ACC_STATUTS[0],victime:"",joursArret:0,description:"",actionsPrises:"",gravite:"mineur"});
+  const [form,setForm]=useState({date:new Date().toISOString().split("T")[0],dateReception:"",site:siteList[0]||"",type:ACC_TYPES[0],cause:ACC_CAUSES[0],statut:ACC_STATUTS[0],partieCorps:ACC_PARTIES[0],victime:"",joursArret:0,description:"",actionsPrises:"",gravite:"mineur"});
   const [tab,setTab]=useState("kpi");
   const [siteFilter,setSiteFilter]=useState("Tous");
   const [reportHTML,setReportHTML]=useState(null);
@@ -3566,6 +3567,7 @@ function AccidentScreen({appState,onAppStateUpdate,sitesState,config}){
       +"<div class='item'><div class='label'>Fonction / Statut</div><div class='value'>"+(a.statut||"—")+"</div></div>"
       +"<div class='item'><div class='label'>Type d'accident</div><div class='value'>"+a.type+"</div></div>"
       +"<div class='item'><div class='label'>Cause</div><div class='value'>"+a.cause+"</div></div>"
+      +"<div class='item'><div class='label'>Partie du corps touchee</div><div class='value'>"+(a.partieCorps||"—")+"</div></div>"
       +"<div class='item'><div class='label'>Jours d'arret</div><div class='value' style='color:#FF1744;font-size:16px'>"+(a.joursArret||0)+" jour(s)</div></div>"
       +"<div class='item'><div class='label'>Gravite</div><div class='value' style='color:"+col+";font-size:16px'>"+gravLabel+"</div></div>"
       +"</div>"
@@ -3577,7 +3579,7 @@ function AccidentScreen({appState,onAppStateUpdate,sitesState,config}){
     setReportHTML(html);
   }
 
-  function resetForm(){setForm({date:new Date().toISOString().split("T")[0],dateReception:"",site:siteList[0]||"",type:ACC_TYPES[0],cause:ACC_CAUSES[0],statut:ACC_STATUTS[0],victime:"",joursArret:0,description:"",actionsPrises:"",gravite:"mineur"});setEditId(null);}
+  function resetForm(){setForm({date:new Date().toISOString().split("T")[0],dateReception:"",site:siteList[0]||"",type:ACC_TYPES[0],cause:ACC_CAUSES[0],statut:ACC_STATUTS[0],partieCorps:ACC_PARTIES[0],victime:"",joursArret:0,description:"",actionsPrises:"",gravite:"mineur"});setEditId(null);}
 
   function saveAcc(){
     var acc={...form,id:editId||Date.now(),joursArret:parseInt(form.joursArret)||0};
@@ -3686,6 +3688,8 @@ function AccidentScreen({appState,onAppStateUpdate,sitesState,config}){
           <select value={form.statut} onChange={function(e){setForm({...form,statut:e.target.value});}} style={{...S.input,marginBottom:10}}>{ACC_STATUTS.map(function(s){return <option key={s} value={s}>{s}</option>;})}</select>
           <label style={S.label}>Cause</label>
           <select value={form.cause} onChange={function(e){setForm({...form,cause:e.target.value});}} style={{...S.input,marginBottom:10}}>{ACC_CAUSES.map(function(c){return <option key={c} value={c}>{c}</option>;})}</select>
+          <label style={S.label}>Partie du corps touchée</label>
+          <select value={form.partieCorps} onChange={function(e){setForm({...form,partieCorps:e.target.value});}} style={{...S.input,marginBottom:10}}>{ACC_PARTIES.map(function(p){return <option key={p} value={p}>{p}</option>;})}</select>
           <label style={S.label}>Gravité</label>
           <div style={{display:"flex",gap:6,marginBottom:10}}>
             {[["mineur","Mineur",C.amber],["eleve","Élevé",C.orange],["critique","Grave",C.red]].map(function(g){var active=form.gravite===g[0];return <button key={g[0]} onClick={function(){setForm({...form,gravite:g[0]});}} style={{flex:1,padding:"8px",borderRadius:8,border:"1px solid "+(active?g[2]:C.border),background:active?g[2]+"18":"transparent",color:active?g[2]:C.muted,fontSize:12,fontWeight:active?800:400,cursor:"pointer"}}>{g[1]}</button>;})}
@@ -3801,7 +3805,7 @@ function AccidentScreen({appState,onAppStateUpdate,sitesState,config}){
                       <span style={{fontSize:10,color:C.muted}}>{fmt(a.date)}</span>
                     </div>
                     {a.victime&&<div style={{fontSize:12,fontWeight:600,marginBottom:3,color:C.text}}>👤 {a.victime}</div>}
-                    <div style={{fontSize:11,color:C.muted,marginBottom:4}}>📍 {a.site} · {a.cause}{a.statut?" · "+a.statut:""}{a.dateReception?" · 📨 Reçu le "+fmt(a.dateReception):""}</div>
+                    <div style={{fontSize:11,color:C.muted,marginBottom:4}}>📍 {a.site} · {a.cause}{a.partieCorps?" · 🦴 "+a.partieCorps:""}{a.statut?" · "+a.statut:""}{a.dateReception?" · 📨 Reçu le "+fmt(a.dateReception):""}</div>
                     {a.description&&<div style={{fontSize:12,lineHeight:1.4,marginBottom:4}}>{a.description}</div>}
                     <div style={{display:"flex",gap:6,flexWrap:"wrap",alignItems:"center"}}>
                       <span style={{fontSize:9,padding:"2px 7px",borderRadius:5,background:col+"18",color:col,fontWeight:800}}>{a.gravite==="critique"?"GRAVE":a.gravite==="eleve"?"ÉLEVÉ":"MINEUR"}</span>
