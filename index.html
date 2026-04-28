@@ -3713,13 +3713,11 @@ function AccidentScreen({appState,onAppStateUpdate,sitesState,config}){
       {/* KPI */}
       {tab==="kpi"&&(
         <div style={{padding:"0 14px"}}>
-          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:14}}>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:10,marginBottom:14}}>
             <div style={{...S.card(),textAlign:"center"}}><div style={{fontSize:28,fontWeight:900,color:C.red}}>{totalAT}</div><div style={{fontSize:10,color:C.muted}}>Accidents du travail</div></div>
             <div style={{...S.card(),textAlign:"center"}}><div style={{fontSize:28,fontWeight:900,color:C.orange}}>{totalJours}</div><div style={{fontSize:10,color:C.muted}}>Jours d&#39;arrêt</div></div>
             <div style={{...S.card(),textAlign:"center"}}><div style={{fontSize:28,fontWeight:900,color:C.amber}}>{totalPresque}</div><div style={{fontSize:10,color:C.muted}}>Presqu&#39;accidents</div></div>
-            <div style={{...S.card(),textAlign:"center"}}><div style={{fontSize:28,fontWeight:900,color:C.cyan}}>{tf!==null?tf:"—"}</div><div style={{fontSize:10,color:C.muted}}>Taux fréquence (Tf)</div></div>
           </div>
-          {tf===null&&<div style={{padding:"8px 12px",background:C.orange+"12",border:"1px solid "+C.orange+"33",borderRadius:10,marginBottom:14,fontSize:11,color:C.orange}}>⚠️ Configurez les heures prestées par catégorie dans Profil → Système pour calculer le Tf et Tg</div>}
 
           {/* Jours sans accident par site */}
           <div style={{...S.card(),marginBottom:14}}>
