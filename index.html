@@ -62,6 +62,7 @@ const supa = {
     let url = SUPA_URL+"/rest/v1/"+table+"?select=*";
     if(opts&&opts.eq) url += "&"+opts.eq.col+"=eq."+opts.eq.val;
     if(opts&&opts.order) url += "&order="+opts.order;
+    if(opts&&opts.limit) url += "&limit="+opts.limit;
     const r = await fetch(url,{headers:{"apikey":SUPA_KEY,"Authorization":"Bearer "+SUPA_KEY}});
     if(!r.ok){console.error("Supabase GET error:",table,r.status);return null;}
     return r.json();
@@ -1671,12 +1672,30 @@ function secPen(items,sec){ return secNC(items,sec).reduce((s,i)=>s+(PENALITE[i.
 function secScore(items,sec){ return calcScore(items.filter(i=>i.s===sec)); }
 
 // ── Photo capture per question ──────────────────────────────────
+function compressImage(dataUrl,maxW,quality,cb){
+  maxW=maxW||800;quality=quality||0.6;
+  var img=new Image();
+  img.onload=function(){
+    var w=img.width,h=img.height;
+    if(w>maxW){h=Math.round(h*maxW/w);w=maxW;}
+    var canvas=document.createElement("canvas");
+    canvas.width=w;canvas.height=h;
+    var ctx=canvas.getContext("2d");
+    ctx.drawImage(img,0,0,w,h);
+    cb(canvas.toDataURL("image/jpeg",quality));
+  };
+  img.onerror=function(){cb(dataUrl);};
+  img.src=dataUrl;
+}
+
 function PhotoBtn({photos=[], onAdd, onRemove}){
   const ref = React.useRef();
   const handleFile = (e) => {
     const file = e.target.files[0]; if(!file) return;
     const reader = new FileReader();
-    reader.onload = ev => onAdd(ev.target.result);
+    reader.onload = function(ev){
+      compressImage(ev.target.result,800,0.6,function(compressed){onAdd(compressed);});
+    };
     reader.readAsDataURL(file);
     e.target.value="";
   };
@@ -2171,7 +2190,11 @@ function NewInspectionScreen({user,onSave,onBack,resps,sitesState,customTemplate
                     var file=e.target.files&&e.target.files[0];
                     if(!file) return;
                     var reader=new FileReader();
-                    reader.onload=function(ev){setForm(function(prev){return {...prev,sitePhoto:ev.target.result};});};
+                    reader.onload=function(ev){
+                      compressImage(ev.target.result,800,0.6,function(compressed){
+                        setForm(function(prev){return {...prev,sitePhoto:compressed};});
+                      });
+                    };
                     reader.readAsDataURL(file);
                   }}/>
                 </label>
@@ -3976,11 +3999,12 @@ function App(){
   React.useEffect(function(){
     async function loadFromDB(){
       try{
-        const [ins, acts, cfg] = await Promise.all([
-          supa.get("inspections",{order:"updated_at.desc"}),
-          supa.get("actions",{order:"echeance.asc"}),
-          supa.get("app_config",{eq:{col:"id",val:"default"}}),
-        ]);
+        // Load inspections with limit to avoid 500 errors (photos are heavy)
+        var ins=await supa.get("inspections",{order:"updated_at.desc",limit:50});
+        // Retry once with smaller limit if first attempt failed
+        if(!ins) ins=await supa.get("inspections",{order:"updated_at.desc",limit:20});
+        var acts=await supa.get("actions",{order:"echeance.asc"});
+        var cfg=await supa.get("app_config",{eq:{col:"id",val:"default"}});
         // Inspections: Supabase ou localStorage
         if(ins&&ins.length){
           setInspections(ins.map(function(i){
