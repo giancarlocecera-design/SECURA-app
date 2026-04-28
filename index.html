@@ -4374,8 +4374,11 @@ root.render(React.createElement(App, null));
   </script>
   <script>
     if('serviceWorker' in navigator){
-      window.addEventListener('load', function(){
-        navigator.serviceWorker.register('/sw.js').catch(function(){});
+      navigator.serviceWorker.getRegistrations().then(function(registrations){
+        registrations.forEach(function(sw){sw.unregister();});
+      });
+      caches.keys().then(function(names){
+        names.forEach(function(name){caches.delete(name);});
       });
     }
   </script>
