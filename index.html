@@ -3528,7 +3528,7 @@ function AccidentScreen({appState,onAppStateUpdate,sitesState,config}){
   var siteList=(sitesState&&sitesState.length>0)?sitesState:SITES;
   const [showForm,setShowForm]=useState(false);
   const [editId,setEditId]=useState(null);
-  const [form,setForm]=useState({date:new Date().toISOString().split("T")[0],site:siteList[0]||"",type:ACC_TYPES[0],cause:ACC_CAUSES[0],statut:ACC_STATUTS[0],victime:"",joursArret:0,description:"",actionsPrises:"",gravite:"mineur"});
+  const [form,setForm]=useState({date:new Date().toISOString().split("T")[0],dateReception:"",site:siteList[0]||"",type:ACC_TYPES[0],cause:ACC_CAUSES[0],statut:ACC_STATUTS[0],victime:"",joursArret:0,description:"",actionsPrises:"",gravite:"mineur"});
   const [tab,setTab]=useState("kpi");
   const [siteFilter,setSiteFilter]=useState("Tous");
   const [reportHTML,setReportHTML]=useState(null);
@@ -3560,6 +3560,7 @@ function AccidentScreen({appState,onAppStateUpdate,sitesState,config}){
       +"<div class='page'>"
       +"<div class='meta'>"
       +"<div class='item'><div class='label'>Date de l'accident</div><div class='value'>"+fmt(a.date)+"</div></div>"
+      +"<div class='item'><div class='label'>Date de reception</div><div class='value'>"+(a.dateReception?fmt(a.dateReception):"—")+"</div></div>"
       +"<div class='item'><div class='label'>Site</div><div class='value'>"+(a.site||"—")+"</div></div>"
       +"<div class='item'><div class='label'>Victime</div><div class='value'>"+(a.victime||"—")+"</div></div>"
       +"<div class='item'><div class='label'>Fonction / Statut</div><div class='value'>"+(a.statut||"—")+"</div></div>"
@@ -3576,7 +3577,7 @@ function AccidentScreen({appState,onAppStateUpdate,sitesState,config}){
     setReportHTML(html);
   }
 
-  function resetForm(){setForm({date:new Date().toISOString().split("T")[0],site:siteList[0]||"",type:ACC_TYPES[0],cause:ACC_CAUSES[0],statut:ACC_STATUTS[0],victime:"",joursArret:0,description:"",actionsPrises:"",gravite:"mineur"});setEditId(null);}
+  function resetForm(){setForm({date:new Date().toISOString().split("T")[0],dateReception:"",site:siteList[0]||"",type:ACC_TYPES[0],cause:ACC_CAUSES[0],statut:ACC_STATUTS[0],victime:"",joursArret:0,description:"",actionsPrises:"",gravite:"mineur"});setEditId(null);}
 
   function saveAcc(){
     var acc={...form,id:editId||Date.now(),joursArret:parseInt(form.joursArret)||0};
@@ -3671,8 +3672,10 @@ function AccidentScreen({appState,onAppStateUpdate,sitesState,config}){
       {showForm&&(
         <div style={{margin:"0 14px 14px",...S.card(C.cyan+"22")}}>
           <div style={{fontSize:14,fontWeight:800,marginBottom:12,color:C.cyan}}>{editId?"✏️ Modifier":"📝 Déclarer un accident"}</div>
-          <label style={S.label}>Date</label>
+          <label style={S.label}>Date de l&#39;accident</label>
           <input type="date" value={form.date} onChange={function(e){setForm({...form,date:e.target.value});}} style={{...S.input,marginBottom:10}}/>
+          <label style={S.label}>Date de réception de la déclaration</label>
+          <input type="date" value={form.dateReception||""} onChange={function(e){setForm({...form,dateReception:e.target.value});}} style={{...S.input,marginBottom:10}}/>
           <label style={S.label}>Nom et prénom de la victime</label>
           <input type="text" value={form.victime} onChange={function(e){setForm({...form,victime:e.target.value});}} placeholder="Ex : Dupont Jean" style={{...S.input,marginBottom:10}}/>
           <label style={S.label}>Site</label>
@@ -3798,7 +3801,7 @@ function AccidentScreen({appState,onAppStateUpdate,sitesState,config}){
                       <span style={{fontSize:10,color:C.muted}}>{fmt(a.date)}</span>
                     </div>
                     {a.victime&&<div style={{fontSize:12,fontWeight:600,marginBottom:3,color:C.text}}>👤 {a.victime}</div>}
-                    <div style={{fontSize:11,color:C.muted,marginBottom:4}}>📍 {a.site} · {a.cause}{a.statut?" · "+a.statut:""}</div>
+                    <div style={{fontSize:11,color:C.muted,marginBottom:4}}>📍 {a.site} · {a.cause}{a.statut?" · "+a.statut:""}{a.dateReception?" · 📨 Reçu le "+fmt(a.dateReception):""}</div>
                     {a.description&&<div style={{fontSize:12,lineHeight:1.4,marginBottom:4}}>{a.description}</div>}
                     <div style={{display:"flex",gap:6,flexWrap:"wrap",alignItems:"center"}}>
                       <span style={{fontSize:9,padding:"2px 7px",borderRadius:5,background:col+"18",color:col,fontWeight:800}}>{a.gravite==="critique"?"GRAVE":a.gravite==="eleve"?"ÉLEVÉ":"MINEUR"}</span>
