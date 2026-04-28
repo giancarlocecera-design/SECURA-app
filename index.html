@@ -3855,6 +3855,84 @@ function AccidentScreen({appState,onAppStateUpdate,sitesState,config}){
               </div>
             </div>
           </div>
+
+          {/* Accidents par catégorie de personnel */}
+          {(function(){
+            var causeColors={"Chute de hauteur":"#FF1744","Chute de plain-pied":"#FF5252","Manutention manuelle":"#FF6D00","Machine/Outil":"#FFB300","Contact chimique":"#7C3AFF","Projection":"#00E5FF","Choc/Coincement":"#FF4081","Électrique":"#FFEA00","Brûlure":"#FF3D00","Circulation":"#00BFA5","Agression":"#D500F9","Autre":"#78909C"};
+            var byStatut={};
+            fAccidents.forEach(function(a){
+              var s=a.statut||"Non renseigné";
+              if(!byStatut[s]) byStatut[s]={total:0,causes:{}};
+              byStatut[s].total++;
+              var c=a.cause||"Autre";
+              if(!byStatut[s].causes[c]) byStatut[s].causes[c]=0;
+              byStatut[s].causes[c]++;
+            });
+            var entries=Object.entries(byStatut).sort(function(a,b){return b[1].total-a[1].total;});
+            if(entries.length===0) return null;
+            var maxVal=entries[0][1].total;
+            return (
+              <div style={{...S.card(),marginBottom:14}}>
+                <div style={{fontSize:14,fontWeight:800,marginBottom:4}}>👤 Accidents par catégorie</div>
+                <div style={{fontSize:11,color:C.muted,marginBottom:12}}>Avec détail des causes</div>
+                {entries.map(function(e,i){
+                  var name=e[0],data=e[1];
+                  var pct=Math.round(data.total/maxVal*100);
+                  var causesArr=Object.entries(data.causes).sort(function(a,b){return b[1]-a[1];});
+                  return (
+                    <div key={i} style={{marginBottom:14}}>
+                      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:4}}>
+                        <span style={{fontSize:12,fontWeight:700}}>{name}</span>
+                        <span style={{fontSize:14,fontWeight:900,color:C.red}}>{data.total}</span>
+                      </div>
+                      <div style={{background:C.dim,borderRadius:99,height:8,overflow:"hidden",marginBottom:6,display:"flex"}}>
+                        {causesArr.map(function(ca,j){
+                          var w=Math.round(ca[1]/data.total*pct);
+                          return <div key={j} style={{width:w+"%",height:"100%",background:causeColors[ca[0]]||"#888",transition:"width .6s"}}/>;
+                        })}
+                      </div>
+                      <div style={{display:"flex",gap:4,flexWrap:"wrap"}}>
+                        {causesArr.map(function(ca,j){
+                          return <span key={j} style={{fontSize:9,padding:"2px 6px",borderRadius:4,background:(causeColors[ca[0]]||"#888")+"22",color:causeColors[ca[0]]||"#888",fontWeight:700}}>{ca[1]}× {ca[0]}</span>;
+                        })}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            );
+          })()}
+
+          {/* Accidents par cause */}
+          {(function(){
+            var causeColors={"Chute de hauteur":"#FF1744","Chute de plain-pied":"#FF5252","Manutention manuelle":"#FF6D00","Machine/Outil":"#FFB300","Contact chimique":"#7C3AFF","Projection":"#00E5FF","Choc/Coincement":"#FF4081","Électrique":"#FFEA00","Brûlure":"#FF3D00","Circulation":"#00BFA5","Agression":"#D500F9","Autre":"#78909C"};
+            var byCause={};
+            fAccidents.forEach(function(a){var c=a.cause||"Autre";if(!byCause[c])byCause[c]=0;byCause[c]++;});
+            var entries=Object.entries(byCause).sort(function(a,b){return b[1]-a[1];});
+            if(entries.length===0) return null;
+            var maxVal=entries[0][1];
+            return (
+              <div style={{...S.card(),marginBottom:14}}>
+                <div style={{fontSize:14,fontWeight:800,marginBottom:12}}>🔍 Répartition par cause</div>
+                {entries.map(function(e,i){
+                  var name=e[0],count=e[1];
+                  var pct=Math.round(count/maxVal*100);
+                  var col=causeColors[name]||"#888";
+                  return (
+                    <div key={i} style={{marginBottom:10}}>
+                      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:3}}>
+                        <span style={{fontSize:11,fontWeight:600,flex:1}}>{name}</span>
+                        <span style={{fontSize:13,fontWeight:900,color:col,marginLeft:8}}>{count}</span>
+                      </div>
+                      <div style={{background:C.dim,borderRadius:99,height:6,overflow:"hidden"}}>
+                        <div style={{width:pct+"%",height:"100%",background:col,borderRadius:99,transition:"width .6s"}}/>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            );
+          })()}
         </div>
       )}
     </div>
