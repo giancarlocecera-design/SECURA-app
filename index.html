@@ -1142,7 +1142,6 @@ function DashboardScreen({user,inspections,actions,onNav,config,sitesState,appSt
           <div style={{fontSize:20,fontWeight:900,marginTop:3}}>{(config&&config.appName)||"SECURA"}</div>
         </div>
         <div style={{display:"flex",gap:8,alignItems:"center"}}>
-          <button onClick={function(){location.reload();}} style={{width:36,height:36,borderRadius:11,background:C.green+"15",border:"1px solid "+C.green+"44",display:"flex",alignItems:"center",justifyContent:"center",fontSize:15,cursor:"pointer",color:C.green}}>↻</button>
           {hasAccess(user,config,"ia")&&<button onClick={function(){setShowAI(true);}} style={{width:36,height:36,borderRadius:11,background:C.purple+"15",border:"1px solid "+C.purple+"44",display:"flex",alignItems:"center",justifyContent:"center",fontSize:15,cursor:"pointer",color:C.purple,fontWeight:900}}>🤖</button>}
           <button onClick={function(){setShowHelp(true);}} style={{width:36,height:36,borderRadius:11,background:C.cyan+"15",border:"1px solid "+C.cyan+"44",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,cursor:"pointer",color:C.cyan,fontWeight:900}}>?</button>
           <div style={{width:36,height:36,borderRadius:11,background:C.cyan+"18",border:"1px solid "+C.cyan+"33",display:"flex",alignItems:"center",justifyContent:"center",fontSize:14,fontWeight:900,color:C.cyan}}>{user.avatar}</div>
@@ -3960,6 +3959,11 @@ function App(){
         if(localCfg.sites&&localCfg.sites.length) setSitesState(localCfg.sites);
         if(localCfg.config&&Object.keys(localCfg.config).length) setConfig(localCfg.config);
       }
+      var localAccidents=LS.load("accidents");
+      var localHeures=LS.load("heuresPresteesParCat");
+      if(localAccidents||localHeures){
+        setAppState(function(prev){return {...prev,accidents:localAccidents||prev.accidents,heuresPresteesParCat:localHeures||prev.heuresPresteesParCat};});
+      }
       setDbReady(true);
     },5000);
     async function loadFromDB(){
@@ -4013,6 +4017,8 @@ function App(){
               delais:c.delais||prev.delais,
               customTemplates:c["customtemplates"]||c["custom_templates"]||c.customTemplates||LS.load("customTemplates")||prev.customTemplates||{},
               siteAddresses:c["siteaddresses"]||c.siteAddresses||prev.siteAddresses||{},
+              accidents:c.accidents||prev.accidents||[],
+              heuresPresteesParCat:c["heuresprestees"]||prev.heuresPresteesParCat||{},
             };
           });
           LS.save("config", cfg[0]);
@@ -4065,7 +4071,7 @@ function App(){
       Responsable:{dashboard:true,inspections:false,actions:true,rapports:false,rappels:false,settings:false,ia:false,accidents:false}
     },
   });
-  const [appState,setAppState]=useState({sites:SITES_DEFAULT,resps:RESPONSABLES_DEFAULT,penalites:{critique:5,eleve:3,mineur:1},delais:{critique:0,eleve:60,mineur:120},customTemplates:{},siteAddresses:{},accidents:LS.load("accidents")||[],heuresPresteesParCat:LS.load("heuresPresteesParCat")||{}});
+  const [appState,setAppState]=useState({sites:SITES_DEFAULT,resps:RESPONSABLES_DEFAULT,penalites:{critique:5,eleve:3,mineur:1},delais:{critique:0,eleve:60,mineur:120},customTemplates:{},siteAddresses:{},accidents:[],heuresPresteesParCat:{}});
   const [respsState,setRespsState]=useState([...RESPONSABLES_DEFAULT]);
   const [sitesState,setSitesState]=useState([...SITES_DEFAULT]);
   async function handleAppStateUpdate(s){
@@ -4086,11 +4092,12 @@ function App(){
     if(merged.customTemplates&&Object.keys(merged.customTemplates).length>0){
       payload["customtemplates"]=merged.customTemplates;
     }
+    if(merged.accidents) payload["accidents"]=merged.accidents;
+    if(merged.heuresPresteesParCat) payload["heuresprestees"]=merged.heuresPresteesParCat;
     try{ await supa.upsert("app_config",payload); }catch(e){console.error("appState save error:",e);}
-    // Save accidents separately in localStorage (no Supabase column yet)
+    // Also save to localStorage as backup
     if(merged.accidents) LS.save("accidents",merged.accidents);
     if(merged.heuresPresteesParCat) LS.save("heuresPresteesParCat",merged.heuresPresteesParCat);
-    // Also save to localStorage as backup
     LS.save("appState", merged);
     LS.save("customTemplates", merged.customTemplates||{});
   }
