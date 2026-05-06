@@ -3501,21 +3501,6 @@ function SettingsScreen({user,onLogout,appState,onAppStateUpdate,respsState,site
                 );
               })}
             </div>
-            {/* Font size */}
-            <div style={{...S.card(),marginBottom:12}}>
-              <div style={{fontSize:13,fontWeight:800,marginBottom:12}}>🔡 Taille du texte</div>
-              <div style={{display:"flex",gap:8}}>
-                {[[1,"Normal"],[1.12,"Grand"]].map(function(s){
-                  var active=((config&&config.textZoom)||1)===s[0];
-                  return (
-                    <button key={s[0]} onClick={()=>onConfigUpdate&&onConfigUpdate({...config,textZoom:s[0]})}
-                      style={{flex:1,padding:"12px",borderRadius:10,border:"1px solid "+(active?ac:C.border),background:active?ac+"18":"transparent",color:active?ac:C.muted,cursor:"pointer",fontSize:active?15:13,fontWeight:active?800:400}}>
-                      {s[1]}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
             {/* Mode daltonien */}
             <div style={{...S.card(),marginBottom:12}}>
               <div style={{fontSize:13,fontWeight:800,marginBottom:12}}>👁️ Mode daltonien</div>
@@ -4204,8 +4189,7 @@ function App(){
     background:bg,
     color:darkMode?C.text:"#1A1E2E",
     fontFamily:(config&&config.fontFamily)||"DM Sans,Segoe UI,sans-serif",
-    fontSize:(config&&config.fontSize)||15,
-    zoom:(config&&config.textZoom)||1,
+    fontSize:16,
     filter:daltonFilter,
   };
 
