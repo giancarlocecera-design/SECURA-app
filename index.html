@@ -124,13 +124,13 @@ const C = {
   text:"#E8ECF4", muted:"#5A6480", dim:"#1E2433",
 };
 const S = {
-  app:{ fontFamily:"DM Sans,Segoe UI,sans-serif", background:C.bg, minHeight:"100vh", color:C.text, maxWidth:430, margin:"0 auto", position:"relative", overflowX:"hidden", fontSize:18, touchAction:"pan-y", WebkitUserSelect:"none" },
+  app:{ fontFamily:"DM Sans,Segoe UI,sans-serif", background:C.bg, minHeight:"100vh", color:C.text, maxWidth:430, margin:"0 auto", position:"relative", overflowX:"hidden", fontSize:20, touchAction:"pan-y", WebkitUserSelect:"none" },
   card:(border)=>({ background:C.card, border:`1px solid ${border||C.border}`, borderRadius:18, padding:16 }),
   btn:(col=C.cyan,outline=false)=>outline
-    ?{ background:`${col}15`, border:`1px solid ${col}55`, borderRadius:12, padding:"12px 18px", color:col, fontWeight:700, fontSize:16, cursor:"pointer", width:"100%" }
-    :{ background:`linear-gradient(135deg,${col},${col}BB)`, border:"none", borderRadius:12, padding:"13px 20px", color:"#000", fontWeight:800, fontSize:20, cursor:"pointer", width:"100%" },
-  input:{ background:C.surface, border:`1px solid ${C.border}`, borderRadius:12, padding:"13px 14px", color:C.text, fontSize:18, width:"100%", outline:"none", boxSizing:"border-box" },
-  label:{ fontSize:14, color:C.muted, letterSpacing:1, textTransform:"uppercase", marginBottom:6, display:"block" },
+    ?{ background:`${col}15`, border:`1px solid ${col}55`, borderRadius:12, padding:"12px 18px", color:col, fontWeight:700, fontSize:18, cursor:"pointer", width:"100%" }
+    :{ background:`linear-gradient(135deg,${col},${col}BB)`, border:"none", borderRadius:12, padding:"13px 20px", color:"#000", fontWeight:800, fontSize:22, cursor:"pointer", width:"100%" },
+  input:{ background:C.surface, border:`1px solid ${C.border}`, borderRadius:12, padding:"13px 14px", color:C.text, fontSize:20, width:"100%", outline:"none", boxSizing:"border-box" },
+  label:{ fontSize:16, color:C.muted, letterSpacing:1, textTransform:"uppercase", marginBottom:6, display:"block" },
 };
 
 const ACCENT = {
@@ -198,7 +198,7 @@ function SplashScreen({onDone, appName, accent}){
         <img src={SHIELD_SRC} alt="SECURA" style={{width:"100%",height:"100%",objectFit:"cover"}}/>
       </div>
       <div style={{fontSize:24,fontWeight:700,letterSpacing:10,color:"#fff",opacity:phase>=1?1:0,transform:phase>=1?"none":"translateY(12px)",transition:"all .5s",marginBottom:6,textAlign:"center",width:"100%"}}>{appName||"SECURA"}</div>
-      <div style={{fontSize:15,color:"rgba(255,255,255,.35)",letterSpacing:3,opacity:phase>=1?1:0,transition:"all .5s .15s",marginBottom:48}}>Audits · Sécurité</div>
+      <div style={{fontSize:17,color:"rgba(255,255,255,.35)",letterSpacing:3,opacity:phase>=1?1:0,transition:"all .5s .15s",marginBottom:48}}>Audits · Sécurité</div>
       <div style={{width:160,height:3,background:"rgba(255,255,255,.08)",borderRadius:99,overflow:"hidden",opacity:phase>=1?1:0,transition:"opacity .4s .2s"}}>
         <div style={{height:"100%",background:"linear-gradient(90deg,"+ac+","+ac+"99)",width:prog+"%",borderRadius:99,transition:"width .04s linear"}}/>
       </div>
@@ -787,7 +787,7 @@ function Tag({label,color,small}){
 function StatutBadge({s}){
   const M={"À valider":{bg:C.amber,text:"#000"},"En cours":{bg:`${C.cyan}25`,text:C.cyan,border:C.cyan},"Brouillon":{bg:`${C.muted}20`,text:C.muted,border:C.muted},"Validée":{bg:`${C.green}20`,text:C.green,border:C.green}};
   const sc=M[s]||{bg:C.dim,text:C.muted};
-  return <span style={{fontSize:13,padding:"3px 9px",borderRadius:6,background:sc.bg,color:sc.text,fontWeight:800,border:`1px solid ${sc.border||"transparent"}`}}>{s}</span>;
+  return <span style={{fontSize:15,padding:"3px 9px",borderRadius:6,background:sc.bg,color:sc.text,fontWeight:800,border:`1px solid ${sc.border||"transparent"}`}}>{s}</span>;
 }
 function ScoreRing({score,size=64}){
   if(score===null||score===undefined||isNaN(score)) score=0;
@@ -838,15 +838,15 @@ function LoginScreen({onLogin, users}){
       <div style={{textAlign:"center",marginBottom:32}}>
         <div style={{width:80,height:80,borderRadius:22,overflow:"hidden",boxShadow:"0 0 40px "+C.cyan+"55",marginBottom:14,border:"2px solid "+C.cyan+"33",display:"inline-block"}}><img src={SHIELD_SRC} alt="SECURA" style={{width:"100%",height:"100%",objectFit:"cover"}}/></div>
         <div style={{fontSize:30,fontWeight:900,letterSpacing:6,color:C.text,marginBottom:4}}>SECURA</div>
-        <div style={{fontSize:16,color:C.muted,marginTop:3}}>Audits & inspections sécurité professionnelle</div>
+        <div style={{fontSize:18,color:C.muted,marginTop:3}}>Audits & inspections sécurité professionnelle</div>
       </div>
       <div style={{...S.card(),padding:24,marginBottom:18}}>
-        <div style={{fontSize:18,fontWeight:800,marginBottom:18}}>Connexion</div>
+        <div style={{fontSize:20,fontWeight:800,marginBottom:18}}>Connexion</div>
         <label style={S.label}>Email</label>
         <input style={{...S.input,marginBottom:14}} type="email" placeholder="votre@email.be" value={email} onChange={e=>setEmail(e.target.value)} onKeyDown={e=>e.key==="Enter"&&handle()} autoCapitalize="off" autoCorrect="off" autoComplete="email"/>
         <label style={S.label}>Mot de passe</label>
         <input style={{...S.input,marginBottom:10}} type="password" placeholder="••••••••" value={pass} onChange={e=>setPass(e.target.value)} onKeyDown={e=>e.key==="Enter"&&handle()}/>
-        {err&&<div style={{fontSize:15,color:C.red,marginBottom:10,padding:"8px 12px",background:`${C.red}12`,borderRadius:8}}>{err}</div>}
+        {err&&<div style={{fontSize:17,color:C.red,marginBottom:10,padding:"8px 12px",background:`${C.red}12`,borderRadius:8}}>{err}</div>}
         <button style={{...S.btn(C.cyan),marginTop:8,opacity:(load?0.65:1)}} onClick={handle} disabled={load}>{load?"Connexion...":"Se connecter →"}</button>
       </div>
     </div>
@@ -936,12 +936,12 @@ function HelpScreen({onBack,config}){
   return (
     <div style={{paddingBottom:90}}>
       <div style={{padding:"20px 16px 12px",display:"flex",alignItems:"center",gap:10}}>
-        <button onClick={onBack} style={{background:C.surface,border:"1px solid "+C.border,borderRadius:10,padding:"8px 12px",color:C.cyan,cursor:"pointer",fontSize:16,fontWeight:700}}>← Retour</button>
-        <div><div style={{fontSize:18,fontWeight:900}}>📖 Aide</div><div style={{fontSize:14,color:C.muted}}>Guide des fonctionnalités {appName}</div></div>
+        <button onClick={onBack} style={{background:C.surface,border:"1px solid "+C.border,borderRadius:10,padding:"8px 12px",color:C.cyan,cursor:"pointer",fontSize:18,fontWeight:700}}>← Retour</button>
+        <div><div style={{fontSize:20,fontWeight:900}}>📖 Aide</div><div style={{fontSize:16,color:C.muted}}>Guide des fonctionnalités {appName}</div></div>
       </div>
       <div style={{margin:"0 14px 14px",padding:"14px",background:"linear-gradient(135deg,"+C.cyan+"10,"+C.purple+"10)",border:"1px solid "+C.cyan+"22",borderRadius:14}}>
-        <div style={{fontSize:20,fontWeight:800,marginBottom:4}}>Bienvenue dans {appName}</div>
-        <div style={{fontSize:15,color:C.muted,lineHeight:1.6}}>Application de gestion des audits de prévention et sécurité. Consultez les sections ci-dessous pour découvrir toutes les fonctionnalités.</div>
+        <div style={{fontSize:22,fontWeight:800,marginBottom:4}}>Bienvenue dans {appName}</div>
+        <div style={{fontSize:17,color:C.muted,lineHeight:1.6}}>Application de gestion des audits de prévention et sécurité. Consultez les sections ci-dessous pour découvrir toutes les fonctionnalités.</div>
       </div>
       <div style={{padding:"0 14px"}}>
         {sections.map(function(sec,i){
@@ -949,12 +949,12 @@ function HelpScreen({onBack,config}){
           return (
             <div key={i} style={{marginBottom:10,borderRadius:14,border:"1px solid "+(isOpen?sec.color+"44":C.border),background:isOpen?sec.color+"06":"transparent",overflow:"hidden",transition:"all .2s"}}>
               <button onClick={function(){toggle(i);}} style={{width:"100%",display:"flex",alignItems:"center",gap:12,padding:"14px 16px",background:"transparent",border:"none",cursor:"pointer",color:C.text,textAlign:"left"}}>
-                <div style={{width:42,height:42,borderRadius:12,background:sec.color+"15",border:"1px solid "+sec.color+"33",display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,flexShrink:0}}>{sec.icon}</div>
+                <div style={{width:42,height:42,borderRadius:12,background:sec.color+"15",border:"1px solid "+sec.color+"33",display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,flexShrink:0}}>{sec.icon}</div>
                 <div style={{flex:1}}>
-                  <div style={{fontSize:20,fontWeight:800,color:isOpen?sec.color:C.text}}>{sec.title}</div>
-                  <div style={{fontSize:14,color:C.muted,marginTop:1}}>{sec.sub}</div>
+                  <div style={{fontSize:22,fontWeight:800,color:isOpen?sec.color:C.text}}>{sec.title}</div>
+                  <div style={{fontSize:16,color:C.muted,marginTop:1}}>{sec.sub}</div>
                 </div>
-                <div style={{fontSize:19,color:C.muted,transform:isOpen?"rotate(90deg)":"rotate(0deg)",transition:"transform .2s",flexShrink:0}}>›</div>
+                <div style={{fontSize:21,color:C.muted,transform:isOpen?"rotate(90deg)":"rotate(0deg)",transition:"transform .2s",flexShrink:0}}>›</div>
               </button>
               {isOpen&&(
                 <div style={{padding:"0 16px 16px"}}>
@@ -963,7 +963,7 @@ function HelpScreen({onBack,config}){
                     return (
                       <div key={j} style={{display:"flex",gap:10,padding:"8px 0",borderBottom:j<sec.items.length-1?"1px solid "+C.dim:"none",alignItems:"flex-start"}}>
                         <div style={{width:6,height:6,borderRadius:99,background:sec.color,marginTop:6,flexShrink:0}}/>
-                        <div style={{fontSize:15,lineHeight:1.5,color:C.text}}>
+                        <div style={{fontSize:17,lineHeight:1.5,color:C.text}}>
                           {parts.length>1?(
                             <span><span style={{fontWeight:700}}>{parts[0]}</span><span style={{color:C.cyan}}> — {parts[1]}</span></span>
                           ):item}
@@ -978,7 +978,7 @@ function HelpScreen({onBack,config}){
         })}
       </div>
       <div style={{padding:"20px 14px",textAlign:"center"}}>
-        <div style={{fontSize:14,color:C.muted}}>Version {appName} · Développé avec ❤️</div>
+        <div style={{fontSize:16,color:C.muted}}>Version {appName} · Développé avec ❤️</div>
       </div>
     </div>
   );
@@ -1035,24 +1035,24 @@ function AIScreen({onBack,config}){
   return (
     <div style={{display:"flex",flexDirection:"column",height:"100vh",maxHeight:"100vh"}}>
       <div style={{padding:"16px",display:"flex",alignItems:"center",gap:10,borderBottom:"1px solid "+C.border,flexShrink:0}}>
-        <button onClick={onBack} style={{background:C.surface,border:"1px solid "+C.border,borderRadius:10,padding:"8px 12px",color:C.cyan,cursor:"pointer",fontSize:16,fontWeight:700}}>← Retour</button>
+        <button onClick={onBack} style={{background:C.surface,border:"1px solid "+C.border,borderRadius:10,padding:"8px 12px",color:C.cyan,cursor:"pointer",fontSize:18,fontWeight:700}}>← Retour</button>
         <div style={{flex:1}}>
-          <div style={{fontSize:19,fontWeight:900,display:"flex",alignItems:"center",gap:6}}>🤖 Assistant IA</div>
-          <div style={{fontSize:13,color:C.purple}}>Prévention & législation HSE belge</div>
+          <div style={{fontSize:21,fontWeight:900,display:"flex",alignItems:"center",gap:6}}>🤖 Assistant IA</div>
+          <div style={{fontSize:15,color:C.purple}}>Prévention & législation HSE belge</div>
         </div>
-        {messages.length>0&&<button onClick={function(){setMessages([]);}} style={{background:"transparent",border:"1px solid "+C.border,borderRadius:8,padding:"5px 10px",color:C.muted,cursor:"pointer",fontSize:13}}>🗑️ Effacer</button>}
+        {messages.length>0&&<button onClick={function(){setMessages([]);}} style={{background:"transparent",border:"1px solid "+C.border,borderRadius:8,padding:"5px 10px",color:C.muted,cursor:"pointer",fontSize:15}}>🗑️ Effacer</button>}
       </div>
       <div style={{flex:1,overflowY:"auto",padding:"14px",display:"flex",flexDirection:"column",gap:12}}>
         {messages.length===0&&(
           <div style={{textAlign:"center",padding:"40px 16px",color:C.muted}}>
             <div style={{fontSize:48,marginBottom:16}}>🤖</div>
-            <div style={{fontSize:19,fontWeight:800,color:C.purple,marginBottom:8}}>Assistant IA</div>
-            <div style={{fontSize:16,lineHeight:1.6,marginBottom:20}}>Posez vos questions sur la législation belge en prévention et sécurité au travail — Code du bien-être, RGPT, RGIE, normes NBN, directives européennes.</div>
-            {!apiKey&&<div style={{padding:"12px 16px",background:C.orange+"15",border:"1px solid "+C.orange+"33",borderRadius:10,marginBottom:16,fontSize:15,color:C.orange}}>⚠️ Clé API non configurée — Allez dans Profil → Système → Clé API IA</div>}
+            <div style={{fontSize:21,fontWeight:800,color:C.purple,marginBottom:8}}>Assistant IA</div>
+            <div style={{fontSize:18,lineHeight:1.6,marginBottom:20}}>Posez vos questions sur la législation belge en prévention et sécurité au travail — Code du bien-être, RGPT, RGIE, normes NBN, directives européennes.</div>
+            {!apiKey&&<div style={{padding:"12px 16px",background:C.orange+"15",border:"1px solid "+C.orange+"33",borderRadius:10,marginBottom:16,fontSize:17,color:C.orange}}>⚠️ Clé API non configurée — Allez dans Profil → Système → Clé API IA</div>}
             <div style={{display:"flex",flexDirection:"column",gap:8,maxWidth:320,margin:"0 auto"}}>
               {["Quelles sont les obligations de l'employeur en matière de premiers secours ?","Un travailleur peut-il refuser un travail dangereux ?","Quels EPI sont obligatoires sur un chantier ?","Quelle est la fréquence des contrôles des extincteurs ?","Que dit le RGIE sur les installations basse tension ?","Quelles normes NBN s'appliquent à la détection incendie ?"].map(function(q,i){
                 return (
-                  <button key={i} onClick={function(){setInput(q);}} style={{background:C.surface,border:"1px solid "+C.border,borderRadius:10,padding:"10px 14px",color:C.text,cursor:"pointer",fontSize:15,textAlign:"left",lineHeight:1.4}}>
+                  <button key={i} onClick={function(){setInput(q);}} style={{background:C.surface,border:"1px solid "+C.border,borderRadius:10,padding:"10px 14px",color:C.text,cursor:"pointer",fontSize:17,textAlign:"left",lineHeight:1.4}}>
                     <span style={{color:C.purple,marginRight:6}}>💬</span>{q}
                   </button>
                 );
@@ -1065,8 +1065,8 @@ function AIScreen({onBack,config}){
           return (
             <div key={i} style={{display:"flex",justifyContent:isUser?"flex-end":"flex-start"}}>
               <div style={{maxWidth:"85%",padding:"12px 16px",borderRadius:isUser?"16px 16px 4px 16px":"16px 16px 16px 4px",background:isUser?C.cyan+"20":C.surface,border:"1px solid "+(isUser?C.cyan+"33":C.border),color:C.text}}>
-                {!isUser&&<div style={{fontSize:13,color:C.purple,fontWeight:700,marginBottom:4}}>🤖 Assistant IA</div>}
-                <div style={{fontSize:16,lineHeight:1.6,whiteSpace:"pre-wrap"}}>{msg.content}</div>
+                {!isUser&&<div style={{fontSize:15,color:C.purple,fontWeight:700,marginBottom:4}}>🤖 Assistant IA</div>}
+                <div style={{fontSize:18,lineHeight:1.6,whiteSpace:"pre-wrap"}}>{msg.content}</div>
               </div>
             </div>
           );
@@ -1074,8 +1074,8 @@ function AIScreen({onBack,config}){
         {loading&&(
           <div style={{display:"flex",justifyContent:"flex-start"}}>
             <div style={{padding:"12px 16px",borderRadius:"16px 16px 16px 4px",background:C.surface,border:"1px solid "+C.border}}>
-              <div style={{fontSize:13,color:C.purple,fontWeight:700,marginBottom:4}}>🤖 Assistant IA</div>
-              <div style={{fontSize:16,color:C.muted}}>Recherche en cours<span style={{animation:"blink 1s infinite"}}>...</span></div>
+              <div style={{fontSize:15,color:C.purple,fontWeight:700,marginBottom:4}}>🤖 Assistant IA</div>
+              <div style={{fontSize:18,color:C.muted}}>Recherche en cours<span style={{animation:"blink 1s infinite"}}>...</span></div>
             </div>
           </div>
         )}
@@ -1084,12 +1084,12 @@ function AIScreen({onBack,config}){
       <div style={{padding:"12px 14px",borderTop:"1px solid "+C.border,display:"flex",gap:8,flexShrink:0,background:C.bg}}>
         <input value={input} onChange={function(e){setInput(e.target.value);}} onKeyDown={function(e){if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();send();}}}
           placeholder="Posez votre question..."
-          style={{...S.input,flex:1,padding:"12px 16px",fontSize:20,borderRadius:14}}/>
+          style={{...S.input,flex:1,padding:"12px 16px",fontSize:22,borderRadius:14}}/>
         <button onClick={send} disabled={!input.trim()||loading}
           style={{background:input.trim()&&!loading?"linear-gradient(135deg,"+C.purple+",#7C3AFF)":"transparent",
             border:input.trim()&&!loading?"none":"1px solid "+C.border,
             borderRadius:14,padding:"12px 18px",color:input.trim()&&!loading?"#fff":C.muted,
-            cursor:input.trim()&&!loading?"pointer":"default",fontSize:20,fontWeight:900,flexShrink:0}}>
+            cursor:input.trim()&&!loading?"pointer":"default",fontSize:22,fontWeight:900,flexShrink:0}}>
           ➤
         </button>
       </div>
@@ -1140,13 +1140,13 @@ function DashboardScreen({user,inspections,actions,onNav,config,sitesState,appSt
       {/* Header */}
       <div style={{padding:"20px 16px 0",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
         <div>
-          <div style={{fontSize:15,color:C.muted,letterSpacing:2,textTransform:"uppercase"}}>Bonjour, {user.nom.split(" ")[0]}</div>
-          <div style={{fontSize:20,fontWeight:900,marginTop:3}}>{(config&&config.appName)||"SECURA"}</div>
+          <div style={{fontSize:17,color:C.muted,letterSpacing:2,textTransform:"uppercase"}}>Bonjour, {user.nom.split(" ")[0]}</div>
+          <div style={{fontSize:22,fontWeight:900,marginTop:3}}>{(config&&config.appName)||"SECURA"}</div>
         </div>
         <div style={{display:"flex",gap:8,alignItems:"center"}}>
-          {hasAccess(user,config,"ia")&&<button onClick={function(){setShowAI(true);}} style={{width:36,height:36,borderRadius:11,background:C.purple+"15",border:"1px solid "+C.purple+"44",display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,cursor:"pointer",color:C.purple,fontWeight:900}}>🤖</button>}
-          <button onClick={function(){setShowHelp(true);}} style={{width:36,height:36,borderRadius:11,background:C.cyan+"15",border:"1px solid "+C.cyan+"44",display:"flex",alignItems:"center",justifyContent:"center",fontSize:19,cursor:"pointer",color:C.cyan,fontWeight:900}}>?</button>
-          <div style={{width:36,height:36,borderRadius:11,background:C.cyan+"18",border:"1px solid "+C.cyan+"33",display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,fontWeight:900,color:C.cyan}}>{user.avatar}</div>
+          {hasAccess(user,config,"ia")&&<button onClick={function(){setShowAI(true);}} style={{width:36,height:36,borderRadius:11,background:C.purple+"15",border:"1px solid "+C.purple+"44",display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,cursor:"pointer",color:C.purple,fontWeight:900}}>🤖</button>}
+          <button onClick={function(){setShowHelp(true);}} style={{width:36,height:36,borderRadius:11,background:C.cyan+"15",border:"1px solid "+C.cyan+"44",display:"flex",alignItems:"center",justifyContent:"center",fontSize:21,cursor:"pointer",color:C.cyan,fontWeight:900}}>?</button>
+          <div style={{width:36,height:36,borderRadius:11,background:C.cyan+"18",border:"1px solid "+C.cyan+"33",display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,fontWeight:900,color:C.cyan}}>{user.avatar}</div>
         </div>
       </div>
       {/* Filtre par site */}
@@ -1159,7 +1159,7 @@ function DashboardScreen({user,inspections,actions,onNav,config,sitesState,appSt
                 borderColor:active?C.cyan:C.border,
                 background:active?C.cyan+"15":"transparent",
                 color:active?C.cyan:C.muted,
-                fontSize:14,fontWeight:active?800:500,cursor:"pointer",transition:"all .2s"}}>
+                fontSize:16,fontWeight:active?800:500,cursor:"pointer",transition:"all .2s"}}>
               {s==="Tous"?"🏢 Tous les sites":s}
             </button>
           );
@@ -1167,22 +1167,22 @@ function DashboardScreen({user,inspections,actions,onNav,config,sitesState,appSt
       </div>
       {siteFilter!=="Tous"&&(
         <div style={{margin:"10px 14px 0",padding:"8px 12px",background:C.cyan+"10",border:"1px solid "+C.cyan+"33",borderRadius:10,display:"flex",alignItems:"center",justifyContent:"space-between"}}>
-          <span style={{fontSize:15,color:C.cyan,fontWeight:700}}>📍 Filtré : {siteFilter}</span>
-          <button onClick={function(){setSiteFilter("Tous");}} style={{background:"transparent",border:"1px solid "+C.border,borderRadius:8,padding:"3px 10px",color:C.muted,fontSize:13,cursor:"pointer"}}>✕ Réinitialiser</button>
+          <span style={{fontSize:17,color:C.cyan,fontWeight:700}}>📍 Filtré : {siteFilter}</span>
+          <button onClick={function(){setSiteFilter("Tous");}} style={{background:"transparent",border:"1px solid "+C.border,borderRadius:8,padding:"3px 10px",color:C.muted,fontSize:15,cursor:"pointer"}}>✕ Réinitialiser</button>
         </div>
       )}
-      {critActs>0&&<div style={{margin:"14px 14px 0",background:`${C.red}10`,border:`1px solid ${C.red}33`,borderRadius:14,padding:"11px 14px",display:"flex",gap:10,alignItems:"center"}}><span style={{fontSize:18}}>🚨</span><div><div style={{fontSize:16,fontWeight:700,color:C.red}}>{critActs} action(s) critique(s) — pénalité active</div><div style={{fontSize:14,color:C.muted}}>Chaque NC critique retire {(appState&&appState.penalites?appState.penalites.critique:5)} pts du score</div></div></div>}
+      {critActs>0&&<div style={{margin:"14px 14px 0",background:`${C.red}10`,border:`1px solid ${C.red}33`,borderRadius:14,padding:"11px 14px",display:"flex",gap:10,alignItems:"center"}}><span style={{fontSize:20}}>🚨</span><div><div style={{fontSize:18,fontWeight:700,color:C.red}}>{critActs} action(s) critique(s) — pénalité active</div><div style={{fontSize:16,color:C.muted}}>Chaque NC critique retire {(appState&&appState.penalites?appState.penalites.critique:5)} pts du score</div></div></div>}
 
       {/* Sites critiques */}
       {siteFilter==="Tous"&&(
       <div style={{margin:"14px 14px 0",...S.card(`${C.red}25`),background:`linear-gradient(140deg,#0F1420,#180A0A)`}}>
-        <div style={{fontSize:15,fontWeight:800,color:C.red,letterSpacing:1,marginBottom:12}}>⚠ SITES LES PLUS CRITIQUES</div>
+        <div style={{fontSize:17,fontWeight:800,color:C.red,letterSpacing:1,marginBottom:12}}>⚠ SITES LES PLUS CRITIQUES</div>
         {sitePens.slice(0,5).map((s,i)=>(
           <div key={i} style={{display:"flex",alignItems:"center",gap:10,padding:"8px 10px",background:i===0?`${C.red}08`:"transparent",borderRadius:10,marginBottom:4,border:i===0?`1px solid ${C.red}22`:"none"}}>
             <ScoreRing score={s.score} size={42}/>
             <div style={{flex:1}}>
-              <div style={{fontSize:16,fontWeight:700}}>{s.site}</div>
-              <div style={{fontSize:13,color:C.muted}}>{s.ins} inspection(s) · pénalité {100-s.score}pts</div>
+              <div style={{fontSize:18,fontWeight:700}}>{s.site}</div>
+              <div style={{fontSize:15,color:C.muted}}>{s.ins} inspection(s) · pénalité {100-s.score}pts</div>
             </div>
             <Tag label={s.score>=80?"BON":s.score>=55?"MODÉRÉ":"CRITIQUE"} color={scoreColor(s.score)}/>
           </div>
@@ -1199,10 +1199,10 @@ function DashboardScreen({user,inspections,actions,onNav,config,sitesState,appSt
           {label:"Inspections",val:`${validated}/${fInspections.length}`,sub:"validées",col:C.cyan,prog:fInspections.length?Math.round(validated/fInspections.length*100):0},
         ].map((k,i)=>(
           <div key={i} style={{...S.card(`${k.col}22`)}}>
-            <div style={{fontSize:13,color:C.muted,letterSpacing:1,textTransform:"uppercase",marginBottom:6}}>{k.label}</div>
+            <div style={{fontSize:15,color:C.muted,letterSpacing:1,textTransform:"uppercase",marginBottom:6}}>{k.label}</div>
             <div style={{fontSize:30,fontWeight:900,color:k.col,lineHeight:1}}>{k.val}</div>
             {k.prog!==null&&<div style={{marginTop:8}}><Bar v={k.prog} col={k.col}/></div>}
-            <div style={{fontSize:14,color:k.col,marginTop:6,opacity:.8}}>{k.sub}</div>
+            <div style={{fontSize:16,color:k.col,marginTop:6,opacity:.8}}>{k.sub}</div>
           </div>
         ))}
       </div>
@@ -1211,18 +1211,18 @@ function DashboardScreen({user,inspections,actions,onNav,config,sitesState,appSt
       <div style={{margin:"14px 14px 0"}}>
         <button onClick={()=>onNav("new-inspection")} style={{width:"100%",border:"none",borderRadius:18,padding:"17px",background:`linear-gradient(135deg,${C.cyan},#007799)`,cursor:"pointer",display:"flex",alignItems:"center",gap:12}}>
           <div style={{width:44,height:44,borderRadius:12,background:"rgba(0,0,0,.18)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,flexShrink:0}}>📋</div>
-          <div style={{textAlign:"left"}}><div style={{fontSize:20,fontWeight:900,color:"#000"}}>Nouvelle inspection</div><div style={{fontSize:15,color:"rgba(0,0,0,.55)"}}>{(CHECKLISTS[chartTab]&&CHECKLISTS[chartTab].length)||40}+ questions · score pénalité 100→0</div></div>
-          <div style={{marginLeft:"auto",fontSize:20,color:"rgba(0,0,0,.35)"}}>→</div>
+          <div style={{textAlign:"left"}}><div style={{fontSize:22,fontWeight:900,color:"#000"}}>Nouvelle inspection</div><div style={{fontSize:17,color:"rgba(0,0,0,.55)"}}>{(CHECKLISTS[chartTab]&&CHECKLISTS[chartTab].length)||40}+ questions · score pénalité 100→0</div></div>
+          <div style={{marginLeft:"auto",fontSize:22,color:"rgba(0,0,0,.35)"}}>→</div>
         </button>
       </div>
 
       {/* Graphique */}
       <div style={{margin:"14px 14px 0",...S.card()}}>
-        <div style={{fontSize:18,fontWeight:800,marginBottom:2}}>{siteFilter==="Tous"?"Score par catégorie & site":"Score par catégorie — "+siteFilter}</div>
-        <div style={{fontSize:15,color:C.muted,marginBottom:12}}>Système pénalité : 100 − Σ déductions NC</div>
+        <div style={{fontSize:20,fontWeight:800,marginBottom:2}}>{siteFilter==="Tous"?"Score par catégorie & site":"Score par catégorie — "+siteFilter}</div>
+        <div style={{fontSize:17,color:C.muted,marginBottom:12}}>Système pénalité : 100 − Σ déductions NC</div>
         <div style={{display:"flex",gap:5,flexWrap:"wrap",marginBottom:14}}>
           {CATEGORIES.map(c=>{const m=CAT_META[c]; return (
-            <button key={c} onClick={()=>selectCat(c)} style={{flexShrink:0,padding:"4px 9px",borderRadius:99,border:"1px solid",borderColor:chartTab===c?m.color:C.border,background:chartTab===c?`${m.color}15`:"transparent",color:chartTab===c?m.color:C.muted,fontSize:13,fontWeight:700,cursor:"pointer"}}>{m.icon} {c}</button>
+            <button key={c} onClick={()=>selectCat(c)} style={{flexShrink:0,padding:"4px 9px",borderRadius:99,border:"1px solid",borderColor:chartTab===c?m.color:C.border,background:chartTab===c?`${m.color}15`:"transparent",color:chartTab===c?m.color:C.muted,fontSize:15,fontWeight:700,cursor:"pointer"}}>{m.icon} {c}</button>
           );})}
         </div>
         <div ref={function(el){_chartEl=el;}} style={{overflowX:"scroll",marginBottom:4}}>
@@ -1232,7 +1232,7 @@ function DashboardScreen({user,inspections,actions,onNav,config,sitesState,appSt
               var v=ins?ins.score:0; var col=scoreColor(v);
               return (
                 <div key={i} style={{width:50,flexShrink:0,display:"flex",flexDirection:"column",alignItems:"center",gap:3,height:"100%",justifyContent:"flex-end"}}>
-                  <div style={{fontSize:12,fontWeight:800,color:v>0?col:C.muted}}>{v>0?v:"-"}</div>
+                  <div style={{fontSize:14,fontWeight:800,color:v>0?col:C.muted}}>{v>0?v:"-"}</div>
                   <div style={{width:"100%",height:Math.max(v,6)+"%",borderRadius:"4px 4px 0 0",background:v>0?"linear-gradient(180deg,"+col+"BB,"+col+"22)":C.dim,transition:"height .6s"}}>{v>0&&<div style={{height:2,background:col}}/>}</div>
                   <div style={{fontSize:7,color:C.muted,textAlign:"center",lineHeight:1.1,width:50,wordBreak:"break-word"}}>{site}</div>
                 </div>
@@ -1240,14 +1240,14 @@ function DashboardScreen({user,inspections,actions,onNav,config,sitesState,appSt
             })}
           </div>
         </div>
-        <div style={{display:"flex",gap:12,fontSize:12,color:C.muted,marginTop:6}}>
+        <div style={{display:"flex",gap:12,fontSize:14,color:C.muted,marginTop:6}}>
           <span style={{color:C.green}}>● ≥80 Bon</span><span style={{color:C.amber}}>● 55-79 Modéré</span><span style={{color:C.red}}>● &lt;55 Critique</span>
         </div>
       </div>
 
       {/* Par catégorie */}
       <div style={{margin:"14px 14px 0",...S.card()}}>
-        <div style={{fontSize:18,fontWeight:800,marginBottom:12}}>Scores moyens par catégorie</div>
+        <div style={{fontSize:20,fontWeight:800,marginBottom:12}}>Scores moyens par catégorie</div>
         {CATEGORIES.map(c=>{
           const ins=fInspections.filter(i=>i.categorie===c);
           const sc=ins.length?Math.round(ins.reduce((s,i)=>s+i.score,0)/ins.length):100;
@@ -1255,8 +1255,8 @@ function DashboardScreen({user,inspections,actions,onNav,config,sitesState,appSt
           return (
             <div key={c} style={{marginBottom:10}}>
               <div style={{display:"flex",justifyContent:"space-between",marginBottom:3}}>
-                <span style={{fontSize:16}}>{m.icon} {c}</span>
-                <span style={{fontSize:15,fontWeight:800,color:scoreColor(sc)}}>{sc}/100</span>
+                <span style={{fontSize:18}}>{m.icon} {c}</span>
+                <span style={{fontSize:17,fontWeight:800,color:scoreColor(sc)}}>{sc}/100</span>
               </div>
               <Bar v={sc} col={scoreColor(sc)}/>
             </div>
@@ -1267,40 +1267,40 @@ function DashboardScreen({user,inspections,actions,onNav,config,sitesState,appSt
 
       {/* Top NC récurrentes */}
       <div style={{margin:"14px 14px 0",...S.card()}}>
-        <div style={{fontSize:18,fontWeight:800,marginBottom:4}}>🔁 Top NC récurrentes</div>
-        <div style={{fontSize:15,color:C.muted,marginBottom:12}}>{siteFilter==="Tous"?"Non-conformités les plus fréquentes tous sites confondus":"Non-conformités sur "+siteFilter}</div>
+        <div style={{fontSize:20,fontWeight:800,marginBottom:4}}>🔁 Top NC récurrentes</div>
+        <div style={{fontSize:17,color:C.muted,marginBottom:12}}>{siteFilter==="Tous"?"Non-conformités les plus fréquentes tous sites confondus":"Non-conformités sur "+siteFilter}</div>
         {(function(){
           var ncMap={};
           fInspections.forEach(function(ins){(ins.items||[]).forEach(function(it){if(it&&!it.ok){var key=it.id||it.l;if(!ncMap[key])ncMap[key]={label:it.l||it.id||"NC inconnue",poids:it.poids||it.p||"mineur",count:0,cats:{}};ncMap[key].count++;if(ins.categorie)ncMap[key].cats[ins.categorie]=true;}});});
           var topNC=Object.values(ncMap).sort(function(a,b){return b.count-a.count;}).slice(0,5);
-          if(topNC.length===0) return <div style={{textAlign:"center",padding:"20px 0",color:C.muted,fontSize:16}}>Aucune NC enregistrée pour l&#39;instant</div>;
+          if(topNC.length===0) return <div style={{textAlign:"center",padding:"20px 0",color:C.muted,fontSize:18}}>Aucune NC enregistrée pour l&#39;instant</div>;
           var maxCount=topNC[0].count;
           return topNC.map(function(nc,i){
             var col=nc.poids==="critique"?C.red:nc.poids==="eleve"?C.orange:C.amber;
             var pct=Math.round((nc.count/maxCount)*100);
             return (<div key={i} style={{marginBottom:12,padding:"10px 12px",borderRadius:12,background:col+"08",border:"1px solid "+col+"22"}}>
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:6}}>
-                <div style={{flex:1,fontSize:15,fontWeight:600,paddingRight:8,lineHeight:1.4}}>{nc.label}</div>
+                <div style={{flex:1,fontSize:17,fontWeight:600,paddingRight:8,lineHeight:1.4}}>{nc.label}</div>
                 <div style={{display:"flex",flexDirection:"column",alignItems:"flex-end",gap:3,flexShrink:0}}>
-                  <span style={{fontSize:19,fontWeight:900,color:col}}>{nc.count}×</span>
-                  <span style={{fontSize:12,padding:"2px 6px",borderRadius:6,background:col+"20",color:col,fontWeight:800}}>{poidsLabel(nc.poids)}</span>
+                  <span style={{fontSize:21,fontWeight:900,color:col}}>{nc.count}×</span>
+                  <span style={{fontSize:14,padding:"2px 6px",borderRadius:6,background:col+"20",color:col,fontWeight:800}}>{poidsLabel(nc.poids)}</span>
                 </div>
               </div>
               <div style={{background:C.dim,borderRadius:99,height:5,overflow:"hidden",marginBottom:4}}><div style={{width:pct+"%",height:"100%",background:col,borderRadius:99,transition:"width .6s"}}/></div>
-              <div style={{fontSize:13,color:C.muted}}>{Object.keys(nc.cats).join(" · ")}</div>
+              <div style={{fontSize:15,color:C.muted}}>{Object.keys(nc.cats).join(" · ")}</div>
             </div>);
           });
         })()}
       </div>
       {/* Répartition NC par criticité */}
       <div style={{margin:"14px 14px 0",...S.card()}}>
-        <div style={{fontSize:18,fontWeight:800,marginBottom:4}}>🎯 Répartition NC par criticité</div>
-        <div style={{fontSize:15,color:C.muted,marginBottom:14}}>{siteFilter==="Tous"?"Toutes inspections confondues":"Inspections — "+siteFilter}</div>
+        <div style={{fontSize:20,fontWeight:800,marginBottom:4}}>🎯 Répartition NC par criticité</div>
+        <div style={{fontSize:17,color:C.muted,marginBottom:14}}>{siteFilter==="Tous"?"Toutes inspections confondues":"Inspections — "+siteFilter}</div>
         {(function(){
           var crit=0,elev=0,min=0;
           fInspections.forEach(function(ins){(ins.items||[]).forEach(function(it){if(it&&!it.ok){var p=it.poids||it.p||"mineur";if(p==="critique")crit++;else if(p==="eleve")elev++;else min++;}});});
           var total=crit+elev+min;
-          if(total===0) return <div style={{textAlign:"center",padding:"20px 0",color:C.muted,fontSize:16}}>Aucune NC enregistrée</div>;
+          if(total===0) return <div style={{textAlign:"center",padding:"20px 0",color:C.muted,fontSize:18}}>Aucune NC enregistrée</div>;
           var its=[{label:"Critique",count:crit,col:C.red},{label:"Élevé",count:elev,col:C.orange},{label:"Mineur",count:min,col:C.amber}];
           var r=54,cx=70,cy=70,circ=2*Math.PI*r,offset=0;
           var segs=its.map(function(it){var pct=total>0?it.count/total:0;var dash=pct*circ;var seg=Object.assign({},it,{dash:dash,offset:offset,pct:Math.round(pct*100)});offset+=dash;return seg;});
@@ -1314,8 +1314,8 @@ function DashboardScreen({user,inspections,actions,onNav,config,sitesState,appSt
             <div style={{flex:1,display:"flex",flexDirection:"column",gap:10}}>
               {its.map(function(it,i){var pct=total>0?Math.round(it.count/total*100):0;return (<div key={i}>
                 <div style={{display:"flex",justifyContent:"space-between",marginBottom:4}}>
-                  <span style={{fontSize:15,fontWeight:700,color:it.col}}>● {it.label}</span>
-                  <span style={{fontSize:15,fontWeight:900,color:it.col}}>{it.count} <span style={{fontSize:13,color:C.muted,fontWeight:400}}>({pct}%)</span></span>
+                  <span style={{fontSize:17,fontWeight:700,color:it.col}}>● {it.label}</span>
+                  <span style={{fontSize:17,fontWeight:900,color:it.col}}>{it.count} <span style={{fontSize:15,color:C.muted,fontWeight:400}}>({pct}%)</span></span>
                 </div>
                 <div style={{background:C.dim,borderRadius:99,height:5,overflow:"hidden"}}><div style={{width:pct+"%",height:"100%",background:it.col,borderRadius:99,transition:"width .6s"}}/></div>
               </div>);})}
@@ -1326,8 +1326,8 @@ function DashboardScreen({user,inspections,actions,onNav,config,sitesState,appSt
 
       {/* Sites — dernière inspection */}
       <div style={{margin:"14px 14px 0",...S.card()}}>
-        <div style={{fontSize:18,fontWeight:800,marginBottom:4}}>📍 Suivi des sites</div>
-        <div style={{fontSize:15,color:C.muted,marginBottom:12}}>{siteFilter==="Tous"?"Dernière inspection par site":"Détail — "+siteFilter}</div>
+        <div style={{fontSize:20,fontWeight:800,marginBottom:4}}>📍 Suivi des sites</div>
+        <div style={{fontSize:17,color:C.muted,marginBottom:12}}>{siteFilter==="Tous"?"Dernière inspection par site":"Détail — "+siteFilter}</div>
         {(function(){
           var today=new Date();today.setHours(0,0,0,0);
           var seuils=(config&&config.seuilSites)||{vert:90,jaune:120,rouge:365};
@@ -1347,7 +1347,7 @@ function DashboardScreen({user,inspections,actions,onNav,config,sitesState,appSt
             if(b.days===null) return 1;
             return b.days-a.days;
           });
-          if(siteData.length===0) return <div style={{textAlign:"center",padding:"20px 0",color:C.muted,fontSize:16}}>Aucun site configuré</div>;
+          if(siteData.length===0) return <div style={{textAlign:"center",padding:"20px 0",color:C.muted,fontSize:18}}>Aucun site configuré</div>;
           return siteData.map(function(s,i){
             var col=s.days===null?C.muted:s.days>seuils.rouge?C.red:s.days>seuils.jaune?C.orange:s.days>seuils.vert?C.amber:C.green;
             var label=s.days===null?"Jamais inspecté":s.days===0?"Aujourd'hui":s.days===1?"Hier":"Il y a "+s.days+" jours";
@@ -1355,15 +1355,15 @@ function DashboardScreen({user,inspections,actions,onNav,config,sitesState,appSt
             return (
               <div key={i} style={{display:"flex",alignItems:"center",gap:10,padding:"10px 0",borderBottom:i<siteData.length-1?"1px solid "+C.dim:"none"}}>
                 <div style={{width:42,height:42,borderRadius:11,background:col+"15",border:"1px solid "+col+"33",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
-                  <div style={{fontSize:20,fontWeight:900,color:col}}>{s.days===null?"?":s.days}</div>
+                  <div style={{fontSize:22,fontWeight:900,color:col}}>{s.days===null?"?":s.days}</div>
                 </div>
                 <div style={{flex:1,minWidth:0}}>
-                  <div style={{fontSize:16,fontWeight:700}}>{s.site}</div>
-                  <div style={{fontSize:14,color:col,marginTop:1}}>{label}{s.lastDate?" · "+fmt(s.lastDate):""}</div>
+                  <div style={{fontSize:18,fontWeight:700}}>{s.site}</div>
+                  <div style={{fontSize:16,color:col,marginTop:1}}>{label}{s.lastDate?" · "+fmt(s.lastDate):""}</div>
                 </div>
                 <div style={{textAlign:"right",flexShrink:0}}>
-                  <div style={{fontSize:13,color:C.muted}}>{s.count} audit{s.count>1?"s":""}</div>
-                  {urgent&&<span style={{fontSize:12,padding:"2px 6px",borderRadius:6,background:col+"18",color:col,fontWeight:800}}>{s.days===null?"⚠ AUCUN":s.days>seuils.rouge?"🔴 URGENT":"⚠ +"+seuils.jaune+"j"}</span>}
+                  <div style={{fontSize:15,color:C.muted}}>{s.count} audit{s.count>1?"s":""}</div>
+                  {urgent&&<span style={{fontSize:14,padding:"2px 6px",borderRadius:6,background:col+"18",color:col,fontWeight:800}}>{s.days===null?"⚠ AUCUN":s.days>seuils.rouge?"🔴 URGENT":"⚠ +"+seuils.jaune+"j"}</span>}
                 </div>
               </div>
             );
@@ -1374,8 +1374,8 @@ function DashboardScreen({user,inspections,actions,onNav,config,sitesState,appSt
 {/* Actions */}
       <div style={{margin:"14px 14px 0",...S.card(`${C.red}22`)}}>
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
-          <div style={{fontSize:18,fontWeight:800}}>⚡ Actions urgentes</div>
-          <button onClick={()=>onNav("actions")} style={{...S.btn(C.cyan,true),width:"auto",padding:"5px 12px",fontSize:14}}>Tout voir</button>
+          <div style={{fontSize:20,fontWeight:800}}>⚡ Actions urgentes</div>
+          <button onClick={()=>onNav("actions")} style={{...S.btn(C.cyan,true),width:"auto",padding:"5px 12px",fontSize:16}}>Tout voir</button>
         </div>
         {[...fActions].filter(a=>a.statut!=="Clôturée").sort((a,b)=>{
           if(a.echeance&&b.echeance) return a.echeance.localeCompare(b.echeance);
@@ -1387,12 +1387,12 @@ function DashboardScreen({user,inspections,actions,onNav,config,sitesState,appSt
             <div key={i} style={{display:"flex",alignItems:"center",gap:10,padding:"9px 10px",borderRadius:10,marginBottom:4,border:"1px solid "+col+"22",background:col+"08"}}>
               <div style={{width:8,height:8,borderRadius:99,background:col,flexShrink:0}}/>
               <div style={{flex:1,minWidth:0}}>
-                <div style={{fontSize:16,fontWeight:700,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{a.label}</div>
-                <div style={{fontSize:14,color:C.muted}}>📍 {a.site}</div>
+                <div style={{fontSize:18,fontWeight:700,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{a.label}</div>
+                <div style={{fontSize:16,color:C.muted}}>📍 {a.site}</div>
               </div>
               {dl!==null&&(
                 <div style={{textAlign:"center",padding:"2px 6px",borderRadius:6,background:col+"18",flexShrink:0}}>
-                  <div style={{fontSize:16,fontWeight:900,color:col}}>{dl<0?Math.abs(dl)+"j":dl===0?"Auj":dl+"j"}</div>
+                  <div style={{fontSize:18,fontWeight:900,color:col}}>{dl<0?Math.abs(dl)+"j":dl===0?"Auj":dl+"j"}</div>
                   <div style={{fontSize:8,color:col}}>{dl<0?"retard":"restants"}</div>
                 </div>
               )}
@@ -1411,14 +1411,14 @@ function InlineDelete({onConfirm}){
   const [confirm,setConfirm]=useState(false);
   if(!confirm) return (
     <div style={{display:"flex",justifyContent:"flex-end",marginTop:8}}>
-      <button onClick={e=>{e.stopPropagation();setConfirm(true);}} style={{background:"transparent",border:"1px solid "+C.red+"44",borderRadius:8,padding:"5px 12px",color:C.red,fontSize:14,cursor:"pointer"}}>🗑 Supprimer</button>
+      <button onClick={e=>{e.stopPropagation();setConfirm(true);}} style={{background:"transparent",border:"1px solid "+C.red+"44",borderRadius:8,padding:"5px 12px",color:C.red,fontSize:16,cursor:"pointer"}}>🗑 Supprimer</button>
     </div>
   );
   return (
     <div style={{display:"flex",gap:8,marginTop:8,padding:"8px",background:C.red+"12",borderRadius:8,border:"1px solid "+C.red+"33"}}>
-      <span style={{flex:1,fontSize:14,color:C.red,alignSelf:"center"}}>Confirmer la suppression ?</span>
-      <button onClick={e=>{e.stopPropagation();setConfirm(false);}} style={{background:"transparent",border:"1px solid "+C.border,borderRadius:6,padding:"4px 10px",color:C.muted,fontSize:14,cursor:"pointer"}}>Non</button>
-      <button onClick={e=>{e.stopPropagation();onConfirm();}} style={{background:C.red,border:"none",borderRadius:6,padding:"4px 10px",color:"#fff",fontSize:14,fontWeight:700,cursor:"pointer"}}>Oui, supprimer</button>
+      <span style={{flex:1,fontSize:16,color:C.red,alignSelf:"center"}}>Confirmer la suppression ?</span>
+      <button onClick={e=>{e.stopPropagation();setConfirm(false);}} style={{background:"transparent",border:"1px solid "+C.border,borderRadius:6,padding:"4px 10px",color:C.muted,fontSize:16,cursor:"pointer"}}>Non</button>
+      <button onClick={e=>{e.stopPropagation();onConfirm();}} style={{background:C.red,border:"none",borderRadius:6,padding:"4px 10px",color:"#fff",fontSize:16,fontWeight:700,cursor:"pointer"}}>Oui, supprimer</button>
     </div>
   );
 }
@@ -1446,7 +1446,7 @@ function DeltaBadge({delta}){
   var col=delta>0?C.green:delta<0?C.red:C.amber;
   var icon=delta>0?"▲":delta<0?"▼":"→";
   return (
-    <span style={{display:"inline-flex",alignItems:"center",gap:3,padding:"3px 8px",borderRadius:99,background:col+"18",border:"1px solid "+col+"33",color:col,fontWeight:800,fontSize:15}}>
+    <span style={{display:"inline-flex",alignItems:"center",gap:3,padding:"3px 8px",borderRadius:99,background:col+"18",border:"1px solid "+col+"33",color:col,fontWeight:800,fontSize:17}}>
       {icon} {delta>0?"+":""}{delta} pts
     </span>
   );
@@ -1479,33 +1479,33 @@ function ComparisonScreen({inspections,onBack}){
     return (
       <div style={{paddingBottom:88}}>
         <div style={{padding:"16px 16px 0",display:"flex",gap:10,alignItems:"center"}}>
-          <button onClick={()=>setSelected(null)} style={{background:C.surface,border:"1px solid "+C.cyan+"44",borderRadius:10,padding:"8px 14px",color:C.cyan,cursor:"pointer",fontSize:16,fontWeight:700}}>← Retour</button>
+          <button onClick={()=>setSelected(null)} style={{background:C.surface,border:"1px solid "+C.cyan+"44",borderRadius:10,padding:"8px 14px",color:C.cyan,cursor:"pointer",fontSize:18,fontWeight:700}}>← Retour</button>
           <div>
-            <div style={{fontSize:18,fontWeight:800}}>{c.titre}</div>
-            <div style={{fontSize:14,color:C.muted}}>📍 {c.site} · {catIcon(c.categorie)} {c.categorie}</div>
+            <div style={{fontSize:20,fontWeight:800}}>{c.titre}</div>
+            <div style={{fontSize:16,color:C.muted}}>📍 {c.site} · {catIcon(c.categorie)} {c.categorie}</div>
           </div>
         </div>
         <div style={{margin:"14px 14px 0",...S.card(col+"22")}}>
           <div style={{display:"flex",justifyContent:"space-around",alignItems:"center",marginBottom:14}}>
             <div style={{textAlign:"center"}}>
-              <div style={{fontSize:14,color:C.muted,marginBottom:4}}>PRÉCÉDENT · {fmt(p.date)}</div>
-              <div style={{fontSize:38,fontWeight:900,color:scoreColor(p.score)}}>{p.score}<span style={{fontSize:20,color:C.muted}}>/100</span></div>
+              <div style={{fontSize:16,color:C.muted,marginBottom:4}}>PRÉCÉDENT · {fmt(p.date)}</div>
+              <div style={{fontSize:38,fontWeight:900,color:scoreColor(p.score)}}>{p.score}<span style={{fontSize:22,color:C.muted}}>/100</span></div>
             </div>
             <div style={{textAlign:"center"}}>
               <DeltaBadge delta={delta}/>
-              <div style={{fontSize:12,color:C.muted,marginTop:4}}>ÉVOLUTION</div>
+              <div style={{fontSize:14,color:C.muted,marginTop:4}}>ÉVOLUTION</div>
             </div>
             <div style={{textAlign:"center"}}>
-              <div style={{fontSize:14,color:C.muted,marginBottom:4}}>ACTUEL · {fmt(c.date)}</div>
-              <div style={{fontSize:38,fontWeight:900,color:scoreColor(c.score)}}>{c.score}<span style={{fontSize:20,color:C.muted}}>/100</span></div>
+              <div style={{fontSize:16,color:C.muted,marginBottom:4}}>ACTUEL · {fmt(c.date)}</div>
+              <div style={{fontSize:38,fontWeight:900,color:scoreColor(c.score)}}>{c.score}<span style={{fontSize:22,color:C.muted}}>/100</span></div>
             </div>
           </div>
           <div style={{marginBottom:6}}>
-            <div style={{fontSize:13,color:C.muted,marginBottom:3}}>N-1</div>
+            <div style={{fontSize:15,color:C.muted,marginBottom:3}}>N-1</div>
             <div style={{background:C.dim,borderRadius:99,height:7,overflow:"hidden",marginBottom:6}}>
               <div style={{width:p.score+"%",height:"100%",background:scoreColor(p.score),borderRadius:99,opacity:.6}}/>
             </div>
-            <div style={{fontSize:13,color:C.muted,marginBottom:3}}>Actuel</div>
+            <div style={{fontSize:15,color:C.muted,marginBottom:3}}>Actuel</div>
             <div style={{background:C.dim,borderRadius:99,height:7,overflow:"hidden"}}>
               <div style={{width:c.score+"%",height:"100%",background:scoreColor(c.score),borderRadius:99}}/>
             </div>
@@ -1514,23 +1514,23 @@ function ComparisonScreen({inspections,onBack}){
         <div style={{margin:"12px 14px 0",display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
           <div style={{...S.card(C.green+"33"),textAlign:"center"}}>
             <div style={{fontSize:26,fontWeight:900,color:C.green}}>{fixed.length}</div>
-            <div style={{fontSize:14,color:C.green,marginTop:2}}>✓ NC résolues</div>
+            <div style={{fontSize:16,color:C.green,marginTop:2}}>✓ NC résolues</div>
           </div>
           <div style={{...S.card(C.red+"33"),textAlign:"center"}}>
             <div style={{fontSize:26,fontWeight:900,color:C.red}}>{newNC.length}</div>
-            <div style={{fontSize:14,color:C.red,marginTop:2}}>✗ Nouvelles NC</div>
+            <div style={{fontSize:16,color:C.red,marginTop:2}}>✗ Nouvelles NC</div>
           </div>
         </div>
         {fixed.length>0&&(
           <div style={{margin:"12px 14px 0",...S.card(C.green+"22")}}>
-            <div style={{fontSize:16,fontWeight:800,color:C.green,marginBottom:8}}>✓ NC résolues depuis N-1</div>
-            {fixed.map(function(it,i){return <div key={i} style={{fontSize:15,padding:"6px 0",borderBottom:"1px solid "+C.border,color:C.muted,textDecoration:"line-through"}}>{it.l}</div>;})}
+            <div style={{fontSize:18,fontWeight:800,color:C.green,marginBottom:8}}>✓ NC résolues depuis N-1</div>
+            {fixed.map(function(it,i){return <div key={i} style={{fontSize:17,padding:"6px 0",borderBottom:"1px solid "+C.border,color:C.muted,textDecoration:"line-through"}}>{it.l}</div>;})}
           </div>
         )}
         {newNC.length>0&&(
           <div style={{margin:"12px 14px 0",...S.card(C.red+"22")}}>
-            <div style={{fontSize:16,fontWeight:800,color:C.red,marginBottom:8}}>✗ Nouvelles NC</div>
-            {newNC.map(function(it,i){return <div key={i} style={{fontSize:15,padding:"6px 0",borderBottom:"1px solid "+C.border}}>{it.l}</div>;})}
+            <div style={{fontSize:18,fontWeight:800,color:C.red,marginBottom:8}}>✗ Nouvelles NC</div>
+            {newNC.map(function(it,i){return <div key={i} style={{fontSize:17,padding:"6px 0",borderBottom:"1px solid "+C.border}}>{it.l}</div>;})}
           </div>
         )}
       </div>
@@ -1540,28 +1540,28 @@ function ComparisonScreen({inspections,onBack}){
   return (
     <div style={{paddingBottom:88}}>
       <div style={{padding:"20px 16px 12px",display:"flex",gap:10,alignItems:"center"}}>
-        <button onClick={onBack} style={{background:C.surface,border:"1px solid "+C.cyan+"44",borderRadius:10,padding:"8px 14px",color:C.cyan,cursor:"pointer",fontSize:16,fontWeight:700}}>← Retour</button>
+        <button onClick={onBack} style={{background:C.surface,border:"1px solid "+C.cyan+"44",borderRadius:10,padding:"8px 14px",color:C.cyan,cursor:"pointer",fontSize:18,fontWeight:700}}>← Retour</button>
         <div>
-          <div style={{fontSize:20,fontWeight:900}}>📊 N vs N-1</div>
-          <div style={{fontSize:15,color:C.muted}}>Évolution entre les deux derniers audits</div>
+          <div style={{fontSize:22,fontWeight:900}}>📊 N vs N-1</div>
+          <div style={{fontSize:17,color:C.muted}}>Évolution entre les deux derniers audits</div>
         </div>
       </div>
       <div style={{margin:"0 14px 12px",display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8}}>
         {[{l:"Progression",v:improving,c:C.green,i:"▲"},{l:"Recul",v:degrading,c:C.red,i:"▼"},{l:"Stable",v:stable,c:C.amber,i:"→"}].map(function(s,i){
-          return <div key={i} style={{...S.card(s.c+"22"),textAlign:"center",padding:"12px 8px"}}><div style={{fontSize:22,fontWeight:900,color:s.c}}>{s.i}{s.v}</div><div style={{fontSize:13,color:C.muted,marginTop:3}}>{s.l}</div></div>;
+          return <div key={i} style={{...S.card(s.c+"22"),textAlign:"center",padding:"12px 8px"}}><div style={{fontSize:22,fontWeight:900,color:s.c}}>{s.i}{s.v}</div><div style={{fontSize:15,color:C.muted,marginTop:3}}>{s.l}</div></div>;
         })}
       </div>
       <div style={{padding:"0 14px 10px",display:"flex",gap:6,overflowX:"auto"}}>
         {["Tout",...sites].map(function(s){
-          return <button key={s} onClick={function(){setFilter(s);}} style={{flexShrink:0,padding:"5px 11px",borderRadius:99,border:"1px solid",borderColor:filter===s?C.cyan:C.border,background:filter===s?C.cyan+"15":"transparent",color:filter===s?C.cyan:C.muted,fontSize:14,fontWeight:700,cursor:"pointer"}}>{s==="Tout"?"Tous":s.split(" ")[0]}</button>;
+          return <button key={s} onClick={function(){setFilter(s);}} style={{flexShrink:0,padding:"5px 11px",borderRadius:99,border:"1px solid",borderColor:filter===s?C.cyan:C.border,background:filter===s?C.cyan+"15":"transparent",color:filter===s?C.cyan:C.muted,fontSize:16,fontWeight:700,cursor:"pointer"}}>{s==="Tout"?"Tous":s.split(" ")[0]}</button>;
         })}
       </div>
       <div style={{padding:"0 14px"}}>
         {filtered.length===0&&(
           <div style={{textAlign:"center",padding:"40px 20px",color:C.muted}}>
             <div style={{fontSize:32,marginBottom:8}}>📋</div>
-            <div style={{fontSize:20,fontWeight:600}}>Pas encore assez d&#39;audits</div>
-            <div style={{fontSize:15,marginTop:4}}>Il faut au moins 2 audits du même site et catégorie.</div>
+            <div style={{fontSize:22,fontWeight:600}}>Pas encore assez d&#39;audits</div>
+            <div style={{fontSize:17,marginTop:4}}>Il faut au moins 2 audits du même site et catégorie.</div>
           </div>
         )}
         {filtered.map(function(pair,i){
@@ -1571,25 +1571,25 @@ function ComparisonScreen({inspections,onBack}){
             <div key={i} onClick={function(){setSelected(pair);}} style={{...S.card(delta>5?C.green+"22":delta<-5?C.red+"22":C.border),marginBottom:10,cursor:"pointer"}}>
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:8}}>
                 <div style={{flex:1}}>
-                  <div style={{fontSize:16,fontWeight:700,marginBottom:2}}>{pair.current.titre}</div>
-                  <div style={{fontSize:14,color:C.muted}}>📍 {pair.current.site} · {catIcon(pair.current.categorie)} {pair.current.categorie}</div>
+                  <div style={{fontSize:18,fontWeight:700,marginBottom:2}}>{pair.current.titre}</div>
+                  <div style={{fontSize:16,color:C.muted}}>📍 {pair.current.site} · {catIcon(pair.current.categorie)} {pair.current.categorie}</div>
                 </div>
                 <DeltaBadge delta={delta}/>
               </div>
               <div style={{display:"flex",alignItems:"center",gap:10}}>
                 <div style={{textAlign:"center",flexShrink:0}}>
-                  <div style={{fontSize:12,color:C.muted}}>N-1</div>
-                  <div style={{fontSize:18,fontWeight:900,color:scoreColor(pair.previous.score),opacity:.7}}>{pair.previous.score}</div>
+                  <div style={{fontSize:14,color:C.muted}}>N-1</div>
+                  <div style={{fontSize:20,fontWeight:900,color:scoreColor(pair.previous.score),opacity:.7}}>{pair.previous.score}</div>
                 </div>
                 <div style={{flex:1,height:4,background:C.dim,borderRadius:99,overflow:"hidden"}}>
                   <div style={{width:pair.current.score+"%",height:"100%",background:col,borderRadius:99}}/>
                 </div>
                 <div style={{textAlign:"center",flexShrink:0}}>
-                  <div style={{fontSize:12,color:C.muted}}>Actuel</div>
-                  <div style={{fontSize:18,fontWeight:900,color:scoreColor(pair.current.score)}}>{pair.current.score}</div>
+                  <div style={{fontSize:14,color:C.muted}}>Actuel</div>
+                  <div style={{fontSize:20,fontWeight:900,color:scoreColor(pair.current.score)}}>{pair.current.score}</div>
                 </div>
               </div>
-              <div style={{display:"flex",justifyContent:"space-between",fontSize:13,color:C.muted,marginTop:8}}>
+              <div style={{display:"flex",justifyContent:"space-between",fontSize:15,color:C.muted,marginTop:8}}>
                 <span>{fmt(pair.previous.date)}</span>
                 <span style={{color:C.cyan}}>Voir détail →</span>
                 <span>{fmt(pair.current.date)}</span>
@@ -1611,24 +1611,24 @@ function InspectionsScreen({inspections,onOpen,onNav,onDelete,user,config}){
   });
   return (
     <div style={{paddingBottom:88}}>
-      <div style={{padding:"20px 16px 10px"}}><div style={{fontSize:20,fontWeight:900}}>Inspections</div><div style={{fontSize:15,color:C.muted,marginTop:2}}>{inspections.length} dossiers · score 100→0 (pénalités)</div></div>
+      <div style={{padding:"20px 16px 10px"}}><div style={{fontSize:22,fontWeight:900}}>Inspections</div><div style={{fontSize:17,color:C.muted,marginTop:2}}>{inspections.length} dossiers · score 100→0 (pénalités)</div></div>
       <div style={{padding:"0 14px 6px",display:"flex",gap:6,overflowX:"auto"}}>
-        {["Actifs","Tout","En cours","Validée"].map(function(s){return <button key={s} onClick={function(){setSf(s);}} style={{flexShrink:0,padding:"5px 11px",borderRadius:99,border:"1px solid",borderColor:sf===s?C.cyan:C.border,background:sf===s?C.cyan+"15":"transparent",color:sf===s?C.cyan:C.muted,fontSize:14,fontWeight:700,cursor:"pointer"}}>{s}</button>;})}
+        {["Actifs","Tout","En cours","Validée"].map(function(s){return <button key={s} onClick={function(){setSf(s);}} style={{flexShrink:0,padding:"5px 11px",borderRadius:99,border:"1px solid",borderColor:sf===s?C.cyan:C.border,background:sf===s?C.cyan+"15":"transparent",color:sf===s?C.cyan:C.muted,fontSize:16,fontWeight:700,cursor:"pointer"}}>{s}</button>;})}
       </div>
       <div style={{padding:"0 14px 10px",display:"flex",gap:5,overflowX:"auto"}}>
         {["Tout",...CATEGORIES].map(c=>{
           const m=CAT_META[c];
           return (
-            <button key={c} onClick={()=>setCf(c)} style={{flexShrink:0,padding:"4px 9px",borderRadius:99,border:"1px solid",borderColor:cf===c?C.cyan:C.border,background:cf===c?`${C.cyan}15`:"transparent",color:cf===c?C.cyan:C.muted,fontSize:14,fontWeight:700,cursor:"pointer"}}>
+            <button key={c} onClick={()=>setCf(c)} style={{flexShrink:0,padding:"4px 9px",borderRadius:99,border:"1px solid",borderColor:cf===c?C.cyan:C.border,background:cf===c?`${C.cyan}15`:"transparent",color:cf===c?C.cyan:C.muted,fontSize:16,fontWeight:700,cursor:"pointer"}}>
               {c==="Tout"?"Tout":(m&&m.icon)+" "+c}
             </button>
           );
         })}
       </div>
       <div style={{padding:"0 14px 10px",display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8}}>
-        <button onClick={()=>onNav("new-inspection")} style={{...S.btn(C.cyan),display:"flex",alignItems:"center",justifyContent:"center",gap:5,fontSize:15}}><span>+</span> Nouveau</button>
-        <button onClick={()=>onNav("quick-visit")} style={{...S.btn(C.orange,true),display:"flex",alignItems:"center",justifyContent:"center",gap:5,fontSize:15}}>⚡ Rapide</button>
-        <button onClick={()=>onNav("comparison")} style={{...S.btn(C.purple,true),display:"flex",alignItems:"center",justifyContent:"center",gap:5,fontSize:15}}>📊 N vs N-1</button>
+        <button onClick={()=>onNav("new-inspection")} style={{...S.btn(C.cyan),display:"flex",alignItems:"center",justifyContent:"center",gap:5,fontSize:17}}><span>+</span> Nouveau</button>
+        <button onClick={()=>onNav("quick-visit")} style={{...S.btn(C.orange,true),display:"flex",alignItems:"center",justifyContent:"center",gap:5,fontSize:17}}>⚡ Rapide</button>
+        <button onClick={()=>onNav("comparison")} style={{...S.btn(C.purple,true),display:"flex",alignItems:"center",justifyContent:"center",gap:5,fontSize:17}}>📊 N vs N-1</button>
       </div>
       <div style={{padding:"0 14px"}}>
         {filtered.map((ins,i)=>{
@@ -1639,13 +1639,13 @@ function InspectionsScreen({inspections,onOpen,onNav,onDelete,user,config}){
           return (
             <div key={i} onClick={()=>onOpen(ins)} style={{...S.card(),marginBottom:10,cursor:"pointer"}}>
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:8}}>
-                <div style={{fontSize:16,fontWeight:700,flex:1,marginRight:8}}>{ins.titre}</div>
+                <div style={{fontSize:18,fontWeight:700,flex:1,marginRight:8}}>{ins.titre}</div>
                 <ScoreRing score={ins.score} size={52}/>
               </div>
               <div style={{display:"flex",gap:6,marginBottom:8,flexWrap:"wrap"}}><StatutBadge s={ins.statut}/><Tag label={`${m.icon} ${ins.categorie}`} color={m.color}/></div>
-              <div style={{fontSize:14,color:C.muted}}>📍 {ins.site}</div>
+              <div style={{fontSize:16,color:C.muted}}>📍 {ins.site}</div>
               <div style={{display:"flex",justifyContent:"space-between",marginTop:8,alignItems:"center"}}>
-                <span style={{fontSize:13,color:C.muted}}>👤 {ins.inspecteur} · {fmt(ins.date)}</span>
+                <span style={{fontSize:15,color:C.muted}}>👤 {ins.inspecteur} · {fmt(ins.date)}</span>
                 <div style={{display:"flex",gap:4}}>
                   {ncC>0&&<Tag label={`−${ncC*PENALITE.critique}c`} color={C.red} small/>}
                   {ncE>0&&<Tag label={`−${ncE*PENALITE.eleve}é`} color={C.orange} small/>}
@@ -1706,12 +1706,12 @@ function PhotoBtn({photos=[], onAdd, onRemove}){
           {photos.map((src,i)=>(
             <div key={i} style={{position:"relative",width:58,height:58}}>
               <img src={src} alt="" style={{width:58,height:58,borderRadius:8,objectFit:"cover",border:`1px solid ${C.border}`}}/>
-              <button onClick={e=>{e.stopPropagation();onRemove(i);}} style={{position:"absolute",top:-4,right:-4,width:16,height:16,borderRadius:99,background:C.red,border:"none",color:"#fff",fontSize:12,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontWeight:900}}>×</button>
+              <button onClick={e=>{e.stopPropagation();onRemove(i);}} style={{position:"absolute",top:-4,right:-4,width:16,height:16,borderRadius:99,background:C.red,border:"none",color:"#fff",fontSize:14,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontWeight:900}}>×</button>
             </div>
           ))}
         </div>
       )}
-      <button onClick={e=>{e.stopPropagation();ref.current.click();}} style={{display:"flex",alignItems:"center",gap:5,background:`${C.cyan}12`,border:`1px dashed ${C.cyan}55`,borderRadius:8,padding:"5px 10px",color:C.cyan,fontSize:13,fontWeight:700,cursor:"pointer"}}>
+      <button onClick={e=>{e.stopPropagation();ref.current.click();}} style={{display:"flex",alignItems:"center",gap:5,background:`${C.cyan}12`,border:`1px dashed ${C.cyan}55`,borderRadius:8,padding:"5px 10px",color:C.cyan,fontSize:15,fontWeight:700,cursor:"pointer"}}>
         📷 {photos.length>0?`+ photo (${photos.length})`:"Ajouter une photo"}
       </button>
       <input ref={ref} type="file" accept="image/*" style={{display:"none"}} onChange={handleFile}/>
@@ -1727,31 +1727,31 @@ function ItemCard({item, onToggle, onComment, onPhotoAdd, onPhotoRemove, onRespC
   const [showComment,setShowComment]=useState(!!item.comment);
   return (
     <div style={{background:item.custom?(C.cyan+"08"):(item.ok?C.green+"06":C.red+"06"),borderRadius:12,marginBottom:8,border:"1px solid "+(item.custom?(C.cyan+"55"):(item.ok?C.green+"22":C.red+"22")),overflow:"hidden"}}>
-      {item.custom&&<div style={{background:"linear-gradient(90deg,"+C.cyan+"33,transparent)",padding:"3px 10px",display:"flex",alignItems:"center",gap:5}}><span style={{fontSize:12,color:C.cyan,fontWeight:800,letterSpacing:1}}>✦ QUESTION PERSONNALISÉE</span></div>}
+      {item.custom&&<div style={{background:"linear-gradient(90deg,"+C.cyan+"33,transparent)",padding:"3px 10px",display:"flex",alignItems:"center",gap:5}}><span style={{fontSize:14,color:C.cyan,fontWeight:800,letterSpacing:1}}>✦ QUESTION PERSONNALISÉE</span></div>}
       {/* Header cliquable */}
       <div onClick={onToggle} style={{display:"flex",alignItems:"flex-start",gap:10,padding:"11px 10px",cursor:"pointer"}}>
-        <div style={{width:24,height:24,borderRadius:7,background:item.ok?C.green:C.red,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,fontSize:16,color:"#000",fontWeight:900,marginTop:1}}>{item.ok?"✓":"✗"}</div>
+        <div style={{width:24,height:24,borderRadius:7,background:item.ok?C.green:C.red,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,fontSize:18,color:"#000",fontWeight:900,marginTop:1}}>{item.ok?"✓":"✗"}</div>
         <div style={{flex:1}}>
-          <div style={{fontSize:15,lineHeight:1.45,color:item.custom?C.cyan:undefined}}>{item.l}</div>
+          <div style={{fontSize:17,lineHeight:1.45,color:item.custom?C.cyan:undefined}}>{item.l}</div>
           <div style={{marginTop:5,display:"flex",gap:4,alignItems:"center",flexWrap:"wrap"}}>
             <Tag label={poidsLabel(item.poids)} color={poidsColor(item.poids)} small/>
-            {!item.ok&&<span style={{fontSize:12,color:C.red,fontWeight:800}}>{poidsPen(item.poids)}</span>}
-            {item.ok&&<span style={{fontSize:12,color:C.green}}>conforme</span>}
-            {(item.photos&&item.photos.length)>0&&<span style={{fontSize:12,color:C.cyan}}>📷 {item.photos.length}</span>}
-            {item.comment&&<span style={{fontSize:12,color:C.amber}}>💬</span>}
+            {!item.ok&&<span style={{fontSize:14,color:C.red,fontWeight:800}}>{poidsPen(item.poids)}</span>}
+            {item.ok&&<span style={{fontSize:14,color:C.green}}>conforme</span>}
+            {(item.photos&&item.photos.length)>0&&<span style={{fontSize:14,color:C.cyan}}>📷 {item.photos.length}</span>}
+            {item.comment&&<span style={{fontSize:14,color:C.amber}}>💬</span>}
           </div>
         </div>
-        {onDelete&&<button onClick={function(e){e.stopPropagation();if(window.confirm("Supprimer cette question ?"))onDelete();}} style={{background:"transparent",border:"none",color:C.muted,fontSize:19,cursor:"pointer",padding:"2px 4px",flexShrink:0,lineHeight:1}} title="Supprimer cette question">✕</button>}
+        {onDelete&&<button onClick={function(e){e.stopPropagation();if(window.confirm("Supprimer cette question ?"))onDelete();}} style={{background:"transparent",border:"none",color:C.muted,fontSize:21,cursor:"pointer",padding:"2px 4px",flexShrink:0,lineHeight:1}} title="Supprimer cette question">✕</button>}
       </div>
       {/* Tools row */}
       <div style={{padding:"0 10px 8px",display:"flex",gap:8,flexWrap:"wrap"}}>
-        <button onClick={e=>{e.stopPropagation();setShowComment(v=>!v);}} style={{fontSize:13,padding:"4px 8px",borderRadius:7,background:`${C.amber}12`,border:`1px solid ${C.amber}33`,color:C.amber,cursor:"pointer",fontWeight:700}}>
+        <button onClick={e=>{e.stopPropagation();setShowComment(v=>!v);}} style={{fontSize:15,padding:"4px 8px",borderRadius:7,background:`${C.amber}12`,border:`1px solid ${C.amber}33`,color:C.amber,cursor:"pointer",fontWeight:700}}>
           💬 {showComment?"Cacher":"Remarque"}
         </button>
         {[["critique","CRIT",C.red],["eleve","ÉLEV",C.orange],["mineur","MOD",C.amber]].map(function(arr){
           var pv=arr[0],pl=arr[1],pc=arr[2];
           var active=(item.poids||item.p||"mineur")===pv;
-          return <button key={pv} onClick={function(){if(onSetPoids){onSetPoids(pv);}else if(onPoidsChange){onPoidsChange(pv);}else if(onPoidsChangeDirect){onPoidsChangeDirect(String(item.id),pv);}}} style={{fontSize:13,padding:"3px 7px",borderRadius:7,background:active?pc+"33":"#1E2535",color:active?pc:"#8892A4",border:"1px solid "+(active?pc+"66":"#2E3545"),fontWeight:active?800:500,cursor:"pointer",minWidth:36,textAlign:"center"}}>{active?"✓ ":""}{pl}</button>;
+          return <button key={pv} onClick={function(){if(onSetPoids){onSetPoids(pv);}else if(onPoidsChange){onPoidsChange(pv);}else if(onPoidsChangeDirect){onPoidsChangeDirect(String(item.id),pv);}}} style={{fontSize:15,padding:"3px 7px",borderRadius:7,background:active?pc+"33":"#1E2535",color:active?pc:"#8892A4",border:"1px solid "+(active?pc+"66":"#2E3545"),fontWeight:active?800:500,cursor:"pointer",minWidth:36,textAlign:"center"}}>{active?"✓ ":""}{pl}</button>;
         })}
       </div>
       {!item.ok&&onRespChange&&(
@@ -1759,7 +1759,7 @@ function ItemCard({item, onToggle, onComment, onPhotoAdd, onPhotoRemove, onRespC
           <select
             value={item.resp||""}
             onChange={e=>onRespChange(e.target.value)}
-            style={{...S.input,fontSize:14,padding:"6px 10px",color:item.resp?C.cyan:C.muted}}
+            style={{...S.input,fontSize:16,padding:"6px 10px",color:item.resp?C.cyan:C.muted}}
           >
             <option value="">👤 Assigner un responsable NC...</option>
             {respList.map(function(r,i){var n=typeof r==="object"?r.nom:r; return <option key={i} value={n}>{n}</option>;})}
@@ -1768,7 +1768,7 @@ function ItemCard({item, onToggle, onComment, onPhotoAdd, onPhotoRemove, onRespC
       )}
       {showComment&&(
         <div style={{padding:"0 10px 10px"}} onClick={e=>e.stopPropagation()}>
-          <textarea value={item.comment||""} onChange={e=>onComment(e.target.value)} placeholder="Remarque, mesure corrective, référence..." style={{...S.input,minHeight:60,fontSize:15,resize:"vertical"}}/>
+          <textarea value={item.comment||""} onChange={e=>onComment(e.target.value)} placeholder="Remarque, mesure corrective, référence..." style={{...S.input,minHeight:60,fontSize:17,resize:"vertical"}}/>
         </div>
       )}
       {showPhoto&&(
@@ -1786,28 +1786,28 @@ function AddQuestionBtn({section, onAdd}){
   const [poids,setPoids]=useState("mineur");
 
   if(!open) return (
-    <button onClick={()=>setOpen(true)} style={{display:"flex",alignItems:"center",gap:6,padding:"9px 14px",borderRadius:10,border:"1px dashed "+C.cyan+"66",background:C.cyan+"08",color:C.cyan,cursor:"pointer",fontSize:15,width:"100%",marginTop:6,fontWeight:600}}>
-      <span style={{fontSize:19}}>✦</span> Ajouter une question personnalisée
+    <button onClick={()=>setOpen(true)} style={{display:"flex",alignItems:"center",gap:6,padding:"9px 14px",borderRadius:10,border:"1px dashed "+C.cyan+"66",background:C.cyan+"08",color:C.cyan,cursor:"pointer",fontSize:17,width:"100%",marginTop:6,fontWeight:600}}>
+      <span style={{fontSize:21}}>✦</span> Ajouter une question personnalisée
     </button>
   );
 
   return (
     <div style={{marginTop:8,padding:12,background:C.surface,borderRadius:10,border:"1px solid "+C.cyan+"33"}}>
-      <div style={{fontSize:15,fontWeight:700,color:C.cyan,marginBottom:8}}>Nouvelle question — {section}</div>
+      <div style={{fontSize:17,fontWeight:700,color:C.cyan,marginBottom:8}}>Nouvelle question — {section}</div>
       <input
         value={label} onChange={e=>setLabel(e.target.value)}
         placeholder="Libellé de la question..."
-        style={{...S.input,fontSize:15,marginBottom:8,padding:"8px 12px"}}
+        style={{...S.input,fontSize:17,marginBottom:8,padding:"8px 12px"}}
       />
       <div style={{display:"flex",gap:6,marginBottom:10}}>
         {[["critique","CRITIQUE",C.red],["eleve","ÉLEVÉ",C.orange],["mineur","MODÉRÉ",C.amber]].map(function(arr){
           var k=arr[0],l=arr[1],col=arr[2];
-          return <button key={k} onClick={function(){setPoids(k);}} style={{flex:1,padding:"5px",borderRadius:8,border:"1px solid",borderColor:poids===k?col:C.border,background:poids===k?col+"18":"transparent",color:poids===k?col:C.muted,fontSize:14,fontWeight:poids===k?800:400,cursor:"pointer"}}>{l}</button>;
+          return <button key={k} onClick={function(){setPoids(k);}} style={{flex:1,padding:"5px",borderRadius:8,border:"1px solid",borderColor:poids===k?col:C.border,background:poids===k?col+"18":"transparent",color:poids===k?col:C.muted,fontSize:16,fontWeight:poids===k?800:400,cursor:"pointer"}}>{l}</button>;
         })}
       </div>
       <div style={{display:"flex",gap:8}}>
-        <button onClick={()=>{setOpen(false);setLabel("");}} style={{...S.btn(C.muted,true),flex:1,padding:"7px",fontSize:15}}>Annuler</button>
-        <button onClick={()=>{if(label.trim()){onAdd(label.trim(),poids);setLabel("");setOpen(false);}}} disabled={!label.trim()} style={{...S.btn(C.cyan),flex:2,padding:"7px",fontSize:15,opacity:label.trim()?1:.4}}>Ajouter ✓</button>
+        <button onClick={()=>{setOpen(false);setLabel("");}} style={{...S.btn(C.muted,true),flex:1,padding:"7px",fontSize:17}}>Annuler</button>
+        <button onClick={()=>{if(label.trim()){onAdd(label.trim(),poids);setLabel("");setOpen(false);}}} disabled={!label.trim()} style={{...S.btn(C.cyan),flex:2,padding:"7px",fontSize:17,opacity:label.trim()?1:.4}}>Ajouter ✓</button>
       </div>
     </div>
   );
@@ -1846,19 +1846,19 @@ function InspectionDetailScreen({inspection,onBack,onUpdate,resps,sitesState}){
   return (
     <div style={{paddingBottom:100}}>
       <div style={{padding:"16px 16px 0",display:"flex",gap:10,alignItems:"flex-start"}}>
-        <button onClick={onBack} style={{background:C.surface,border:"1px solid "+C.cyan+"44",borderRadius:10,padding:"8px 14px",color:C.cyan,cursor:"pointer",flexShrink:0,fontSize:16,fontWeight:700,display:"flex",alignItems:"center",gap:5}}>← Retour</button>
+        <button onClick={onBack} style={{background:C.surface,border:"1px solid "+C.cyan+"44",borderRadius:10,padding:"8px 14px",color:C.cyan,cursor:"pointer",flexShrink:0,fontSize:18,fontWeight:700,display:"flex",alignItems:"center",gap:5}}>← Retour</button>
         <div style={{flex:1}}>
-          <div style={{fontSize:20,fontWeight:800}}>{metaForm.titre}</div>
-          <div style={{fontSize:14,color:C.muted,marginTop:2}}>📍 {metaForm.site} · {fmt(metaForm.date)}</div>
+          <div style={{fontSize:22,fontWeight:800}}>{metaForm.titre}</div>
+          <div style={{fontSize:16,color:C.muted,marginTop:2}}>📍 {metaForm.site} · {fmt(metaForm.date)}</div>
         </div>
-        <button onClick={()=>setEditMeta(e=>!e)} style={{background:editMeta?C.red+"18":C.cyan+"15",border:"1px solid "+(editMeta?C.red+"66":C.cyan+"66"),borderRadius:10,padding:"8px 14px",color:editMeta?C.red:C.cyan,cursor:"pointer",fontSize:16,fontWeight:700,flexShrink:0}}>
+        <button onClick={()=>setEditMeta(e=>!e)} style={{background:editMeta?C.red+"18":C.cyan+"15",border:"1px solid "+(editMeta?C.red+"66":C.cyan+"66"),borderRadius:10,padding:"8px 14px",color:editMeta?C.red:C.cyan,cursor:"pointer",fontSize:18,fontWeight:700,flexShrink:0}}>
           {editMeta?"✕ Fermer":"✏️ Modifier"}
         </button>
       </div>
 
       {editMeta&&(
         <div style={{margin:"12px 14px 0",...S.card(C.cyan+"33")}}>
-          <div style={{fontSize:16,fontWeight:800,marginBottom:12,color:C.cyan}}>✏️ Modifier les informations</div>
+          <div style={{fontSize:18,fontWeight:800,marginBottom:12,color:C.cyan}}>✏️ Modifier les informations</div>
           <label style={S.label}>Titre</label>
           <input value={metaForm.titre} onChange={e=>setMetaForm({...metaForm,titre:e.target.value})} style={{...S.input,marginBottom:10}}/>
           <label style={S.label}>Site</label>
@@ -1880,7 +1880,7 @@ function InspectionDetailScreen({inspection,onBack,onUpdate,resps,sitesState}){
       {/* Photo du site */}
       {inspection.sitePhoto&&(
         <div style={{margin:"12px 14px 0",...S.card(),overflow:"hidden",padding:0}}>
-          <div style={{fontSize:14,fontWeight:700,padding:"10px 14px",color:C.muted}}>📷 Photo du site</div>
+          <div style={{fontSize:16,fontWeight:700,padding:"10px 14px",color:C.muted}}>📷 Photo du site</div>
           <img src={inspection.sitePhoto} style={{width:"100%",maxHeight:180,objectFit:"cover",display:"block"}}/>
         </div>
       )}
@@ -1889,20 +1889,20 @@ function InspectionDetailScreen({inspection,onBack,onUpdate,resps,sitesState}){
       <div style={{margin:"14px 14px 0",...S.card(`${scoreColor(score)}33`)}}>
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
           <div>
-            <div style={{fontSize:12,color:C.muted,letterSpacing:1,textTransform:"uppercase"}}>SCORE PÉNALISÉ</div>
-            <div style={{fontSize:40,fontWeight:900,color:scoreColor(score),lineHeight:1}}>{score}<span style={{fontSize:19}}>/100</span></div>
-            <div style={{fontSize:14,color:penTotal>0?C.red:C.green,marginTop:2}}>Pénalité : −{penTotal}pts</div>
+            <div style={{fontSize:14,color:C.muted,letterSpacing:1,textTransform:"uppercase"}}>SCORE PÉNALISÉ</div>
+            <div style={{fontSize:40,fontWeight:900,color:scoreColor(score),lineHeight:1}}>{score}<span style={{fontSize:21}}>/100</span></div>
+            <div style={{fontSize:16,color:penTotal>0?C.red:C.green,marginTop:2}}>Pénalité : −{penTotal}pts</div>
           </div>
           <div style={{textAlign:"right"}}>
-            <div style={{fontSize:12,color:C.muted,marginBottom:4}}>DÉTAIL NC</div>
+            <div style={{fontSize:14,color:C.muted,marginBottom:4}}>DÉTAIL NC</div>
                 {["critique","eleve","mineur"].map(p=>{
                   const n=ncItems.filter(i=>i.poids===p).length;
                   if(!n) return null;
                   return (
-                    <span key={p} style={{fontSize:14,padding:"2px 7px",borderRadius:6,background:`${poidsColor(p)}18`,color:poidsColor(p),fontWeight:800,marginRight:4}}>{n}x {poidsPen(p)}</span>
+                    <span key={p} style={{fontSize:16,padding:"2px 7px",borderRadius:6,background:`${poidsColor(p)}18`,color:poidsColor(p),fontWeight:800,marginRight:4}}>{n}x {poidsPen(p)}</span>
                   );
                 })}
-            {ncItems.length===0&&<div style={{fontSize:15,color:C.green,fontWeight:800}}>✓ Aucune NC</div>}
+            {ncItems.length===0&&<div style={{fontSize:17,color:C.green,fontWeight:800}}>✓ Aucune NC</div>}
           </div>
         </div>
         <Bar v={score} col={scoreColor(score)} h={10}/>
@@ -1915,10 +1915,10 @@ function InspectionDetailScreen({inspection,onBack,onUpdate,resps,sitesState}){
 
       {/* Légende */}
       <div style={{margin:"10px 14px 0",padding:"10px 12px",background:C.surface,borderRadius:12,display:"flex",gap:10,flexWrap:"wrap"}}>
-        <div style={{fontSize:13,color:C.muted,fontWeight:700,width:"100%"}}>PÉNALITÉS · Appuyez sur ✓/✗ pour basculer · 📷 photo par question</div>
+        <div style={{fontSize:15,color:C.muted,fontWeight:700,width:"100%"}}>PÉNALITÉS · Appuyez sur ✓/✗ pour basculer · 📷 photo par question</div>
         {[["critique","CRITIQUE"],["eleve","ÉLEVÉ"],["mineur","MINEUR"]].map(function(arr){
           var p=arr[0],l=arr[1],v=PENALITE[p]||0;
-          return <div key={p} style={{display:"flex",alignItems:"center",gap:4}}><div style={{width:8,height:8,borderRadius:2,background:poidsColor(p)}}/><span style={{fontSize:13,color:C.muted}}>{l} = -{v}pt{v>1?"s":""}</span></div>;
+          return <div key={p} style={{display:"flex",alignItems:"center",gap:4}}><div style={{width:8,height:8,borderRadius:2,background:poidsColor(p)}}/><span style={{fontSize:15,color:C.muted}}>{l} = -{v}pt{v>1?"s":""}</span></div>;
         })}
       </div>
 
@@ -1932,11 +1932,11 @@ function InspectionDetailScreen({inspection,onBack,onUpdate,resps,sitesState}){
           <div key={sec} id={"sec-"+sec.replace(/\s/g,"_")} style={{margin:"10px 14px 0",...S.card(sp>0?`${C.red}22`:C.border)}}>
             <div onClick={function(){if(open){setOpenSec(null);}else{setOpenSec(sec);setTimeout(function(){var el=document.getElementById("sec-"+sec.replace(/\s/g,"_"));if(el)el.scrollIntoView({behavior:"smooth",block:"start"});},150);}}} style={{display:"flex",alignItems:"center",gap:10,cursor:"pointer"}}>
               <div style={{flex:1}}>
-                <div style={{fontSize:16,fontWeight:700}}>{sec}</div>
-                <div style={{fontSize:13,color:C.muted,marginTop:2}}>{items.filter(i=>i.s===sec).length} questions · {snc.length} NC · −{sp}pts</div>
+                <div style={{fontSize:18,fontWeight:700}}>{sec}</div>
+                <div style={{fontSize:15,color:C.muted,marginTop:2}}>{items.filter(i=>i.s===sec).length} questions · {snc.length} NC · −{sp}pts</div>
               </div>
-              <div style={{fontSize:18,fontWeight:900,color:scoreColor(ss),marginRight:4}}>{ss}</div>
-              <div style={{fontSize:15,color:C.muted}}>{open?"▲":"▼"}</div>
+              <div style={{fontSize:20,fontWeight:900,color:scoreColor(ss),marginRight:4}}>{ss}</div>
+              <div style={{fontSize:17,color:C.muted}}>{open?"▲":"▼"}</div>
             </div>
             {!open&&<div style={{marginTop:8}}><Bar v={ss} col={scoreColor(ss)}/></div>}
             {open&&(
@@ -1972,7 +1972,7 @@ function InspectionDetailScreen({inspection,onBack,onUpdate,resps,sitesState}){
       </div>
       {showSig&&(
         <div style={{margin:"12px 14px 0",...S.card()}}>
-          <div style={{fontSize:20,fontWeight:800,marginBottom:12}}>✍️ Signatures</div>
+          <div style={{fontSize:22,fontWeight:800,marginBottom:12}}>✍️ Signatures</div>
           {!sigInsp&&<SignaturePad label="SIGNATURE INSPECTEUR" onSave={(d)=>setSigInsp(d)}/>}
           {sigInsp&&!sigResp&&<SignaturePad label="SIGNATURE RESPONSABLE SITE" onSave={function(d){
             setSigResp(d);
@@ -1980,8 +1980,8 @@ function InspectionDetailScreen({inspection,onBack,onUpdate,resps,sitesState}){
           {sigInsp&&sigResp&&(
             <div style={{textAlign:"center",padding:"16px 0",background:C.green+"10",borderRadius:12,border:"1px solid "+C.green+"33"}}>
               <div style={{fontSize:28,marginBottom:8}}>✅</div>
-              <div style={{fontSize:20,fontWeight:800,color:C.green,marginBottom:4}}>Signatures complètes</div>
-              <div style={{fontSize:15,color:C.muted}}>Appuyez sur "✓ Valider" pour finaliser l'audit</div>
+              <div style={{fontSize:22,fontWeight:800,color:C.green,marginBottom:4}}>Signatures complètes</div>
+              <div style={{fontSize:17,color:C.muted}}>Appuyez sur "✓ Valider" pour finaliser l'audit</div>
             </div>
           )}
         </div>
@@ -2034,29 +2034,29 @@ function QuickVisitScreen({user, onSave, onBack, sitesState}){
     return (
       <div style={{paddingBottom:80}}>
         <div style={{padding:"16px 16px 0",display:"flex",gap:10,alignItems:"center"}}>
-          <button onClick={onBack} style={{background:C.surface,border:"1px solid "+C.cyan+"44",borderRadius:10,padding:"8px 14px",color:C.cyan,cursor:"pointer",fontSize:16,fontWeight:700}}>← Retour</button>
-          <div style={{flex:1}}><div style={{fontSize:18,fontWeight:900}}>⚡ Visite rapide</div><div style={{fontSize:14,color:C.muted}}>{form.cat} · question {idx+1}/{critItems.length}</div></div>
+          <button onClick={onBack} style={{background:C.surface,border:"1px solid "+C.cyan+"44",borderRadius:10,padding:"8px 14px",color:C.cyan,cursor:"pointer",fontSize:18,fontWeight:700}}>← Retour</button>
+          <div style={{flex:1}}><div style={{fontSize:20,fontWeight:900}}>⚡ Visite rapide</div><div style={{fontSize:16,color:C.muted}}>{form.cat} · question {idx+1}/{critItems.length}</div></div>
         </div>
         <div style={{margin:"14px 14px 0",background:C.surface,borderRadius:12,overflow:"hidden"}}>
           <div style={{height:4,background:C.dim}}><div style={{height:"100%",width:(((idx)/critItems.length)*100)+"%",background:C.cyan,transition:"width .3s"}}/></div>
         </div>
         <div style={{margin:"14px 14px 0",...S.card(),padding:24}}>
-          <div style={{fontSize:13,color:C.muted,letterSpacing:1,marginBottom:8}}>POINT CRITIQUE · {q.s}</div>
-          <div style={{fontSize:19,fontWeight:700,lineHeight:1.5,marginBottom:24}}>{q.l}</div>
+          <div style={{fontSize:15,color:C.muted,letterSpacing:1,marginBottom:8}}>POINT CRITIQUE · {q.s}</div>
+          <div style={{fontSize:21,fontWeight:700,lineHeight:1.5,marginBottom:24}}>{q.l}</div>
           <div style={{display:"flex",gap:8}}>
-            <button onClick={function(){answer(true);}} style={{...S.btn(C.green),flex:1,fontSize:18,padding:"12px 6px"}}>✅ Conforme</button>
-            <button onClick={function(){answer(false);}} style={{...S.btn(C.red,true),flex:1,fontSize:18,padding:"12px 6px"}}>❌ NC</button>
-            <button onClick={function(){answer("na");}} style={{...S.btn(C.muted,true),flex:1,fontSize:18,padding:"12px 6px",opacity:0.8}}>➖ N/A</button>
+            <button onClick={function(){answer(true);}} style={{...S.btn(C.green),flex:1,fontSize:20,padding:"12px 6px"}}>✅ Conforme</button>
+            <button onClick={function(){answer(false);}} style={{...S.btn(C.red,true),flex:1,fontSize:20,padding:"12px 6px"}}>❌ NC</button>
+            <button onClick={function(){answer("na");}} style={{...S.btn(C.muted,true),flex:1,fontSize:20,padding:"12px 6px",opacity:0.8}}>➖ N/A</button>
           </div>
         </div>
         <div style={{margin:"12px 14px 0",...S.card(),padding:12}}>
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
-            <div style={{fontSize:13,color:C.muted,letterSpacing:1}}>SITE</div>
+            <div style={{fontSize:15,color:C.muted,letterSpacing:1}}>SITE</div>
           </div>
           <div style={{display:"flex",flexDirection:"column",gap:6}}>
             {siteOpts.map(function(s){return (
-              <button key={s} onClick={function(){setForm({...form,site:s});}} style={{padding:"10px 14px",borderRadius:10,border:"1px solid",borderColor:form.site===s?C.cyan:C.border,background:form.site===s?C.cyan+"18":"transparent",color:form.site===s?C.cyan:C.text,fontSize:16,fontWeight:form.site===s?800:400,cursor:"pointer",textAlign:"left",display:"flex",alignItems:"center",gap:8}}>
-                {form.site===s&&<span style={{color:C.cyan,fontSize:15}}>✓</span>}
+              <button key={s} onClick={function(){setForm({...form,site:s});}} style={{padding:"10px 14px",borderRadius:10,border:"1px solid",borderColor:form.site===s?C.cyan:C.border,background:form.site===s?C.cyan+"18":"transparent",color:form.site===s?C.cyan:C.text,fontSize:18,fontWeight:form.site===s?800:400,cursor:"pointer",textAlign:"left",display:"flex",alignItems:"center",gap:8}}>
+                {form.site===s&&<span style={{color:C.cyan,fontSize:17}}>✓</span>}
                 {s}
               </button>
             );})}
@@ -2069,8 +2069,8 @@ function QuickVisitScreen({user, onSave, onBack, sitesState}){
   return (
     <div style={{padding:"40px 20px",textAlign:"center"}}>
       <div style={{fontSize:40,marginBottom:12}}>✅</div>
-      <div style={{fontSize:18,fontWeight:800,marginBottom:8}}>Visite terminée !</div>
-      <div style={{fontSize:16,color:C.muted}}>Sauvegarde en cours...</div>
+      <div style={{fontSize:20,fontWeight:800,marginBottom:8}}>Visite terminée !</div>
+      <div style={{fontSize:18,color:C.muted}}>Sauvegarde en cours...</div>
     </div>
   );
 }
@@ -2114,16 +2114,16 @@ function NewInspectionScreen({user,onSave,onBack,resps,sitesState,customTemplate
   const qMin=(CHECKLISTS[form.categorie]&&CHECKLISTS[form.categorie].filter(q=>q.p==="mineur").length)||0||0;
   const maxPen=qCrit*PENALITE.critique+qElev*PENALITE.eleve+qMin*PENALITE.mineur;
 
-  const StepDot=({n})=><div style={{width:28,height:28,borderRadius:99,background:step>=n?C.cyan:C.dim,color:step>=n?"#000":C.muted,display:"flex",alignItems:"center",justifyContent:"center",fontSize:15,fontWeight:900}}>{n}</div>;
+  const StepDot=({n})=><div style={{width:28,height:28,borderRadius:99,background:step>=n?C.cyan:C.dim,color:step>=n?"#000":C.muted,display:"flex",alignItems:"center",justifyContent:"center",fontSize:17,fontWeight:900}}>{n}</div>;
 
   return (
     <div style={{paddingBottom:100}}>
       <div style={{padding:"16px 16px 0",display:"flex",gap:10,alignItems:"center"}}>
-        <button onClick={onBack} style={{background:C.surface,border:`1px solid ${C.cyan}44`,borderRadius:10,padding:"8px 14px",color:C.cyan,cursor:"pointer",flexShrink:0,fontSize:16,fontWeight:700}}>← Retour</button>
-        <div style={{fontSize:19,fontWeight:800}}>Nouvelle inspection</div>
+        <button onClick={onBack} style={{background:C.surface,border:`1px solid ${C.cyan}44`,borderRadius:10,padding:"8px 14px",color:C.cyan,cursor:"pointer",flexShrink:0,fontSize:18,fontWeight:700}}>← Retour</button>
+        <div style={{fontSize:21,fontWeight:800}}>Nouvelle inspection</div>
       </div>
       <div style={{padding:"14px 20px 0",display:"flex",alignItems:"center"}}><StepDot n={1}/><div style={{flex:1,height:2,background:step>=2?C.cyan:C.dim}}/><StepDot n={2}/><div style={{flex:1,height:2,background:step>=3?C.cyan:C.dim}}/><StepDot n={3}/></div>
-      <div style={{display:"flex",justifyContent:"space-between",padding:"5px 14px 14px",fontSize:13,color:C.muted}}><span>Informations</span><span>Checklist</span><span>Résumé</span></div>
+      <div style={{display:"flex",justifyContent:"space-between",padding:"5px 14px 14px",fontSize:15,color:C.muted}}><span>Informations</span><span>Checklist</span><span>Résumé</span></div>
 
       {step===1&&(
         <div style={{padding:"0 14px"}}>
@@ -2135,7 +2135,7 @@ function NewInspectionScreen({user,onSave,onBack,resps,sitesState,customTemplate
             <label style={S.label}>Site</label>
             <select style={{...S.input,marginBottom:14}} value={form.site} onChange={function(e){setForm({...form,site:e.target.value,adresse:(siteAddresses&&siteAddresses[e.target.value])||""});}}>{siteOpts.map(function(s){return <option key={s} value={s}>{s}</option>;})}</select>
             <label style={S.label}>Adresse</label>
-            <div style={{...S.input,marginBottom:14,background:C.surface,color:C.muted,fontSize:15,padding:"10px 14px",minHeight:36}}>
+            <div style={{...S.input,marginBottom:14,background:C.surface,color:C.muted,fontSize:17,padding:"10px 14px",minHeight:36}}>
               {(siteAddresses&&siteAddresses[form.site])||<span style={{color:C.border,fontStyle:"italic"}}>Aucune adresse configurée pour ce site</span>}
             </div>
             <label style={S.label}>Catégorie</label>
@@ -2144,7 +2144,7 @@ function NewInspectionScreen({user,onSave,onBack,resps,sitesState,customTemplate
                 var m=CAT_META[c];
                 var active=form.categorie===c;
                 return (
-                  <button key={c} onClick={function(){setForm({...form,categorie:c});}} style={{padding:"10px 8px",borderRadius:12,border:"1px solid",borderColor:active?C.cyan:C.border,background:active?C.cyan+"18":"transparent",color:active?C.cyan:C.muted,fontSize:15,fontWeight:active?800:500,cursor:"pointer",textAlign:"center",display:"flex",alignItems:"center",justifyContent:"center",gap:5}}>
+                  <button key={c} onClick={function(){setForm({...form,categorie:c});}} style={{padding:"10px 8px",borderRadius:12,border:"1px solid",borderColor:active?C.cyan:C.border,background:active?C.cyan+"18":"transparent",color:active?C.cyan:C.muted,fontSize:17,fontWeight:active?800:500,cursor:"pointer",textAlign:"center",display:"flex",alignItems:"center",justifyContent:"center",gap:5}}>
                     <span>{(m&&m.icon)||""}</span><span>{c}</span>
                   </button>
                 );
@@ -2165,10 +2165,10 @@ function NewInspectionScreen({user,onSave,onBack,resps,sitesState,customTemplate
                     borderColor:checked?C.cyan:C.border,
                     background:checked?C.cyan+"18":"transparent",
                     color:checked?C.cyan:C.muted,
-                    fontSize:15,fontWeight:checked?800:400,cursor:"pointer",
+                    fontSize:17,fontWeight:checked?800:400,cursor:"pointer",
                     display:"flex",alignItems:"center",gap:6
                   }}>
-                    {checked&&<span style={{fontSize:13}}>✓</span>}
+                    {checked&&<span style={{fontSize:15}}>✓</span>}
                     {a}
                   </button>
                 );
@@ -2181,11 +2181,11 @@ function NewInspectionScreen({user,onSave,onBack,resps,sitesState,customTemplate
               {form.sitePhoto?(
                 <div style={{position:"relative",borderRadius:12,overflow:"hidden",border:"1px solid "+C.border}}>
                   <img src={form.sitePhoto} style={{width:"100%",maxHeight:200,objectFit:"cover",display:"block"}}/>
-                  <button onClick={function(){setForm({...form,sitePhoto:null});}} style={{position:"absolute",top:8,right:8,width:28,height:28,borderRadius:99,background:"rgba(0,0,0,0.7)",border:"none",color:"#fff",cursor:"pointer",fontSize:20,display:"flex",alignItems:"center",justifyContent:"center"}}>✕</button>
+                  <button onClick={function(){setForm({...form,sitePhoto:null});}} style={{position:"absolute",top:8,right:8,width:28,height:28,borderRadius:99,background:"rgba(0,0,0,0.7)",border:"none",color:"#fff",cursor:"pointer",fontSize:22,display:"flex",alignItems:"center",justifyContent:"center"}}>✕</button>
                 </div>
               ):(
-                <label style={{display:"flex",alignItems:"center",justifyContent:"center",gap:8,padding:"20px",borderRadius:12,border:"2px dashed "+C.border,cursor:"pointer",color:C.muted,fontSize:15}}>
-                  <span style={{fontSize:20}}>📷</span> Ajouter une photo du site
+                <label style={{display:"flex",alignItems:"center",justifyContent:"center",gap:8,padding:"20px",borderRadius:12,border:"2px dashed "+C.border,cursor:"pointer",color:C.muted,fontSize:17}}>
+                  <span style={{fontSize:22}}>📷</span> Ajouter une photo du site
                   <input type="file" accept="image/*" style={{display:"none"}} onChange={function(e){
                     var file=e.target.files&&e.target.files[0];
                     if(!file) return;
@@ -2211,20 +2211,20 @@ function NewInspectionScreen({user,onSave,onBack,resps,sitesState,customTemplate
           <div style={{...S.card(`${scoreColor(score)}33`),marginBottom:12}}>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
               <div>
-                <div style={{fontSize:12,color:C.muted,letterSpacing:1}}>SCORE EN DIRECT</div>
-                <div style={{fontSize:34,fontWeight:900,color:scoreColor(score),lineHeight:1}}>{score}<span style={{fontSize:17}}>/100</span></div>
-                <div style={{fontSize:14,color:penTotal>0?C.red:C.green,marginTop:2}}>Pénalité : −{penTotal}pts{totalPhotos>0?` · 📷 ${totalPhotos}`:""}</div>
+                <div style={{fontSize:14,color:C.muted,letterSpacing:1}}>SCORE EN DIRECT</div>
+                <div style={{fontSize:34,fontWeight:900,color:scoreColor(score),lineHeight:1}}>{score}<span style={{fontSize:19}}>/100</span></div>
+                <div style={{fontSize:16,color:penTotal>0?C.red:C.green,marginTop:2}}>Pénalité : −{penTotal}pts{totalPhotos>0?` · 📷 ${totalPhotos}`:""}</div>
               </div>
               <div style={{textAlign:"right"}}>
-                <div style={{fontSize:12,color:C.muted,marginBottom:4}}>NC ACTIVES</div>
+                <div style={{fontSize:14,color:C.muted,marginBottom:4}}>NC ACTIVES</div>
                 {["critique","eleve","mineur"].map(p=>{
                   const n=ncItems.filter(i=>i.poids===p).length;
                   if(!n) return null;
                   return (
-                    <div key={p} style={{fontSize:13,fontWeight:800,color:poidsColor(p),marginBottom:1}}>{n}x {poidsPen(p)}</div>
+                    <div key={p} style={{fontSize:15,fontWeight:800,color:poidsColor(p),marginBottom:1}}>{n}x {poidsPen(p)}</div>
                   );
                 })}
-                {ncItems.length===0&&<div style={{fontSize:14,color:C.green,fontWeight:800}}>✓ 100/100</div>}
+                {ncItems.length===0&&<div style={{fontSize:16,color:C.green,fontWeight:800}}>✓ 100/100</div>}
               </div>
             </div>
             <Bar v={score} col={scoreColor(score)} h={8}/>
@@ -2239,9 +2239,9 @@ function NewInspectionScreen({user,onSave,onBack,resps,sitesState,customTemplate
             return (
               <div key={sec} id={"sec2-"+sec.replace(/\s/g,"_")} style={{...S.card(sp>0?`${C.red}22`:C.border),marginBottom:10}}>
                 <div onClick={function(){if(open){setOpenSec(null);}else{setOpenSec(sec);setTimeout(function(){var el=document.getElementById("sec2-"+sec.replace(/\s/g,"_"));if(el)el.scrollIntoView({behavior:"smooth",block:"start"});},150);}}} style={{display:"flex",alignItems:"center",gap:10,cursor:"pointer"}}>
-                  <div style={{flex:1}}><div style={{fontSize:16,fontWeight:700}}>{sec}</div><div style={{fontSize:13,color:C.muted,marginTop:1}}>{secItems.length} questions · {sncLen} NC · −{sp}pts</div></div>
-                  <div style={{fontSize:20,fontWeight:900,color:scoreColor(ss),marginRight:4}}>{ss}</div>
-                  <div style={{fontSize:15,color:C.muted}}>{open?"▲":"▼"}</div>
+                  <div style={{flex:1}}><div style={{fontSize:18,fontWeight:700}}>{sec}</div><div style={{fontSize:15,color:C.muted,marginTop:1}}>{secItems.length} questions · {sncLen} NC · −{sp}pts</div></div>
+                  <div style={{fontSize:22,fontWeight:900,color:scoreColor(ss),marginRight:4}}>{ss}</div>
+                  <div style={{fontSize:17,color:C.muted}}>{open?"▲":"▼"}</div>
                 </div>
                 {!open&&<div style={{marginTop:8}}><Bar v={ss} col={scoreColor(ss)}/></div>}
                 {open&&(
@@ -2281,8 +2281,8 @@ function NewInspectionScreen({user,onSave,onBack,resps,sitesState,customTemplate
         <div style={{padding:"0 14px"}}>
           <div style={{...S.card(),marginBottom:14,textAlign:"center",padding:24}}>
             <div style={{fontSize:40,marginBottom:10}}>✅</div>
-            <div style={{fontSize:18,fontWeight:900,marginBottom:4}}>Prêt à créer</div>
-            <div style={{fontSize:16,color:C.muted,marginBottom:12}}>Récapitulatif complet</div>
+            <div style={{fontSize:20,fontWeight:900,marginBottom:4}}>Prêt à créer</div>
+            <div style={{fontSize:18,color:C.muted,marginBottom:12}}>Récapitulatif complet</div>
 
             {[
               ["Titre",form.titre],["Date",form.date||"—"],["Site",form.site],["Adresse",form.adresse||"—"],["Accompagnateurs",(form.accompagnateurs&&form.accompagnateurs.length>0)?form.accompagnateurs.join(", "):"—"],
@@ -2294,26 +2294,26 @@ function NewInspectionScreen({user,onSave,onBack,resps,sitesState,customTemplate
               ["Photos jointes",totalPhotos],["Inspecteur",user.nom]
             ].map(function(arr){
               var k=arr[0]; var v=arr[1];
-              return (<div key={k} style={{display:"flex",justifyContent:"space-between",padding:"8px 0",borderBottom:"1px solid "+C.border}}><span style={{fontSize:15,color:C.muted}}>{k}</span><span style={{fontSize:15,fontWeight:700}}>{v}</span></div>);
+              return (<div key={k} style={{display:"flex",justifyContent:"space-between",padding:"8px 0",borderBottom:"1px solid "+C.border}}><span style={{fontSize:17,color:C.muted}}>{k}</span><span style={{fontSize:17,fontWeight:700}}>{v}</span></div>);
             })}
           </div>
           {form.sitePhoto&&(
             <div style={{...S.card(),marginBottom:12,overflow:"hidden"}}>
-              <div style={{fontSize:15,fontWeight:700,marginBottom:8}}>📷 Photo du site</div>
+              <div style={{fontSize:17,fontWeight:700,marginBottom:8}}>📷 Photo du site</div>
               <img src={form.sitePhoto} style={{width:"100%",maxHeight:200,objectFit:"cover",borderRadius:10,display:"block"}}/>
             </div>
           )}
           {items.filter(function(i){return i.custom;}).length>0&&(
               <div style={{...S.card(),marginBottom:12,background:C.cyan+"10",border:"1px solid "+C.cyan+"33"}}>
-                <div style={{fontSize:15,fontWeight:800,color:C.cyan,marginBottom:6}}>💡 {items.filter(function(i){return i.custom;}).length} question(s) personnalisée(s) ajoutée(s)</div>
-                <div style={{fontSize:14,color:C.muted,marginBottom:10}}>Voulez-vous sauvegarder ces questions comme nouveau standard pour la catégorie "{form.categorie}" ?</div>
+                <div style={{fontSize:17,fontWeight:800,color:C.cyan,marginBottom:6}}>💡 {items.filter(function(i){return i.custom;}).length} question(s) personnalisée(s) ajoutée(s)</div>
+                <div style={{fontSize:16,color:C.muted,marginBottom:10}}>Voulez-vous sauvegarder ces questions comme nouveau standard pour la catégorie "{form.categorie}" ?</div>
                 <div style={{display:"flex",gap:8}}>
                   <button onClick={function(){
                     var newTpl=items.map(function(i){return {id:i.id,s:i.s,l:i.l,p:i.poids||i.p||"mineur",poids:i.poids||i.p||"mineur"};});
                     onSaveTemplate&&onSaveTemplate(form.categorie,newTpl);
                     save();
-                  }} style={{...S.btn(C.cyan),flex:2,fontSize:15,padding:"8px"}}>💾 Sauvegarder comme standard</button>
-                  <button onClick={save} style={{...S.btn(C.muted,true),flex:1,fontSize:15,padding:"8px"}}>Non merci</button>
+                  }} style={{...S.btn(C.cyan),flex:2,fontSize:17,padding:"8px"}}>💾 Sauvegarder comme standard</button>
+                  <button onClick={save} style={{...S.btn(C.muted,true),flex:1,fontSize:17,padding:"8px"}}>Non merci</button>
                 </div>
               </div>
           )}
@@ -2382,31 +2382,31 @@ function RappelsScreen({actions,resps,config,onConfigUpdate,onBack}){
   return (
     <div style={{paddingBottom:88}}>
       <div style={{padding:"20px 16px 12px",display:"flex",alignItems:"center",gap:10}}>
-        <button onClick={onBack} style={{background:C.surface,border:"1px solid "+C.border,borderRadius:10,padding:"8px 12px",color:C.cyan,cursor:"pointer",fontSize:16,fontWeight:700}}>← Retour</button>
-        <div style={{flex:1}}><div style={{fontSize:18,fontWeight:900}}>📧 Rappels</div><div style={{fontSize:14,color:C.muted}}>Envoi aux responsables par email</div></div>
-        {Object.keys(dismissed).length>0&&<button onClick={function(){saveDismissed({});}} style={{background:"transparent",border:"1px solid "+C.border,borderRadius:10,padding:"6px 10px",color:C.muted,cursor:"pointer",fontSize:13,fontWeight:700}}>🔄 Reset</button>}
+        <button onClick={onBack} style={{background:C.surface,border:"1px solid "+C.border,borderRadius:10,padding:"8px 12px",color:C.cyan,cursor:"pointer",fontSize:18,fontWeight:700}}>← Retour</button>
+        <div style={{flex:1}}><div style={{fontSize:20,fontWeight:900}}>📧 Rappels</div><div style={{fontSize:16,color:C.muted}}>Envoi aux responsables par email</div></div>
+        {Object.keys(dismissed).length>0&&<button onClick={function(){saveDismissed({});}} style={{background:"transparent",border:"1px solid "+C.border,borderRadius:10,padding:"6px 10px",color:C.muted,cursor:"pointer",fontSize:15,fontWeight:700}}>🔄 Reset</button>}
       </div>
       <div style={{margin:"0 14px 14px",...S.card(C.cyan+"22")}}>
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-          <div><div style={{fontSize:16,fontWeight:700}}>⏰ Délai de rappel</div><div style={{fontSize:14,color:C.muted,marginTop:2}}>Actions dont l&#39;échéance est dans ≤ {delai} jour(s)</div></div>
+          <div><div style={{fontSize:18,fontWeight:700}}>⏰ Délai de rappel</div><div style={{fontSize:16,color:C.muted,marginTop:2}}>Actions dont l&#39;échéance est dans ≤ {delai} jour(s)</div></div>
           {!editDelai?(
-            <button onClick={function(){setEditDelai(true);setTempDelai(delai);}} style={{...S.btn(C.cyan,true),width:"auto",padding:"6px 14px",fontSize:15}}>{delai}j ✏️</button>
+            <button onClick={function(){setEditDelai(true);setTempDelai(delai);}} style={{...S.btn(C.cyan,true),width:"auto",padding:"6px 14px",fontSize:17}}>{delai}j ✏️</button>
           ):(
             <div style={{display:"flex",gap:8,alignItems:"center"}}>
-              <input type="number" min="1" max="90" value={tempDelai} onChange={function(e){setTempDelai(parseInt(e.target.value)||1);}} style={{...S.input,width:60,textAlign:"center",padding:"6px 8px",fontSize:20,fontWeight:800}}/>
-              <button onClick={function(){onConfigUpdate&&onConfigUpdate(Object.assign({},config,{rappelDelai:tempDelai}));setEditDelai(false);}} style={{...S.btn(C.green),width:"auto",padding:"6px 14px",fontSize:15}}>✓</button>
-              <button onClick={function(){setEditDelai(false);}} style={{...S.btn(C.muted,true),width:"auto",padding:"6px 10px",fontSize:15}}>✕</button>
+              <input type="number" min="1" max="90" value={tempDelai} onChange={function(e){setTempDelai(parseInt(e.target.value)||1);}} style={{...S.input,width:60,textAlign:"center",padding:"6px 8px",fontSize:22,fontWeight:800}}/>
+              <button onClick={function(){onConfigUpdate&&onConfigUpdate(Object.assign({},config,{rappelDelai:tempDelai}));setEditDelai(false);}} style={{...S.btn(C.green),width:"auto",padding:"6px 14px",fontSize:17}}>✓</button>
+              <button onClick={function(){setEditDelai(false);}} style={{...S.btn(C.muted,true),width:"auto",padding:"6px 10px",fontSize:17}}>✕</button>
             </div>
           )}
         </div>
       </div>
       {sansResp.length>0&&(
         <div style={{margin:"0 14px 10px",padding:"10px 14px",background:C.orange+"12",border:"1px solid "+C.orange+"33",borderRadius:12,display:"flex",alignItems:"center",gap:10}}>
-          <span style={{fontSize:18}}>⚠️</span>
-          <div><div style={{fontSize:15,fontWeight:700,color:C.orange}}>{sansResp.length} action(s) sans responsable</div><div style={{fontSize:14,color:C.muted,marginTop:2}}>Assignez un responsable dans Actions pour les inclure dans les rappels</div></div>
+          <span style={{fontSize:20}}>⚠️</span>
+          <div><div style={{fontSize:17,fontWeight:700,color:C.orange}}>{sansResp.length} action(s) sans responsable</div><div style={{fontSize:16,color:C.muted,marginTop:2}}>Assignez un responsable dans Actions pour les inclure dans les rappels</div></div>
         </div>
       )}
-      {groups.length===0&&<div style={{textAlign:"center",padding:"50px 20px",color:C.muted}}><div style={{fontSize:36,marginBottom:12}}>✅</div><div style={{fontSize:20,fontWeight:700,marginBottom:6}}>Aucun rappel nécessaire</div><div style={{fontSize:15,marginBottom:16}}>Aucune action n&#39;arrive à échéance dans les {delai} prochains jours.</div>{Object.keys(dismissed).length>0&&<button onClick={function(){saveDismissed({});}} style={{...S.btn(C.muted,true),width:"auto",padding:"8px 16px",fontSize:14,margin:"0 auto"}}>🔄 Réafficher les rappels envoyés</button>}</div>}
+      {groups.length===0&&<div style={{textAlign:"center",padding:"50px 20px",color:C.muted}}><div style={{fontSize:36,marginBottom:12}}>✅</div><div style={{fontSize:22,fontWeight:700,marginBottom:6}}>Aucun rappel nécessaire</div><div style={{fontSize:17,marginBottom:16}}>Aucune action n&#39;arrive à échéance dans les {delai} prochains jours.</div>{Object.keys(dismissed).length>0&&<button onClick={function(){saveDismissed({});}} style={{...S.btn(C.muted,true),width:"auto",padding:"8px 16px",fontSize:16,margin:"0 auto"}}>🔄 Réafficher les rappels envoyés</button>}</div>}
       <div style={{padding:"0 14px"}}>
         {groups.map(function(group,gi){
           var hasEmail=!!group.email;
@@ -2416,13 +2416,13 @@ function RappelsScreen({actions,resps,config,onConfigUpdate,onBack}){
           return (
             <div key={gi} style={{...S.card(),marginBottom:14}}>
               <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:12,paddingBottom:12,borderBottom:"1px solid "+C.border}}>
-                <div style={{width:44,height:44,borderRadius:13,background:C.cyan+"18",border:"1px solid "+C.cyan+"33",display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,fontWeight:900,color:C.cyan,flexShrink:0}}>{initials}</div>
-                <div style={{flex:1,minWidth:0}}><div style={{fontSize:20,fontWeight:800}}>{group.resp}</div><div style={{fontSize:14,color:hasEmail?C.muted:C.red,marginTop:1,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{hasEmail?group.email:"⚠ Email manquant — configurer dans Paramètres"}</div></div>
-                <div style={{textAlign:"right",flexShrink:0}}><div style={{fontSize:20,fontWeight:900,color:C.cyan}}>{group.actions.length}</div><div style={{fontSize:12,color:C.muted}}>action(s)</div></div>
+                <div style={{width:44,height:44,borderRadius:13,background:C.cyan+"18",border:"1px solid "+C.cyan+"33",display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,fontWeight:900,color:C.cyan,flexShrink:0}}>{initials}</div>
+                <div style={{flex:1,minWidth:0}}><div style={{fontSize:22,fontWeight:800}}>{group.resp}</div><div style={{fontSize:16,color:hasEmail?C.muted:C.red,marginTop:1,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{hasEmail?group.email:"⚠ Email manquant — configurer dans Paramètres"}</div></div>
+                <div style={{textAlign:"right",flexShrink:0}}><div style={{fontSize:22,fontWeight:900,color:C.cyan}}>{group.actions.length}</div><div style={{fontSize:14,color:C.muted}}>action(s)</div></div>
               </div>
               {(retard>0||critique>0)&&<div style={{display:"flex",gap:6,marginBottom:10,flexWrap:"wrap"}}>
-                {retard>0&&<span style={{fontSize:13,padding:"3px 9px",borderRadius:6,background:C.red+"18",color:C.red,fontWeight:700}}>⚠ {retard} en retard</span>}
-                {critique>0&&<span style={{fontSize:13,padding:"3px 9px",borderRadius:6,background:C.orange+"18",color:C.orange,fontWeight:700}}>🔴 {critique} critique{critique>1?"s":""}</span>}
+                {retard>0&&<span style={{fontSize:15,padding:"3px 9px",borderRadius:6,background:C.red+"18",color:C.red,fontWeight:700}}>⚠ {retard} en retard</span>}
+                {critique>0&&<span style={{fontSize:15,padding:"3px 9px",borderRadius:6,background:C.orange+"18",color:C.orange,fontWeight:700}}>🔴 {critique} critique{critique>1?"s":""}</span>}
               </div>}
               {group.actions.map(function(a,ai){
                 var col=a.prio==="CRITIQUE"?C.red:a.prio==="ÉLEVÉE"?C.orange:C.amber;
@@ -2432,18 +2432,18 @@ function RappelsScreen({actions,resps,config,onConfigUpdate,onBack}){
                 return (<div key={ai} style={{display:"flex",gap:10,padding:"8px 0",borderBottom:ai<group.actions.length-1?"1px solid "+C.dim:"none",alignItems:"flex-start"}}>
                   <div style={{width:6,height:6,borderRadius:99,background:col,marginTop:5,flexShrink:0}}/>
                   <div style={{flex:1,minWidth:0}}>
-                    <div style={{fontSize:15,fontWeight:600,lineHeight:1.3,marginBottom:3}}>{a.label}</div>
+                    <div style={{fontSize:17,fontWeight:600,lineHeight:1.3,marginBottom:3}}>{a.label}</div>
                     <div style={{display:"flex",gap:6,alignItems:"center",flexWrap:"wrap"}}>
-                      <span style={{fontSize:12,padding:"1px 6px",borderRadius:5,background:col+"18",color:col,fontWeight:800}}>{a.prio}</span>
-                      <span style={{fontSize:13,color:C.muted}}>📍 {a.site}</span>
-                      <span style={{fontSize:13,color:dlCol,fontWeight:dl<0?800:400}}>{dlTxt}</span>
+                      <span style={{fontSize:14,padding:"1px 6px",borderRadius:5,background:col+"18",color:col,fontWeight:800}}>{a.prio}</span>
+                      <span style={{fontSize:15,color:C.muted}}>📍 {a.site}</span>
+                      <span style={{fontSize:15,color:dlCol,fontWeight:dl<0?800:400}}>{dlTxt}</span>
                     </div>
                   </div>
-                  <button onClick={function(){dismissOne(a);}} style={{background:"transparent",border:"1px solid "+C.border,borderRadius:8,width:28,height:28,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",color:C.muted,fontSize:16,flexShrink:0}}>✕</button>
+                  <button onClick={function(){dismissOne(a);}} style={{background:"transparent",border:"1px solid "+C.border,borderRadius:8,width:28,height:28,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",color:C.muted,fontSize:18,flexShrink:0}}>✕</button>
                 </div>);
               })}
               <button onClick={function(){send(group);}} disabled={!hasEmail}
-                style={{marginTop:14,width:"100%",padding:"13px",borderRadius:12,background:hasEmail?"linear-gradient(135deg,"+C.cyan+","+C.cyan+"BB)":C.dim,border:"none",color:hasEmail?"#000":C.muted,fontWeight:800,fontSize:16,cursor:hasEmail?"pointer":"default",display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
+                style={{marginTop:14,width:"100%",padding:"13px",borderRadius:12,background:hasEmail?"linear-gradient(135deg,"+C.cyan+","+C.cyan+"BB)":C.dim,border:"none",color:hasEmail?"#000":C.muted,fontWeight:800,fontSize:18,cursor:hasEmail?"pointer":"default",display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
                 <span>📧</span>Envoyer rappel à {group.resp.split(" ")[0]}
               </button>
             </div>
@@ -2468,8 +2468,8 @@ function PermissionsScreen({config,onConfigUpdate,onBack}){
   return (
     <div style={{paddingBottom:20}}>
       <div style={{marginBottom:14,padding:"10px 0 0"}}>
-        <div style={{fontSize:18,fontWeight:800,marginBottom:4}}>🔐 Permissions par rôle</div>
-        <div style={{fontSize:14,color:C.muted}}>L&#39;Admin a toujours accès à tout</div>
+        <div style={{fontSize:20,fontWeight:800,marginBottom:4}}>🔐 Permissions par rôle</div>
+        <div style={{fontSize:16,color:C.muted}}>L&#39;Admin a toujours accès à tout</div>
       </div>
       {roles.map(function(role,ri){
         var rolePerms=perms[role]||{};
@@ -2477,16 +2477,16 @@ function PermissionsScreen({config,onConfigUpdate,onBack}){
         return (
           <div key={ri} style={{...S.card(),marginBottom:14}}>
             <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:14,paddingBottom:12,borderBottom:"1px solid "+C.border}}>
-              <div style={{width:38,height:38,borderRadius:11,background:roleCol+"18",border:"1px solid "+roleCol+"33",display:"flex",alignItems:"center",justifyContent:"center",fontSize:19}}>{role==="Inspecteur"?"🔍":"👤"}</div>
-              <div><div style={{fontSize:18,fontWeight:800}}>{role}</div><div style={{fontSize:14,color:C.muted}}>{Object.values(rolePerms).filter(Boolean).length} accès actifs</div></div>
+              <div style={{width:38,height:38,borderRadius:11,background:roleCol+"18",border:"1px solid "+roleCol+"33",display:"flex",alignItems:"center",justifyContent:"center",fontSize:21}}>{role==="Inspecteur"?"🔍":"👤"}</div>
+              <div><div style={{fontSize:20,fontWeight:800}}>{role}</div><div style={{fontSize:16,color:C.muted}}>{Object.values(rolePerms).filter(Boolean).length} accès actifs</div></div>
             </div>
             {features.map(function(f,fi){
               var active=!!rolePerms[f.k];
               return (
                 <div key={fi} style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"10px 0",borderBottom:fi<features.length-1?"1px solid "+C.dim:"none"}}>
                   <div style={{display:"flex",alignItems:"center",gap:10}}>
-                    <span style={{fontSize:19,width:24,textAlign:"center"}}>{f.icon}</span>
-                    <span style={{fontSize:16,fontWeight:active?700:400,color:active?C.text:C.muted}}>{f.l}</span>
+                    <span style={{fontSize:21,width:24,textAlign:"center"}}>{f.icon}</span>
+                    <span style={{fontSize:18,fontWeight:active?700:400,color:active?C.text:C.muted}}>{f.l}</span>
                   </div>
                   <button onClick={function(){toggle(role,f.k);}} style={{width:46,height:26,borderRadius:99,background:active?roleCol:C.border,border:"none",cursor:"pointer",transition:"background .2s",position:"relative",flexShrink:0}}>
                     <div style={{position:"absolute",top:3,left:active?22:3,width:20,height:20,borderRadius:99,background:"#fff",transition:"left .2s",boxShadow:"0 1px 3px rgba(0,0,0,.3)"}}/>
@@ -2522,12 +2522,12 @@ function ActionsScreen({actions,onUpdate,resps,config,onConfigUpdate,user}){
   return (
     <div style={{paddingBottom:88}}>
       <div style={{padding:"20px 16px 12px",display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
-        <div><div style={{fontSize:20,fontWeight:900}}>Actions urgentes</div><div style={{fontSize:15,color:C.muted,marginTop:2}}>{actions.filter(a=>a.statut!=="Clôturée").length} en cours</div></div>
-        {hasAccess(user,config,"rappels")&&<button onClick={function(){setShowRappels(true);}} style={{background:"linear-gradient(135deg,"+C.cyan+",#007799)",border:"none",borderRadius:14,padding:"10px 16px",color:"#000",fontWeight:900,fontSize:16,cursor:"pointer",flexShrink:0,display:"flex",alignItems:"center",gap:7,boxShadow:"0 0 16px "+C.cyan+"55"}}><span style={{fontSize:18}}>📧</span><span>Rappels</span></button>}
+        <div><div style={{fontSize:22,fontWeight:900}}>Actions urgentes</div><div style={{fontSize:17,color:C.muted,marginTop:2}}>{actions.filter(a=>a.statut!=="Clôturée").length} en cours</div></div>
+        {hasAccess(user,config,"rappels")&&<button onClick={function(){setShowRappels(true);}} style={{background:"linear-gradient(135deg,"+C.cyan+",#007799)",border:"none",borderRadius:14,padding:"10px 16px",color:"#000",fontWeight:900,fontSize:18,cursor:"pointer",flexShrink:0,display:"flex",alignItems:"center",gap:7,boxShadow:"0 0 16px "+C.cyan+"55"}}><span style={{fontSize:20}}>📧</span><span>Rappels</span></button>}
       </div>
       <div style={{padding:"0 14px 12px",display:"flex",gap:8,alignItems:"center"}}>
-        <span style={{fontSize:14,color:C.muted,flexShrink:0}}>📍 Site :</span>
-        <select value={siteFilter} onChange={function(e){setSiteFilter(e.target.value);}} style={{...S.input,flex:1,padding:"7px 12px",fontSize:15,borderRadius:10}}>
+        <span style={{fontSize:16,color:C.muted,flexShrink:0}}>📍 Site :</span>
+        <select value={siteFilter} onChange={function(e){setSiteFilter(e.target.value);}} style={{...S.input,flex:1,padding:"7px 12px",fontSize:17,borderRadius:10}}>
           <option value="Tous">Tous les sites</option>
           {siteList.map(function(s){return <option key={s} value={s}>{s}</option>;})}
         </select>
@@ -2541,16 +2541,16 @@ function ActionsScreen({actions,onUpdate,resps,config,onConfigUpdate,user}){
           return (
             <div key={a.id} style={{...S.card(urgency==="retard"?C.red+"33":urgency==="urgent"?C.red+"22":C.border),marginBottom:10}}>
               <div style={{display:"flex",alignItems:"flex-start",gap:10}}>
-                <div style={{width:30,height:30,borderRadius:8,background:col+"18",display:"flex",alignItems:"center",justifyContent:"center",fontSize:15,fontWeight:900,color:col,flexShrink:0}}>{i+1}</div>
+                <div style={{width:30,height:30,borderRadius:8,background:col+"18",display:"flex",alignItems:"center",justifyContent:"center",fontSize:17,fontWeight:900,color:col,flexShrink:0}}>{i+1}</div>
                 <div style={{flex:1}}>
-                  <div style={{fontSize:16,fontWeight:700}}>{a.label}</div>
-                  <div style={{fontSize:14,color:C.muted,marginTop:2}}>📍 {a.site}</div>
+                  <div style={{fontSize:18,fontWeight:700}}>{a.label}</div>
+                  <div style={{fontSize:16,color:C.muted,marginTop:2}}>📍 {a.site}</div>
                   <div style={{display:"flex",alignItems:"center",gap:6,marginTop:4}}>
                     {editRespId===a.id?(
                       <select
                         value={a.resp||""}
                         onChange={e=>{onUpdate({...a,resp:e.target.value});setEditRespId(null);}}
-                        style={{...S.input,fontSize:14,padding:"4px 8px",flex:1}}
+                        style={{...S.input,fontSize:16,padding:"4px 8px",flex:1}}
                         onBlur={()=>setEditRespId(null)}
                         autoFocus
                       >
@@ -2558,7 +2558,7 @@ function ActionsScreen({actions,onUpdate,resps,config,onConfigUpdate,user}){
                         {respList.map(function(r,i){var n=typeof r==="object"?r.nom:r; return <option key={i} value={n}>{n}</option>;})}
                       </select>
                     ):(
-                      <button onClick={()=>setEditRespId(a.id)} style={{background:"transparent",border:"1px dashed "+C.border,borderRadius:6,padding:"3px 8px",color:a.resp?C.cyan:C.muted,fontSize:14,cursor:"pointer"}}>
+                      <button onClick={()=>setEditRespId(a.id)} style={{background:"transparent",border:"1px dashed "+C.border,borderRadius:6,padding:"3px 8px",color:a.resp?C.cyan:C.muted,fontSize:16,cursor:"pointer"}}>
                         👤 {a.resp||"Assigner un responsable"}
                       </button>
                     )}
@@ -2566,17 +2566,17 @@ function ActionsScreen({actions,onUpdate,resps,config,onConfigUpdate,user}){
                 </div>
                 {dl!==null&&(
                   <div style={{textAlign:"center",padding:"4px 8px",borderRadius:8,background:urgCol+"18",border:"1px solid "+urgCol+"44",flexShrink:0}}>
-                    <div style={{fontSize:18,fontWeight:900,color:urgCol,lineHeight:1}}>{dl<0?Math.abs(dl)+"j":dl===0?"Auj":dl+"j"}</div>
-                    <div style={{fontSize:12,color:urgCol}}>{dl<0?"retard":dl===0?"auj.":"restants"}</div>
+                    <div style={{fontSize:20,fontWeight:900,color:urgCol,lineHeight:1}}>{dl<0?Math.abs(dl)+"j":dl===0?"Auj":dl+"j"}</div>
+                    <div style={{fontSize:14,color:urgCol}}>{dl<0?"retard":dl===0?"auj.":"restants"}</div>
                   </div>
                 )}
               </div>
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginTop:10}}>
                 <div style={{display:"flex",gap:6,alignItems:"center"}}>
                   <Tag label={a.prio} color={col}/>
-                  <span style={{fontSize:13,color:C.muted}}>{fmt(a.echeance)}</span>
+                  <span style={{fontSize:15,color:C.muted}}>{fmt(a.echeance)}</span>
                 </div>
-                <button onClick={()=>cycle(a)} style={{...S.btn(a.statut==="Clôturée"?C.green:C.cyan,true),width:"auto",padding:"5px 12px",fontSize:14}}>
+                <button onClick={()=>cycle(a)} style={{...S.btn(a.statut==="Clôturée"?C.green:C.cyan,true),width:"auto",padding:"5px 12px",fontSize:16}}>
                   {a.statut==="Clôturée"?"✓ Clôturée":"→ Clôturer"}
                 </button>
               </div>
@@ -2673,7 +2673,7 @@ function SignaturePad({onSave, label}){
 
   return (
     <div style={{marginBottom:16}}>
-      <div style={{fontSize:14,color:C.muted,letterSpacing:1,marginBottom:6,textTransform:"uppercase"}}>{label}</div>
+      <div style={{fontSize:16,color:C.muted,letterSpacing:1,marginBottom:6,textTransform:"uppercase"}}>{label}</div>
       <div style={{background:C.surface,borderRadius:10,border:"2px dashed "+C.border,overflow:"hidden"}}>
         <canvas ref={ref} width={340} height={140}
           style={{display:"block",width:"100%",touchAction:"none",cursor:"crosshair"}}
@@ -2683,10 +2683,10 @@ function SignaturePad({onSave, label}){
           onMouseLeave={mouseEnd}
         />
       </div>
-      {!hasLine&&<div style={{fontSize:13,color:C.muted,textAlign:"center",marginTop:4}}>✍️ Signez dans le cadre ci-dessus</div>}
+      {!hasLine&&<div style={{fontSize:15,color:C.muted,textAlign:"center",marginTop:4}}>✍️ Signez dans le cadre ci-dessus</div>}
       <div style={{display:"flex",gap:8,marginTop:8}}>
-        <button onClick={clear} style={{...S.btn(C.muted,true),flex:1,padding:"8px",fontSize:15}}>Effacer</button>
-        <button onClick={save} disabled={!hasLine} style={{...S.btn(C.cyan),flex:2,padding:"8px",fontSize:15,opacity:hasLine?1:.4}}>✓ Confirmer</button>
+        <button onClick={clear} style={{...S.btn(C.muted,true),flex:1,padding:"8px",fontSize:17}}>Effacer</button>
+        <button onClick={save} disabled={!hasLine} style={{...S.btn(C.cyan),flex:2,padding:"8px",fontSize:17,opacity:hasLine?1:.4}}>✓ Confirmer</button>
       </div>
     </div>
   );
@@ -2701,7 +2701,7 @@ function QRCodeDisplay({text, size}){
       <div style={{background:"#fff",borderRadius:12,padding:12,display:"inline-block",boxShadow:"0 0 20px #00E5FF22"}}>
         <img src={qrUrl} width={sz} height={sz} alt="QR Code" style={{display:"block"}}/>
       </div>
-      <a href={text} target="_blank" style={{fontSize:13,color:C.cyan,wordBreak:"break-all",textAlign:"center",maxWidth:240,textDecoration:"none",padding:"6px 10px",background:C.cyan+"11",borderRadius:8,border:"1px solid "+C.cyan+"33"}}>
+      <a href={text} target="_blank" style={{fontSize:15,color:C.cyan,wordBreak:"break-all",textAlign:"center",maxWidth:240,textDecoration:"none",padding:"6px 10px",background:C.cyan+"11",borderRadius:8,border:"1px solid "+C.cyan+"33"}}>
         🔗 {text}
       </a>
     </div>
@@ -2918,12 +2918,12 @@ function RapportsScreen({inspections,onDelete,onArchive,config}){
       {publicURL&&(
         <div style={{position:"fixed",inset:0,zIndex:300,background:"#fff",display:"flex",flexDirection:"column"}}>
           <div style={{display:"flex",alignItems:"center",gap:8,padding:"12px 14px",background:"#0A0C13",borderBottom:"1px solid #1E2433",flexShrink:0}}>
-            <button onClick={function(){setPublicURL(null);}} style={{background:"transparent",border:"1px solid "+C.cyan+"44",borderRadius:10,padding:"7px 12px",color:C.cyan,cursor:"pointer",fontSize:15,fontWeight:700}}>← Fermer</button>
-            <div style={{flex:1,fontSize:16,fontWeight:700,color:"#fff",minWidth:60}}>Rapport public</div>
+            <button onClick={function(){setPublicURL(null);}} style={{background:"transparent",border:"1px solid "+C.cyan+"44",borderRadius:10,padding:"7px 12px",color:C.cyan,cursor:"pointer",fontSize:17,fontWeight:700}}>← Fermer</button>
+            <div style={{flex:1,fontSize:18,fontWeight:700,color:"#fff",minWidth:60}}>Rapport public</div>
             <button onClick={function(){
               if(navigator.clipboard) navigator.clipboard.writeText(publicURL).then(function(){alert("Lien copié");});
               else{var t=document.createElement("textarea");t.value=publicURL;document.body.appendChild(t);t.select();document.execCommand("copy");document.body.removeChild(t);alert("Lien copié");}
-            }} style={{background:"linear-gradient(135deg,"+C.cyan+",#007799)",border:"none",borderRadius:8,padding:"7px 12px",color:"#000",cursor:"pointer",fontSize:14,fontWeight:800}}>📋 Copier lien</button>
+            }} style={{background:"linear-gradient(135deg,"+C.cyan+",#007799)",border:"none",borderRadius:8,padding:"7px 12px",color:"#000",cursor:"pointer",fontSize:16,fontWeight:800}}>📋 Copier lien</button>
           </div>
           <iframe src={publicURL} style={{flex:1,border:"none",width:"100%"}} title="Rapport public"/>
         </div>
@@ -2931,44 +2931,44 @@ function RapportsScreen({inspections,onDelete,onArchive,config}){
       {reportHTML&&(
         <div style={{position:"fixed",inset:0,zIndex:300,background:"#fff",display:"flex",flexDirection:"column"}}>
           <div style={{display:"flex",alignItems:"center",gap:8,padding:"12px 14px",background:"#0A0C13",borderBottom:"1px solid #1E2433",flexShrink:0,flexWrap:"wrap"}}>
-            <button onClick={function(){setReportHTML(null);}} style={{background:"transparent",border:"1px solid "+C.cyan+"44",borderRadius:10,padding:"7px 12px",color:C.cyan,cursor:"pointer",fontSize:15,fontWeight:700}}>← Fermer</button>
-            <div style={{flex:1,fontSize:16,fontWeight:700,color:"#fff",minWidth:60}}>Rapport</div>
+            <button onClick={function(){setReportHTML(null);}} style={{background:"transparent",border:"1px solid "+C.cyan+"44",borderRadius:10,padding:"7px 12px",color:C.cyan,cursor:"pointer",fontSize:17,fontWeight:700}}>← Fermer</button>
+            <div style={{flex:1,fontSize:18,fontWeight:700,color:"#fff",minWidth:60}}>Rapport</div>
             <button onClick={function(){
               var w=window.open("","_blank","width=800,height=900");
               if(!w){alert("Autorisez les popups pour exporter.");return;}
               w.document.write(reportHTML+"<script src='https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js'><\/script><script>window.onload=function(){setTimeout(function(){html2pdf().set({margin:0.3,filename:'rapport-secura.pdf',image:{type:'jpeg',quality:0.98},html2canvas:{scale:2,useCORS:true},jsPDF:{unit:'in',format:'a4',orientation:'portrait'}}).from(document.body).save().then(function(){setTimeout(function(){window.close();},2000);});},800);}<\/script>");
               w.document.close();
-            }} style={{background:"linear-gradient(135deg,"+C.cyan+",#007799)",border:"none",borderRadius:8,padding:"7px 12px",color:"#000",cursor:"pointer",fontSize:14,fontWeight:800,display:"flex",alignItems:"center",gap:5}}>📥 PDF</button>
+            }} style={{background:"linear-gradient(135deg,"+C.cyan+",#007799)",border:"none",borderRadius:8,padding:"7px 12px",color:"#000",cursor:"pointer",fontSize:16,fontWeight:800,display:"flex",alignItems:"center",gap:5}}>📥 PDF</button>
           </div>
           <iframe id="secura-report-frame" srcDoc={reportHTML} style={{flex:1,border:"none",width:"100%"}} title="Rapport"/>
         </div>
       )}
       <div style={{padding:"20px 16px 12px",display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
         <div>
-          <div style={{fontSize:20,fontWeight:900}}>{showArchives?"Archives":"Rapports"}</div>
-          <div style={{fontSize:15,color:C.muted}}>{showArchives?archived.length+" rapport(s) archivé(s)":"Export HTML · score pénalité 100→0"}</div>
+          <div style={{fontSize:22,fontWeight:900}}>{showArchives?"Archives":"Rapports"}</div>
+          <div style={{fontSize:17,color:C.muted}}>{showArchives?archived.length+" rapport(s) archivé(s)":"Export HTML · score pénalité 100→0"}</div>
         </div>
-        <button onClick={function(){setShowArchives(!showArchives);setSel(null);}} style={{background:showArchives?"linear-gradient(135deg,"+C.cyan+",#007799)":"transparent",border:showArchives?"none":"1px solid "+C.amber+"66",borderRadius:10,padding:"7px 12px",color:showArchives?"#000":C.amber,fontSize:14,fontWeight:800,cursor:"pointer"}}>{showArchives?"← Retour":"📦 Archives ("+archived.length+")"}</button>
+        <button onClick={function(){setShowArchives(!showArchives);setSel(null);}} style={{background:showArchives?"linear-gradient(135deg,"+C.cyan+",#007799)":"transparent",border:showArchives?"none":"1px solid "+C.amber+"66",borderRadius:10,padding:"7px 12px",color:showArchives?"#000":C.amber,fontSize:16,fontWeight:800,cursor:"pointer"}}>{showArchives?"← Retour":"📦 Archives ("+archived.length+")"}</button>
       </div>
       <div style={{padding:"0 14px 14px",display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:10}}>
         {[{l:"Score moyen",v:avg+"/100",c:scoreColor(avg)},{l:"Total NC",v:totalNC,c:C.red},{l:"Validées",v:validated.length,c:C.green}].map(function(s,i){
-          return <div key={i} style={{...S.card(s.c+"22"),textAlign:"center"}}><div style={{fontSize:22,fontWeight:900,color:s.c}}>{s.v}</div><div style={{fontSize:13,color:C.muted,marginTop:4}}>{s.l}</div></div>;
+          return <div key={i} style={{...S.card(s.c+"22"),textAlign:"center"}}><div style={{fontSize:22,fontWeight:900,color:s.c}}>{s.v}</div><div style={{fontSize:15,color:C.muted,marginTop:4}}>{s.l}</div></div>;
         })}
       </div>
       <div style={{padding:"0 14px"}}>
-        <div style={{fontSize:13,color:C.muted,marginBottom:10,letterSpacing:2,textTransform:"uppercase"}}>Sélectionner une inspection</div>
+        <div style={{fontSize:15,color:C.muted,marginBottom:10,letterSpacing:2,textTransform:"uppercase"}}>Sélectionner une inspection</div>
         {!showArchives&&validated.length===0&&(
           <div style={{textAlign:"center",padding:"40px 20px",color:C.muted}}>
             <div style={{fontSize:32,marginBottom:8}}>📋</div>
-            <div style={{fontSize:20,fontWeight:600}}>Aucun rapport validé</div>
-            <div style={{fontSize:15,marginTop:4}}>Les rapports apparaissent ici une fois les audits validés et signés.</div>
+            <div style={{fontSize:22,fontWeight:600}}>Aucun rapport validé</div>
+            <div style={{fontSize:17,marginTop:4}}>Les rapports apparaissent ici une fois les audits validés et signés.</div>
           </div>
         )}
         {showArchives&&archived.length===0&&(
           <div style={{textAlign:"center",padding:"40px 20px",color:C.muted}}>
             <div style={{fontSize:32,marginBottom:8}}>📦</div>
-            <div style={{fontSize:20,fontWeight:600}}>Aucune archive</div>
-            <div style={{fontSize:15,marginTop:4}}>Les rapports archivés apparaîtront ici. Le QR code reste accessible même après archivage.</div>
+            <div style={{fontSize:22,fontWeight:600}}>Aucune archive</div>
+            <div style={{fontSize:17,marginTop:4}}>Les rapports archivés apparaîtront ici. Le QR code reste accessible même après archivage.</div>
           </div>
         )}
         {(showArchives?archived:validated).map(function(ins,i){
@@ -2977,16 +2977,16 @@ function RapportsScreen({inspections,onDelete,onArchive,config}){
             <div key={i} style={{...S.card(sel===i?C.cyan:C.border),marginBottom:10,cursor:"pointer",opacity:showArchives?0.85:1}} onClick={function(){setSel(i===sel?null:i);}}>
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
                 <div style={{flex:1}}>
-                  <div style={{fontSize:16,fontWeight:700}}>{ins.titre}</div>
-                  <div style={{fontSize:14,color:C.muted,marginTop:3}}>📍 {ins.site} · {fmt(ins.date)}</div>
+                  <div style={{fontSize:18,fontWeight:700}}>{ins.titre}</div>
+                  <div style={{fontSize:16,color:C.muted,marginTop:3}}>📍 {ins.site} · {fmt(ins.date)}</div>
                   <div style={{display:"flex",gap:6,marginTop:8,flexWrap:"wrap"}}>
-                    {showArchives?<span style={{fontSize:12,padding:"2px 7px",borderRadius:5,background:C.amber+"22",color:C.amber,fontWeight:800}}>📦 ARCHIVÉE</span>:<StatutBadge s={ins.statut}/>}
+                    {showArchives?<span style={{fontSize:14,padding:"2px 7px",borderRadius:5,background:C.amber+"22",color:C.amber,fontWeight:800}}>📦 ARCHIVÉE</span>:<StatutBadge s={ins.statut}/>}
                     <Tag label={((CAT_META[ins.categorie]&&CAT_META[ins.categorie].icon)||"")+" "+ins.categorie} color={(CAT_META[ins.categorie]&&CAT_META[ins.categorie].color)||C.muted}/>
                   </div>
                 </div>
                 <div style={{textAlign:"right",marginLeft:10}}>
                   <ScoreRing score={ins.score} size={52}/>
-                  <div style={{fontSize:13,color:C.red,marginTop:2}}>{"−"+pen+"pts"}</div>
+                  <div style={{fontSize:15,color:C.red,marginTop:2}}>{"−"+pen+"pts"}</div>
                 </div>
               </div>
               {sel===i&&(
@@ -3008,12 +3008,12 @@ function RapportsScreen({inspections,onDelete,onArchive,config}){
                   </div>
                   {showArchives?(
                     <div style={{display:"flex",gap:8,marginTop:4}}>
-                      <button onClick={function(e){e.stopPropagation();onArchive&&onArchive(ins.id,false);}} style={{flex:1,background:"transparent",border:"1px solid "+C.green+"44",borderRadius:8,padding:"7px 12px",color:C.green,fontSize:14,fontWeight:700,cursor:"pointer"}}>↩️ Restaurer</button>
+                      <button onClick={function(e){e.stopPropagation();onArchive&&onArchive(ins.id,false);}} style={{flex:1,background:"transparent",border:"1px solid "+C.green+"44",borderRadius:8,padding:"7px 12px",color:C.green,fontSize:16,fontWeight:700,cursor:"pointer"}}>↩️ Restaurer</button>
                       <InlineDelete onConfirm={()=>onDelete&&onDelete(ins.id)}/>
                     </div>
                   ):(
                     <div style={{display:"flex",gap:8,marginTop:4}}>
-                      <button onClick={function(e){e.stopPropagation();onArchive&&onArchive(ins.id,true);setSel(null);}} style={{flex:1,background:"transparent",border:"1px solid "+C.amber+"44",borderRadius:8,padding:"7px 12px",color:C.amber,fontSize:14,fontWeight:700,cursor:"pointer"}}>📦 Archiver</button>
+                      <button onClick={function(e){e.stopPropagation();onArchive&&onArchive(ins.id,true);setSel(null);}} style={{flex:1,background:"transparent",border:"1px solid "+C.amber+"44",borderRadius:8,padding:"7px 12px",color:C.amber,fontSize:16,fontWeight:700,cursor:"pointer"}}>📦 Archiver</button>
                       <InlineDelete onConfirm={()=>onDelete&&onDelete(ins.id)}/>
                     </div>
                   )}
@@ -3025,8 +3025,8 @@ function RapportsScreen({inspections,onDelete,onArchive,config}){
       </div>
       <div style={{padding:"14px 14px 0"}}>
         <div style={{...S.card(C.purple+"33")}}>
-          <div style={{fontSize:20,fontWeight:800,marginBottom:4}}>📊 Tableau global</div>
-          <div style={{fontSize:15,color:C.muted,marginBottom:12}}>Toutes inspections · scores pénalisés</div>
+          <div style={{fontSize:22,fontWeight:800,marginBottom:4}}>📊 Tableau global</div>
+          <div style={{fontSize:17,color:C.muted,marginBottom:12}}>Toutes inspections · scores pénalisés</div>
           <button onClick={function(){
             try{
               var bySite={};
@@ -3180,17 +3180,17 @@ function SettingsScreen({user,onLogout,appState,onAppStateUpdate,respsState,site
   };
 
   const ac=(config&&config.accentColor)||C.cyan;
-  const tabStyle=(t)=>({padding:"8px 16px",borderRadius:10,border:"none",cursor:"pointer",fontSize:15,fontWeight:tab===t?800:500,background:tab===t?ac+"18":"transparent",color:tab===t?ac:C.muted});
+  const tabStyle=(t)=>({padding:"8px 16px",borderRadius:10,border:"none",cursor:"pointer",fontSize:17,fontWeight:tab===t?800:500,background:tab===t?ac+"18":"transparent",color:tab===t?ac:C.muted});
 
   return (
     <div style={{paddingBottom:88}}>
       <div style={{padding:"20px 16px 10px"}}>
-        <div style={{fontSize:20,fontWeight:900}}>Profil & Paramètres</div>
+        <div style={{fontSize:22,fontWeight:900}}>Profil & Paramètres</div>
       </div>
       <div style={{margin:"0 14px 14px",...S.card(),textAlign:"center",padding:20}}>
-        <div style={{width:56,height:56,borderRadius:99,background:C.cyan+"18",border:"2px solid "+C.cyan+"44",display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,fontWeight:900,color:C.cyan,margin:"0 auto 8px"}}>{user.avatar}</div>
-        <div style={{fontSize:19,fontWeight:900}}>{user.nom}</div>
-        <div style={{fontSize:14,color:C.muted,marginTop:2}}>{user.email}</div>
+        <div style={{width:56,height:56,borderRadius:99,background:C.cyan+"18",border:"2px solid "+C.cyan+"44",display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,fontWeight:900,color:C.cyan,margin:"0 auto 8px"}}>{user.avatar}</div>
+        <div style={{fontSize:21,fontWeight:900}}>{user.nom}</div>
+        <div style={{fontSize:16,color:C.muted,marginTop:2}}>{user.email}</div>
         <div style={{marginTop:6}}><Tag label={user.role} color={rc[user.role]||C.muted}/></div>
       </div>
       <div style={{padding:"0 14px 12px",display:"flex",gap:6,overflowX:"auto"}}>
@@ -3205,8 +3205,8 @@ function SettingsScreen({user,onLogout,appState,onAppStateUpdate,respsState,site
         {tab==="equipe"&&(
           <div style={{...S.card(),marginBottom:12}}>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
-              <div style={{fontSize:16,fontWeight:800}}>Équipe</div>
-              <div style={{fontSize:13,color:C.cyan,background:C.cyan+"18",padding:"2px 8px",borderRadius:99}}>{resps.length} membres</div>
+              <div style={{fontSize:18,fontWeight:800}}>Équipe</div>
+              <div style={{fontSize:15,color:C.cyan,background:C.cyan+"18",padding:"2px 8px",borderRadius:99}}>{resps.length} membres</div>
             </div>
             {resps.map(function(r,i){
               var nom=typeof r==="object"?r.nom:r;
@@ -3216,25 +3216,25 @@ function SettingsScreen({user,onLogout,appState,onAppStateUpdate,respsState,site
               return (
                 <div key={i} style={{padding:"8px 0",borderBottom:"1px solid "+C.border}}>
                   <div style={{display:"flex",alignItems:"center",gap:8}}>
-                    <div style={{width:28,height:28,borderRadius:99,background:C.cyan+"15",display:"flex",alignItems:"center",justifyContent:"center",fontSize:13,fontWeight:900,color:C.cyan,flexShrink:0}}>{initials}</div>
+                    <div style={{width:28,height:28,borderRadius:99,background:C.cyan+"15",display:"flex",alignItems:"center",justifyContent:"center",fontSize:15,fontWeight:900,color:C.cyan,flexShrink:0}}>{initials}</div>
                     <div style={{flex:1}}>
-                      <div style={{fontSize:16,fontWeight:700}}>{nom}</div>
-                      {email&&<div style={{fontSize:13,color:C.muted}}>{email}</div>}
+                      <div style={{fontSize:18,fontWeight:700}}>{nom}</div>
+                      {email&&<div style={{fontSize:15,color:C.muted}}>{email}</div>}
                     </div>
-                    <div style={{fontSize:13,color:C.muted,marginRight:8}}>{role}</div>
-                    <button onClick={()=>removeResp(i)} style={{background:"transparent",border:"none",color:C.red,cursor:"pointer",fontSize:19,padding:"0 4px"}}>×</button>
+                    <div style={{fontSize:15,color:C.muted,marginRight:8}}>{role}</div>
+                    <button onClick={()=>removeResp(i)} style={{background:"transparent",border:"none",color:C.red,cursor:"pointer",fontSize:21,padding:"0 4px"}}>×</button>
                   </div>
                 </div>
               );
             })}
             <div style={{marginTop:14,padding:12,background:C.surface,borderRadius:10,border:"1px dashed "+C.border}}>
-              <div style={{fontSize:14,color:C.cyan,fontWeight:700,marginBottom:10}}>+ Nouvelle personne</div>
-              <input ref={newRespRef} defaultValue="" onChange={e=>setNewResp(e.target.value)} placeholder="Nom complet..." style={{...S.input,marginBottom:8,padding:"8px 12px",fontSize:15}}/>
-              <input ref={newRespEmailRef} defaultValue="" onChange={e=>setNewRespEmail(e.target.value)} placeholder="Email (ex: nom@corp.be)" style={{...S.input,marginBottom:8,padding:"8px 12px",fontSize:15}}/>
-              <input ref={newRespPassRef} defaultValue="" onChange={e=>setNewRespPass(e.target.value)} placeholder="Mot de passe" type="password" style={{...S.input,marginBottom:10,padding:"8px 12px",fontSize:15}}/>
+              <div style={{fontSize:16,color:C.cyan,fontWeight:700,marginBottom:10}}>+ Nouvelle personne</div>
+              <input ref={newRespRef} defaultValue="" onChange={e=>setNewResp(e.target.value)} placeholder="Nom complet..." style={{...S.input,marginBottom:8,padding:"8px 12px",fontSize:17}}/>
+              <input ref={newRespEmailRef} defaultValue="" onChange={e=>setNewRespEmail(e.target.value)} placeholder="Email (ex: nom@corp.be)" style={{...S.input,marginBottom:8,padding:"8px 12px",fontSize:17}}/>
+              <input ref={newRespPassRef} defaultValue="" onChange={e=>setNewRespPass(e.target.value)} placeholder="Mot de passe" type="password" style={{...S.input,marginBottom:10,padding:"8px 12px",fontSize:17}}/>
               <div style={{display:"flex",gap:6,marginBottom:10}}>
                 {["Admin","Inspecteur","Responsable"].map(function(r){
-                  return <button key={r} onClick={()=>setNewRespRole(r)} style={{flex:1,padding:"6px",borderRadius:8,border:"1px solid",borderColor:newRespRole===r?C.cyan:C.border,background:newRespRole===r?C.cyan+"18":"transparent",color:newRespRole===r?C.cyan:C.muted,fontSize:14,cursor:"pointer",fontWeight:newRespRole===r?700:400}}>{r}</button>;
+                  return <button key={r} onClick={()=>setNewRespRole(r)} style={{flex:1,padding:"6px",borderRadius:8,border:"1px solid",borderColor:newRespRole===r?C.cyan:C.border,background:newRespRole===r?C.cyan+"18":"transparent",color:newRespRole===r?C.cyan:C.muted,fontSize:16,cursor:"pointer",fontWeight:newRespRole===r?700:400}}>{r}</button>;
                 })}
               </div>
               <button onClick={addResp} style={{...S.btn(C.cyan),padding:"9px"}}>Ajouter ✓</button>
@@ -3243,15 +3243,15 @@ function SettingsScreen({user,onLogout,appState,onAppStateUpdate,respsState,site
         )}
         {tab==="sites"&&(
           <div style={{...S.card(),marginBottom:12}}>
-            <div style={{fontSize:16,fontWeight:800,marginBottom:10}}>Gestion des sites</div>
+            <div style={{fontSize:18,fontWeight:800,marginBottom:10}}>Gestion des sites</div>
             {sites.map(function(s,i){
               var addr=(appState&&appState.siteAddresses&&appState.siteAddresses[s])||"";
               return (
                 <div key={i} style={{padding:"8px 0",borderBottom:"1px solid "+C.border}}>
                   <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:4}}>
-                    <span style={{fontSize:19}}>📍</span>
-                    <span style={{flex:1,fontSize:16,fontWeight:700}}>{s}</span>
-                    <button onClick={function(){removeSite(i);}} style={{background:"transparent",border:"none",color:C.red,cursor:"pointer",fontSize:19,padding:"0 4px"}}>×</button>
+                    <span style={{fontSize:21}}>📍</span>
+                    <span style={{flex:1,fontSize:18,fontWeight:700}}>{s}</span>
+                    <button onClick={function(){removeSite(i);}} style={{background:"transparent",border:"none",color:C.red,cursor:"pointer",fontSize:21,padding:"0 4px"}}>×</button>
                   </div>
                   <input
                     placeholder="Adresse du site..."
@@ -3261,48 +3261,48 @@ function SettingsScreen({user,onLogout,appState,onAppStateUpdate,respsState,site
                       newAddrs[s]=e.target.value;
                       update({siteAddresses:newAddrs});
                     }}
-                    style={{...S.input,fontSize:14,padding:"5px 10px",color:C.muted,marginLeft:24}}
+                    style={{...S.input,fontSize:16,padding:"5px 10px",color:C.muted,marginLeft:24}}
                   />
                 </div>
               );
             })}
             <div style={{display:"flex",gap:8,marginTop:10}}>
-              <input ref={newSiteRef} defaultValue="" onChange={e=>setNewSite(e.target.value)} placeholder="Nom du site..." style={{...S.input,flex:1,padding:"8px 12px",fontSize:15}} onKeyDown={e=>{if(e.key==="Enter")addSite();}}/>
-              <button onClick={addSite} style={{...S.btn(C.cyan),width:"auto",padding:"0 16px",fontSize:18}}>+</button>
+              <input ref={newSiteRef} defaultValue="" onChange={e=>setNewSite(e.target.value)} placeholder="Nom du site..." style={{...S.input,flex:1,padding:"8px 12px",fontSize:17}} onKeyDown={e=>{if(e.key==="Enter")addSite();}}/>
+              <button onClick={addSite} style={{...S.btn(C.cyan),width:"auto",padding:"0 16px",fontSize:20}}>+</button>
             </div>
           </div>
         )}
         {tab==="systeme"&&(
           <div>
             <div style={{...S.card(),marginBottom:12}}>
-              <div style={{fontSize:16,fontWeight:800,marginBottom:12}}>🧮 Pénalités (pts déduits)</div>
+              <div style={{fontSize:18,fontWeight:800,marginBottom:12}}>🧮 Pénalités (pts déduits)</div>
               {[["critique","CRITIQUE",C.red],["eleve","ÉLEVÉ",C.orange],["mineur","MODÉRÉ",C.amber]].map(function(arr){
                 var k=arr[0],l=arr[1],col=arr[2];
                 return (
                   <div key={k} style={{display:"flex",alignItems:"center",gap:10,marginBottom:10}}>
                     <Tag label={l} color={col}/>
-                    <input type="text" inputMode="numeric" pattern="[0-9]*" value={penalites[k]} onFocus={e=>e.target.select()} onChange={e=>setPen(k,e.target.value.replace(/[^0-9]/g,""))} style={{...S.input,width:70,padding:"6px 10px",textAlign:"center",fontSize:20,fontWeight:800}}/>
-                    <span style={{fontSize:15,color:C.muted}}>pts</span>
+                    <input type="text" inputMode="numeric" pattern="[0-9]*" value={penalites[k]} onFocus={e=>e.target.select()} onChange={e=>setPen(k,e.target.value.replace(/[^0-9]/g,""))} style={{...S.input,width:70,padding:"6px 10px",textAlign:"center",fontSize:22,fontWeight:800}}/>
+                    <span style={{fontSize:17,color:C.muted}}>pts</span>
                   </div>
                 );
               })}
             </div>
             <div style={{...S.card(),marginBottom:12}}>
-              <div style={{fontSize:16,fontWeight:800,marginBottom:12}}>⏱️ Délais de résolution</div>
+              <div style={{fontSize:18,fontWeight:800,marginBottom:12}}>⏱️ Délais de résolution</div>
               {[["critique","CRITIQUE",C.red],["eleve","ÉLEVÉ",C.orange],["mineur","MODÉRÉ",C.amber]].map(function(arr){
                 var k=arr[0],l=arr[1],col=arr[2];
                 return (
                   <div key={k} style={{display:"flex",alignItems:"center",gap:10,marginBottom:10}}>
                     <Tag label={l} color={col}/>
-                    <input type="text" inputMode="numeric" pattern="[0-9]*" value={delais[k]} onFocus={e=>e.target.select()} onChange={e=>setDel(k,e.target.value.replace(/[^0-9]/g,""))} style={{...S.input,width:70,padding:"6px 10px",textAlign:"center",fontSize:20,fontWeight:800}}/>
-                    <span style={{fontSize:15,color:C.muted}}>jours {delais[k]===0?"(immédiat)":""}</span>
+                    <input type="text" inputMode="numeric" pattern="[0-9]*" value={delais[k]} onFocus={e=>e.target.select()} onChange={e=>setDel(k,e.target.value.replace(/[^0-9]/g,""))} style={{...S.input,width:70,padding:"6px 10px",textAlign:"center",fontSize:22,fontWeight:800}}/>
+                    <span style={{fontSize:17,color:C.muted}}>jours {delais[k]===0?"(immédiat)":""}</span>
                   </div>
                 );
               })}
             </div>
             <div style={{...S.card(),marginBottom:12}}>
-              <div style={{fontSize:16,fontWeight:800,marginBottom:4}}>📍 Seuils suivi des sites</div>
-              <div style={{fontSize:14,color:C.muted,marginBottom:12}}>Nombre de jours depuis la dernière inspection</div>
+              <div style={{fontSize:18,fontWeight:800,marginBottom:4}}>📍 Seuils suivi des sites</div>
+              <div style={{fontSize:16,color:C.muted,marginBottom:12}}>Nombre de jours depuis la dernière inspection</div>
               {(function(){
                 var seuils=(config&&config.seuilSites)||{vert:90,jaune:120,rouge:365};
                 function setSeuil(k,v){
@@ -3318,40 +3318,40 @@ function SettingsScreen({user,onLogout,appState,onAppStateUpdate,respsState,site
                   return (
                     <div key={s.k} style={{display:"flex",alignItems:"center",gap:10,marginBottom:10}}>
                       <div style={{width:10,height:10,borderRadius:99,background:s.col,flexShrink:0}}/>
-                      <span style={{fontSize:15,color:s.col,fontWeight:700,minWidth:110}}>{s.label}</span>
-                      <span style={{fontSize:14,color:C.muted}}>≤</span>
-                      <input type="text" inputMode="numeric" pattern="[0-9]*" value={seuils[s.k]} onFocus={function(e){e.target.select();}} onChange={function(e){setSeuil(s.k,e.target.value.replace(/[^0-9]/g,""));}} style={{...S.input,width:60,padding:"6px 10px",textAlign:"center",fontSize:20,fontWeight:800}}/>
-                      <span style={{fontSize:15,color:C.muted}}>{s.desc}</span>
+                      <span style={{fontSize:17,color:s.col,fontWeight:700,minWidth:110}}>{s.label}</span>
+                      <span style={{fontSize:16,color:C.muted}}>≤</span>
+                      <input type="text" inputMode="numeric" pattern="[0-9]*" value={seuils[s.k]} onFocus={function(e){e.target.select();}} onChange={function(e){setSeuil(s.k,e.target.value.replace(/[^0-9]/g,""));}} style={{...S.input,width:60,padding:"6px 10px",textAlign:"center",fontSize:22,fontWeight:800}}/>
+                      <span style={{fontSize:17,color:C.muted}}>{s.desc}</span>
                     </div>
                   );
                 });
               })()}
             </div>
             <div style={{...S.card(),marginBottom:12}}>
-              <div style={{fontSize:16,fontWeight:800,marginBottom:4}}>🏭 Heures prestées par catégorie (annuelles)</div>
-              <div style={{fontSize:14,color:C.muted,marginBottom:10}}>Nécessaire pour calculer le Tf et Tg dans Accidentologie</div>
+              <div style={{fontSize:18,fontWeight:800,marginBottom:4}}>🏭 Heures prestées par catégorie (annuelles)</div>
+              <div style={{fontSize:16,color:C.muted,marginBottom:10}}>Nécessaire pour calculer le Tf et Tg dans Accidentologie</div>
               {(function(){
                 var hp=(appState&&appState.heuresPresteesParCat)||{};
                 var categories=["Enseignement","Ouvriers","Employés","Techniciennes de surface","Puéricultrices","Aides-familiales"];
                 return categories.map(function(cat,i){
                   return (
                     <div key={i} style={{display:"flex",alignItems:"center",gap:8,marginBottom:6}}>
-                      <span style={{fontSize:14,flex:1,color:C.text,minWidth:0,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{cat}</span>
+                      <span style={{fontSize:16,flex:1,color:C.text,minWidth:0,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{cat}</span>
                       <input type="text" inputMode="numeric" pattern="[0-9]*" placeholder="0" defaultValue={hp[cat]||""} onBlur={function(e){
                         var val=parseInt(e.target.value)||0;
                         var next=Object.assign({},hp);
                         if(val>0) next[cat]=val; else delete next[cat];
                         onAppStateUpdate&&onAppStateUpdate({...appState,heuresPresteesParCat:next});
-                      }} style={{...S.input,width:90,padding:"6px 10px",textAlign:"center",fontSize:15,fontWeight:700}}/>
-                      <span style={{fontSize:13,color:C.muted}}>h/an</span>
+                      }} style={{...S.input,width:90,padding:"6px 10px",textAlign:"center",fontSize:17,fontWeight:700}}/>
+                      <span style={{fontSize:15,color:C.muted}}>h/an</span>
                     </div>
                   );
                 });
               })()}
             </div>
             <div style={{...S.card(),marginBottom:12}}>
-              <div style={{fontSize:16,fontWeight:800,marginBottom:4}}>🤖 Clé API IA</div>
-              <div style={{fontSize:14,color:C.muted,marginBottom:10}}>Clé Anthropic pour l&#39;assistant IA (Code du bien-être)</div>
+              <div style={{fontSize:18,fontWeight:800,marginBottom:4}}>🤖 Clé API IA</div>
+              <div style={{fontSize:16,color:C.muted,marginBottom:10}}>Clé Anthropic pour l&#39;assistant IA (Code du bien-être)</div>
               {(function(){
                 var savedKey=localStorage.getItem("secura_ai_key")||"";
                 var hasKey=savedKey.length>10;
@@ -3360,18 +3360,18 @@ function SettingsScreen({user,onLogout,appState,onAppStateUpdate,respsState,site
                     <div style={{display:"flex",gap:8,alignItems:"center"}}>
                       <input type="password" placeholder="sk-ant-api03-..." defaultValue={savedKey}
                         onBlur={function(e){localStorage.setItem("secura_ai_key",e.target.value.trim());}}
-                        style={{...S.input,flex:1,padding:"10px 14px",fontSize:15,fontFamily:"monospace"}}/>
+                        style={{...S.input,flex:1,padding:"10px 14px",fontSize:17,fontFamily:"monospace"}}/>
                       <div style={{width:12,height:12,borderRadius:99,background:hasKey?C.green:C.red,flexShrink:0}}/>
                     </div>
-                    <div style={{fontSize:13,color:hasKey?C.green:C.muted,marginTop:6}}>{hasKey?"✅ Clé configurée — l'assistant IA est actif":"⚠ Aucune clé — obtenez-la sur console.anthropic.com"}</div>
+                    <div style={{fontSize:15,color:hasKey?C.green:C.muted,marginTop:6}}>{hasKey?"✅ Clé configurée — l'assistant IA est actif":"⚠ Aucune clé — obtenez-la sur console.anthropic.com"}</div>
                   </div>
                 );
               })()}
             </div>
                     <div style={{...S.card(),marginBottom:12}}>
-            <div style={{fontSize:16,fontWeight:800,marginBottom:10}}>📋 Templates personnalisés</div>
+            <div style={{fontSize:18,fontWeight:800,marginBottom:10}}>📋 Templates personnalisés</div>
             {Object.keys(appState&&appState.customTemplates||{}).length===0?(
-              <div style={{fontSize:15,color:C.muted}}>Aucun template modifié — checklists d'origine utilisées</div>
+              <div style={{fontSize:17,color:C.muted}}>Aucun template modifié — checklists d'origine utilisées</div>
             ):(
               <div>
                 {Object.keys(appState.customTemplates||{}).map(function(cat){
@@ -3381,14 +3381,14 @@ function SettingsScreen({user,onLogout,appState,onAppStateUpdate,respsState,site
                   return (
                     <div key={cat} style={{display:"flex",alignItems:"center",gap:8,padding:"8px 0",borderBottom:"1px solid "+C.border}}>
                       <div style={{flex:1}}>
-                        <div style={{fontSize:15,fontWeight:700}}>{cat}</div>
-                        <div style={{fontSize:13,color:C.muted}}>{(tpl||[]).length} questions ({added} ajoutée(s))</div>
+                        <div style={{fontSize:17,fontWeight:700}}>{cat}</div>
+                        <div style={{fontSize:15,color:C.muted}}>{(tpl||[]).length} questions ({added} ajoutée(s))</div>
                       </div>
                       <button onClick={function(){
                         var newTpls={...(appState.customTemplates||{})};
                         delete newTpls[cat];
                         update({customTemplates:newTpls});
-                      }} style={{background:"transparent",border:"1px solid "+C.red+"44",borderRadius:8,color:C.red,padding:"4px 10px",fontSize:14,cursor:"pointer"}}>
+                      }} style={{background:"transparent",border:"1px solid "+C.red+"44",borderRadius:8,color:C.red,padding:"4px 10px",fontSize:16,cursor:"pointer"}}>
                         ↩ Original
                       </button>
                     </div>
@@ -3400,8 +3400,8 @@ function SettingsScreen({user,onLogout,appState,onAppStateUpdate,respsState,site
           <div style={{...S.card(),marginBottom:12}}>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
               <div>
-                <div style={{fontSize:16,fontWeight:800}}>🔔 Notifications push</div>
-                <div style={{fontSize:14,color:C.muted,marginTop:2}}>Alertes échéances actions sur iPhone</div>
+                <div style={{fontSize:18,fontWeight:800}}>🔔 Notifications push</div>
+                <div style={{fontSize:16,color:C.muted,marginTop:2}}>Alertes échéances actions sur iPhone</div>
               </div>
               <button onClick={function(){
                 var enabled=!(config&&config.notificationsEnabled);
@@ -3429,7 +3429,7 @@ function SettingsScreen({user,onLogout,appState,onAppStateUpdate,respsState,site
               </button>
             </div>
             {config&&config.notificationsEnabled&&(
-              <div style={{marginTop:10,fontSize:14,color:C.green,padding:"6px 10px",background:C.green+"15",borderRadius:8}}>
+              <div style={{marginTop:10,fontSize:16,color:C.green,padding:"6px 10px",background:C.green+"15",borderRadius:8}}>
                 ✅ Notifications actives — alertes J-3, J-1 et le jour J
               </div>
             )}
@@ -3441,8 +3441,8 @@ function SettingsScreen({user,onLogout,appState,onAppStateUpdate,respsState,site
 
             {/* Mode Tec */}
             <div style={{...S.card(),marginBottom:12}}>
-              <div style={{fontSize:16,fontWeight:800,marginBottom:4}}>🎭 Mode Tec</div>
-              <div style={{fontSize:14,color:C.muted,marginBottom:12}}>Changer l&#39;ambiance de fond de l&#39;application</div>
+              <div style={{fontSize:18,fontWeight:800,marginBottom:4}}>🎭 Mode Tec</div>
+              <div style={{fontSize:16,color:C.muted,marginBottom:12}}>Changer l&#39;ambiance de fond de l&#39;application</div>
               {(function(){
                 var current=(config&&config.techMode)||"off";
                 var ambiances=[
@@ -3461,10 +3461,10 @@ function SettingsScreen({user,onLogout,appState,onAppStateUpdate,respsState,site
                         cursor:"pointer",textAlign:"left",color:C.text,transition:"all .2s"}}>
                       <div style={{width:40,height:40,borderRadius:10,background:a.gradient,border:"1px solid "+a.border,flexShrink:0}}/>
                       <div style={{flex:1}}>
-                        <div style={{fontSize:16,fontWeight:active?800:600,color:active?ac:C.text}}>{a.label}</div>
-                        <div style={{fontSize:13,color:C.muted,marginTop:1}}>{a.desc}</div>
+                        <div style={{fontSize:18,fontWeight:active?800:600,color:active?ac:C.text}}>{a.label}</div>
+                        <div style={{fontSize:15,color:C.muted,marginTop:1}}>{a.desc}</div>
                       </div>
-                      {active&&<div style={{width:22,height:22,borderRadius:99,background:ac,display:"flex",alignItems:"center",justifyContent:"center",fontSize:15,color:"#000",fontWeight:900,flexShrink:0}}>✓</div>}
+                      {active&&<div style={{width:22,height:22,borderRadius:99,background:ac,display:"flex",alignItems:"center",justifyContent:"center",fontSize:17,color:"#000",fontWeight:900,flexShrink:0}}>✓</div>}
                     </button>
                   );
                 });
@@ -3473,38 +3473,38 @@ function SettingsScreen({user,onLogout,appState,onAppStateUpdate,respsState,site
 
             {/* Accent color */}
             <div style={{...S.card(),marginBottom:12}}>
-              <div style={{fontSize:16,fontWeight:800,marginBottom:12}}>🎨 Couleur principale</div>
+              <div style={{fontSize:18,fontWeight:800,marginBottom:12}}>🎨 Couleur principale</div>
               <div style={{display:"flex",gap:10,flexWrap:"wrap"}}>
                 {[["#00E5FF","Cyan"],["#00E676","Vert"],["#FF6D00","Orange"],["#D500F9","Violet"],["#FF1744","Rouge"],["#2979FF","Bleu"],["#FFB300","Ambre"],["#1DE9B6","Teal"]].map(function(c){
                   var active=(config&&config.accentColor)===c[0];
                   return (
                     <button key={c[0]} onClick={()=>onConfigUpdate&&onConfigUpdate({...config,accentColor:c[0]})}
                       style={{width:44,height:44,borderRadius:12,background:c[0],border:active?"3px solid #fff":"3px solid transparent",cursor:"pointer",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",boxShadow:active?"0 0 0 2px "+c[0]:"none",transition:"all .2s"}}>
-                      {active&&<span style={{fontSize:19,color:"#000"}}>✓</span>}
+                      {active&&<span style={{fontSize:21,color:"#000"}}>✓</span>}
                     </button>
                   );
                 })}
               </div>
-              <div style={{fontSize:14,color:C.muted,marginTop:8}}>Couleur active : <span style={{color:(config&&config.accentColor)||C.cyan,fontWeight:800}}>{(config&&config.accentColor)||"#00E5FF"}</span></div>
+              <div style={{fontSize:16,color:C.muted,marginTop:8}}>Couleur active : <span style={{color:(config&&config.accentColor)||C.cyan,fontWeight:800}}>{(config&&config.accentColor)||"#00E5FF"}</span></div>
             </div>
             {/* Font family */}
             <div style={{...S.card(),marginBottom:12}}>
-              <div style={{fontSize:16,fontWeight:800,marginBottom:12}}>✍️ Police de caractères</div>
+              <div style={{fontSize:18,fontWeight:800,marginBottom:12}}>✍️ Police de caractères</div>
               {[["DM Sans,Segoe UI,sans-serif","DM Sans"],["Georgia,serif","Georgia"],["Courier New,monospace","Courier"],["Helvetica,Arial,sans-serif","Helvetica"],["system-ui,sans-serif","Système"]].map(function(f){
                 var active=(config&&config.fontFamily)===f[0];
                 return (
                   <button key={f[0]} onClick={()=>onConfigUpdate&&onConfigUpdate({...config,fontFamily:f[0]})}
                     style={{display:"flex",alignItems:"center",justifyContent:"space-between",width:"100%",padding:"10px 12px",marginBottom:6,borderRadius:10,border:"1px solid "+(active?C.cyan:C.border),background:active?C.cyan+"18":"transparent",cursor:"pointer",color:active?C.cyan:C.text}}>
-                    <span style={{fontFamily:f[0],fontSize:17}}>{f[1]}</span>
-                    {active&&<span style={{color:C.cyan,fontSize:17}}>✓</span>}
+                    <span style={{fontFamily:f[0],fontSize:19}}>{f[1]}</span>
+                    {active&&<span style={{color:C.cyan,fontSize:19}}>✓</span>}
                   </button>
                 );
               })}
             </div>
             {/* Mode daltonien */}
             <div style={{...S.card(),marginBottom:12}}>
-              <div style={{fontSize:16,fontWeight:800,marginBottom:12}}>👁️ Mode daltonien</div>
-              <div style={{fontSize:14,color:C.muted,marginBottom:12}}>Remplace les couleurs par des palettes accessibles</div>
+              <div style={{fontSize:18,fontWeight:800,marginBottom:12}}>👁️ Mode daltonien</div>
+              <div style={{fontSize:16,color:C.muted,marginBottom:12}}>Remplace les couleurs par des palettes accessibles</div>
               {[
                 ["normal","Défaut","Palette standard"],
                 ["deuteranopie","Deutéranopie","Rouge-vert (type le plus fréquent)"],
@@ -3515,14 +3515,14 @@ function SettingsScreen({user,onLogout,appState,onAppStateUpdate,respsState,site
                 return (
                   <button key={m[0]} onClick={()=>onConfigUpdate&&onConfigUpdate({...config,daltonMode:m[0]})}
                     style={{display:"flex",alignItems:"center",gap:12,width:"100%",padding:"10px 12px",marginBottom:6,borderRadius:10,border:"1px solid "+(active?ac:C.border),background:active?ac+"18":"transparent",cursor:"pointer",textAlign:"left"}}>
-                    <div style={{width:32,height:32,borderRadius:8,flexShrink:0,display:"flex",alignItems:"center",justifyContent:"center",background:active?ac+"30":C.surface,fontSize:19}}>
+                    <div style={{width:32,height:32,borderRadius:8,flexShrink:0,display:"flex",alignItems:"center",justifyContent:"center",background:active?ac+"30":C.surface,fontSize:21}}>
                       {m[0]==="normal"?"🎨":m[0]==="deuteranopie"?"🟡":m[0]==="protanopie"?"🔵":"🟣"}
                     </div>
                     <div style={{flex:1}}>
-                      <div style={{fontSize:16,fontWeight:active?800:500,color:active?ac:C.text}}>{m[1]}</div>
-                      <div style={{fontSize:13,color:C.muted,marginTop:1}}>{m[2]}</div>
+                      <div style={{fontSize:18,fontWeight:active?800:500,color:active?ac:C.text}}>{m[1]}</div>
+                      <div style={{fontSize:15,color:C.muted,marginTop:1}}>{m[2]}</div>
                     </div>
-                    {active&&<span style={{color:ac,fontSize:20,fontWeight:900}}>✓</span>}
+                    {active&&<span style={{color:ac,fontSize:22,fontWeight:900}}>✓</span>}
                   </button>
                 );
               })}
@@ -3531,7 +3531,7 @@ function SettingsScreen({user,onLogout,appState,onAppStateUpdate,respsState,site
         )}
 
         {savedMsg&&(
-          <div style={{background:C.green+"18",border:"1px solid "+C.green+"44",borderRadius:10,padding:"10px 14px",marginBottom:10,textAlign:"center",color:C.green,fontWeight:700,fontSize:16}}>
+          <div style={{background:C.green+"18",border:"1px solid "+C.green+"44",borderRadius:10,padding:"10px 14px",marginBottom:10,textAlign:"center",color:C.green,fontWeight:700,fontSize:18}}>
             ✓ Paramètres sauvegardés !
           </div>
         )}
@@ -3685,39 +3685,39 @@ function AccidentScreen({appState,onAppStateUpdate,sitesState,config}){
   }
   var maxMonth=Math.max.apply(null,months.map(function(m){return m.count;}))||1;
 
-  var tabStyle=function(t){return {padding:"6px 14px",borderRadius:99,border:"1px solid",borderColor:tab===t?C.cyan:C.border,background:tab===t?C.cyan+"15":"transparent",color:tab===t?C.cyan:C.muted,fontSize:14,fontWeight:tab===t?800:500,cursor:"pointer"};};
+  var tabStyle=function(t){return {padding:"6px 14px",borderRadius:99,border:"1px solid",borderColor:tab===t?C.cyan:C.border,background:tab===t?C.cyan+"15":"transparent",color:tab===t?C.cyan:C.muted,fontSize:16,fontWeight:tab===t?800:500,cursor:"pointer"};};
 
   return (
     <div style={{paddingBottom:90}}>
       {reportHTML&&(
         <div style={{position:"fixed",inset:0,zIndex:300,background:"#fff",display:"flex",flexDirection:"column"}}>
           <div style={{display:"flex",alignItems:"center",gap:8,padding:"12px 14px",background:"#0A0C13",borderBottom:"1px solid #1E2433",flexShrink:0}}>
-            <button onClick={function(){setReportHTML(null);}} style={{background:"transparent",border:"1px solid "+C.cyan+"44",borderRadius:10,padding:"7px 12px",color:C.cyan,cursor:"pointer",fontSize:15,fontWeight:700}}>← Fermer</button>
-            <div style={{flex:1,fontSize:16,fontWeight:700,color:"#fff"}}>Fiche accident</div>
+            <button onClick={function(){setReportHTML(null);}} style={{background:"transparent",border:"1px solid "+C.cyan+"44",borderRadius:10,padding:"7px 12px",color:C.cyan,cursor:"pointer",fontSize:17,fontWeight:700}}>← Fermer</button>
+            <div style={{flex:1,fontSize:18,fontWeight:700,color:"#fff"}}>Fiche accident</div>
             <button onClick={function(){
               var w=window.open("","_blank");
               if(!w)return;
               w.document.write(reportHTML+"<script src='https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js'><\/script><script>window.onload=function(){setTimeout(function(){html2pdf().set({margin:0.3,filename:'fiche-accident.pdf',image:{type:'jpeg',quality:0.98},html2canvas:{scale:2,useCORS:true},jsPDF:{unit:'in',format:'a4',orientation:'portrait'}}).from(document.body).save().then(function(){setTimeout(function(){window.close();},2000);});},800);}<\/script>");
               w.document.close();
-            }} style={{background:"linear-gradient(135deg,"+C.cyan+",#007799)",border:"none",borderRadius:8,padding:"7px 12px",color:"#000",cursor:"pointer",fontSize:14,fontWeight:800}}>📥 PDF</button>
+            }} style={{background:"linear-gradient(135deg,"+C.cyan+",#007799)",border:"none",borderRadius:8,padding:"7px 12px",color:"#000",cursor:"pointer",fontSize:16,fontWeight:800}}>📥 PDF</button>
           </div>
           <iframe srcDoc={reportHTML} style={{flex:1,border:"none",width:"100%"}} title="Fiche accident"/>
         </div>
       )}
       <div style={{padding:"20px 16px 12px",display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
-        <div><div style={{fontSize:20,fontWeight:900}}>🩹 Accidentologie</div><div style={{fontSize:15,color:C.muted,marginTop:2}}>{accidents.length} accident(s) enregistré(s)</div></div>
-        <button onClick={function(){resetForm();setShowForm(!showForm);}} style={{background:showForm?"transparent":"linear-gradient(135deg,"+C.cyan+",#007799)",border:showForm?"1px solid "+C.border:"none",borderRadius:12,padding:"9px 14px",color:showForm?C.muted:"#000",fontWeight:800,fontSize:15,cursor:"pointer"}}>{showForm?"✕ Annuler":"+ Déclarer"}</button>
+        <div><div style={{fontSize:22,fontWeight:900}}>🩹 Accidentologie</div><div style={{fontSize:17,color:C.muted,marginTop:2}}>{accidents.length} accident(s) enregistré(s)</div></div>
+        <button onClick={function(){resetForm();setShowForm(!showForm);}} style={{background:showForm?"transparent":"linear-gradient(135deg,"+C.cyan+",#007799)",border:showForm?"1px solid "+C.border:"none",borderRadius:12,padding:"9px 14px",color:showForm?C.muted:"#000",fontWeight:800,fontSize:17,cursor:"pointer"}}>{showForm?"✕ Annuler":"+ Déclarer"}</button>
       </div>
 
       {/* Filtre par site */}
       <div style={{padding:"0 14px 10px",display:"flex",gap:6,overflowX:"auto",WebkitOverflowScrolling:"touch"}}>
-        {["Tous"].concat(siteList).map(function(s){var active=siteFilter===s;return <button key={s} onClick={function(){setSiteFilter(s);}} style={{flexShrink:0,padding:"5px 12px",borderRadius:99,border:"1px solid",borderColor:active?C.cyan:C.border,background:active?C.cyan+"15":"transparent",color:active?C.cyan:C.muted,fontSize:13,fontWeight:active?800:500,cursor:"pointer"}}>{s==="Tous"?"🏢 Tous":s}</button>;})}
+        {["Tous"].concat(siteList).map(function(s){var active=siteFilter===s;return <button key={s} onClick={function(){setSiteFilter(s);}} style={{flexShrink:0,padding:"5px 12px",borderRadius:99,border:"1px solid",borderColor:active?C.cyan:C.border,background:active?C.cyan+"15":"transparent",color:active?C.cyan:C.muted,fontSize:15,fontWeight:active?800:500,cursor:"pointer"}}>{s==="Tous"?"🏢 Tous":s}</button>;})}
       </div>
 
       {/* Formulaire */}
       {showForm&&(
         <div style={{margin:"0 14px 14px",...S.card(C.cyan+"22")}}>
-          <div style={{fontSize:20,fontWeight:800,marginBottom:12,color:C.cyan}}>{editId?"✏️ Modifier":"📝 Déclarer un accident"}</div>
+          <div style={{fontSize:22,fontWeight:800,marginBottom:12,color:C.cyan}}>{editId?"✏️ Modifier":"📝 Déclarer un accident"}</div>
           <label style={S.label}>Date de l&#39;accident</label>
           <input type="date" value={form.date} onChange={function(e){setForm({...form,date:e.target.value});}} style={{...S.input,marginBottom:10}}/>
           <label style={S.label}>Date de réception de la déclaration</label>
@@ -3736,7 +3736,7 @@ function AccidentScreen({appState,onAppStateUpdate,sitesState,config}){
           <select value={form.partieCorps} onChange={function(e){setForm({...form,partieCorps:e.target.value});}} style={{...S.input,marginBottom:10}}>{ACC_PARTIES.map(function(p){return <option key={p} value={p}>{p}</option>;})}</select>
           <label style={S.label}>Gravité</label>
           <div style={{display:"flex",gap:6,marginBottom:10}}>
-            {[["mineur","Mineur",C.amber],["eleve","Élevé",C.orange],["critique","Grave",C.red]].map(function(g){var active=form.gravite===g[0];return <button key={g[0]} onClick={function(){setForm({...form,gravite:g[0]});}} style={{flex:1,padding:"8px",borderRadius:8,border:"1px solid "+(active?g[2]:C.border),background:active?g[2]+"18":"transparent",color:active?g[2]:C.muted,fontSize:15,fontWeight:active?800:400,cursor:"pointer"}}>{g[1]}</button>;})}
+            {[["mineur","Mineur",C.amber],["eleve","Élevé",C.orange],["critique","Grave",C.red]].map(function(g){var active=form.gravite===g[0];return <button key={g[0]} onClick={function(){setForm({...form,gravite:g[0]});}} style={{flex:1,padding:"8px",borderRadius:8,border:"1px solid "+(active?g[2]:C.border),background:active?g[2]+"18":"transparent",color:active?g[2]:C.muted,fontSize:17,fontWeight:active?800:400,cursor:"pointer"}}>{g[1]}</button>;})}
           </div>
           <label style={S.label}>Jours d&#39;arrêt</label>
           <input type="number" min="0" value={form.joursArret} onChange={function(e){setForm({...form,joursArret:e.target.value});}} style={{...S.input,marginBottom:10}}/>
@@ -3759,22 +3759,22 @@ function AccidentScreen({appState,onAppStateUpdate,sitesState,config}){
       {tab==="kpi"&&(
         <div style={{padding:"0 14px"}}>
           <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:14}}>
-            <div style={{...S.card(),textAlign:"center"}}><div style={{fontSize:28,fontWeight:900,color:C.red}}>{totalAT}</div><div style={{fontSize:13,color:C.muted}}>Accidents du travail</div></div>
-            <div style={{...S.card(),textAlign:"center"}}><div style={{fontSize:28,fontWeight:900,color:C.orange}}>{totalJours}</div><div style={{fontSize:13,color:C.muted}}>Jours d&#39;arrêt</div></div>
-            <div style={{...S.card(),textAlign:"center"}}><div style={{fontSize:28,fontWeight:900,color:C.amber}}>{totalPresque}</div><div style={{fontSize:13,color:C.muted}}>Presqu&#39;accidents</div></div>
-            <div style={{...S.card(),textAlign:"center"}}><div style={{fontSize:28,fontWeight:900,color:C.cyan}}>{tf!==null?tf:"—"}</div><div style={{fontSize:13,color:C.muted}}>Taux fréquence (Tf)</div></div>
+            <div style={{...S.card(),textAlign:"center"}}><div style={{fontSize:28,fontWeight:900,color:C.red}}>{totalAT}</div><div style={{fontSize:15,color:C.muted}}>Accidents du travail</div></div>
+            <div style={{...S.card(),textAlign:"center"}}><div style={{fontSize:28,fontWeight:900,color:C.orange}}>{totalJours}</div><div style={{fontSize:15,color:C.muted}}>Jours d&#39;arrêt</div></div>
+            <div style={{...S.card(),textAlign:"center"}}><div style={{fontSize:28,fontWeight:900,color:C.amber}}>{totalPresque}</div><div style={{fontSize:15,color:C.muted}}>Presqu&#39;accidents</div></div>
+            <div style={{...S.card(),textAlign:"center"}}><div style={{fontSize:28,fontWeight:900,color:C.cyan}}>{tf!==null?tf:"—"}</div><div style={{fontSize:15,color:C.muted}}>Taux fréquence (Tf)</div></div>
           </div>
-          {tf===null&&<div style={{padding:"8px 12px",background:C.orange+"12",border:"1px solid "+C.orange+"33",borderRadius:10,marginBottom:14,fontSize:14,color:C.orange}}>⚠️ Configurez les heures prestées par catégorie dans Profil → Système pour calculer le Tf et Tg</div>}
+          {tf===null&&<div style={{padding:"8px 12px",background:C.orange+"12",border:"1px solid "+C.orange+"33",borderRadius:10,marginBottom:14,fontSize:16,color:C.orange}}>⚠️ Configurez les heures prestées par catégorie dans Profil → Système pour calculer le Tf et Tg</div>}
 
           {/* Jours sans accident par site */}
           <div style={{...S.card(),marginBottom:14}}>
-            <div style={{fontSize:20,fontWeight:800,marginBottom:10}}>🏆 Jours sans accident</div>
+            <div style={{fontSize:22,fontWeight:800,marginBottom:10}}>🏆 Jours sans accident</div>
             {joursSansAcc.map(function(s,i){
               var col=s.jours===null?C.green:s.jours>365?C.green:s.jours>90?C.cyan:s.jours>30?C.amber:C.red;
               return (
                 <div key={i} style={{display:"flex",alignItems:"center",gap:10,padding:"8px 0",borderBottom:i<joursSansAcc.length-1?"1px solid "+C.dim:"none"}}>
-                  <div style={{width:38,height:38,borderRadius:10,background:col+"15",border:"1px solid "+col+"33",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,fontWeight:900,color:col,flexShrink:0}}>{s.jours===null?"∞":s.jours}</div>
-                  <div style={{flex:1}}><div style={{fontSize:16,fontWeight:700}}>{s.site}</div><div style={{fontSize:13,color:C.muted}}>{s.jours===null?"Aucun accident enregistré":"jours sans AT"}</div></div>
+                  <div style={{width:38,height:38,borderRadius:10,background:col+"15",border:"1px solid "+col+"33",display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,fontWeight:900,color:col,flexShrink:0}}>{s.jours===null?"∞":s.jours}</div>
+                  <div style={{flex:1}}><div style={{fontSize:18,fontWeight:700}}>{s.site}</div><div style={{fontSize:15,color:C.muted}}>{s.jours===null?"Aucun accident enregistré":"jours sans AT"}</div></div>
                 </div>
               );
             })}
@@ -3786,33 +3786,33 @@ function AccidentScreen({appState,onAppStateUpdate,sitesState,config}){
       {/* Liste */}
       {tab==="liste"&&(
         <div style={{padding:"0 14px"}}>
-          {sorted.length===0&&<div style={{textAlign:"center",padding:"40px 20px",color:C.muted}}><div style={{fontSize:36,marginBottom:12}}>✅</div><div style={{fontSize:20,fontWeight:700}}>Aucun accident enregistré</div></div>}
+          {sorted.length===0&&<div style={{textAlign:"center",padding:"40px 20px",color:C.muted}}><div style={{fontSize:36,marginBottom:12}}>✅</div><div style={{fontSize:22,fontWeight:700}}>Aucun accident enregistré</div></div>}
           {sorted.map(function(a,i){
             var col=a.gravite==="critique"?C.red:a.gravite==="eleve"?C.orange:C.amber;
             var typeIcon=a.type==="AT avec arrêt"?"🚑":a.type==="AT sans arrêt"?"🩹":a.type==="Presqu'accident"?"⚠️":"📋";
             return (
               <div key={a.id} style={{...S.card(),marginBottom:10}}>
                 <div style={{display:"flex",alignItems:"flex-start",gap:10}}>
-                  <div style={{width:38,height:38,borderRadius:10,background:col+"15",border:"1px solid "+col+"33",display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,flexShrink:0}}>{typeIcon}</div>
+                  <div style={{width:38,height:38,borderRadius:10,background:col+"15",border:"1px solid "+col+"33",display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,flexShrink:0}}>{typeIcon}</div>
                   <div style={{flex:1,minWidth:0}}>
                     <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:4}}>
-                      <span style={{fontSize:16,fontWeight:800}}>{a.type}</span>
-                      <span style={{fontSize:13,color:C.muted}}>{fmt(a.date)}</span>
+                      <span style={{fontSize:18,fontWeight:800}}>{a.type}</span>
+                      <span style={{fontSize:15,color:C.muted}}>{fmt(a.date)}</span>
                     </div>
-                    {a.victime&&<div style={{fontSize:15,fontWeight:600,marginBottom:3,color:C.text}}>👤 {a.victime}</div>}
-                    <div style={{fontSize:14,color:C.muted,marginBottom:4}}>📍 {a.site} · {a.cause}{a.partieCorps?" · 🦴 "+a.partieCorps:""}{a.statut?" · "+a.statut:""}{a.dateReception?" · 📨 Reçu le "+fmt(a.dateReception):""}</div>
-                    {a.description&&<div style={{fontSize:15,lineHeight:1.4,marginBottom:4}}>{a.description}</div>}
+                    {a.victime&&<div style={{fontSize:17,fontWeight:600,marginBottom:3,color:C.text}}>👤 {a.victime}</div>}
+                    <div style={{fontSize:16,color:C.muted,marginBottom:4}}>📍 {a.site} · {a.cause}{a.partieCorps?" · 🦴 "+a.partieCorps:""}{a.statut?" · "+a.statut:""}{a.dateReception?" · 📨 Reçu le "+fmt(a.dateReception):""}</div>
+                    {a.description&&<div style={{fontSize:17,lineHeight:1.4,marginBottom:4}}>{a.description}</div>}
                     <div style={{display:"flex",gap:6,flexWrap:"wrap",alignItems:"center"}}>
-                      <span style={{fontSize:12,padding:"2px 7px",borderRadius:5,background:col+"18",color:col,fontWeight:800}}>{a.gravite==="critique"?"GRAVE":a.gravite==="eleve"?"ÉLEVÉ":"MINEUR"}</span>
-                      {a.joursArret>0&&<span style={{fontSize:12,padding:"2px 7px",borderRadius:5,background:C.red+"18",color:C.red,fontWeight:800}}>{a.joursArret}j arrêt</span>}
-                      {a.actionsPrises&&<span style={{fontSize:12,padding:"2px 7px",borderRadius:5,background:C.green+"18",color:C.green,fontWeight:800}}>Actions prises</span>}
+                      <span style={{fontSize:14,padding:"2px 7px",borderRadius:5,background:col+"18",color:col,fontWeight:800}}>{a.gravite==="critique"?"GRAVE":a.gravite==="eleve"?"ÉLEVÉ":"MINEUR"}</span>
+                      {a.joursArret>0&&<span style={{fontSize:14,padding:"2px 7px",borderRadius:5,background:C.red+"18",color:C.red,fontWeight:800}}>{a.joursArret}j arrêt</span>}
+                      {a.actionsPrises&&<span style={{fontSize:14,padding:"2px 7px",borderRadius:5,background:C.green+"18",color:C.green,fontWeight:800}}>Actions prises</span>}
                     </div>
                   </div>
                 </div>
                 <div style={{display:"flex",gap:6,marginTop:10,justifyContent:"flex-end"}}>
-                  <button onClick={function(){exportFiche(a);}} style={{background:"transparent",border:"1px solid "+C.purple+"44",borderRadius:8,padding:"5px 12px",color:C.purple,cursor:"pointer",fontSize:13,fontWeight:700}}>📄 Fiche</button>
-                  <button onClick={function(){editAcc(a);}} style={{background:"transparent",border:"1px solid "+C.cyan+"44",borderRadius:8,padding:"5px 12px",color:C.cyan,cursor:"pointer",fontSize:13,fontWeight:700}}>✏️ Modifier</button>
-                  <button onClick={function(){deleteAcc(a.id);}} style={{background:"transparent",border:"1px solid "+C.red+"44",borderRadius:8,padding:"5px 12px",color:C.red,cursor:"pointer",fontSize:13,fontWeight:700}}>🗑️</button>
+                  <button onClick={function(){exportFiche(a);}} style={{background:"transparent",border:"1px solid "+C.purple+"44",borderRadius:8,padding:"5px 12px",color:C.purple,cursor:"pointer",fontSize:15,fontWeight:700}}>📄 Fiche</button>
+                  <button onClick={function(){editAcc(a);}} style={{background:"transparent",border:"1px solid "+C.cyan+"44",borderRadius:8,padding:"5px 12px",color:C.cyan,cursor:"pointer",fontSize:15,fontWeight:700}}>✏️ Modifier</button>
+                  <button onClick={function(){deleteAcc(a.id);}} style={{background:"transparent",border:"1px solid "+C.red+"44",borderRadius:8,padding:"5px 12px",color:C.red,cursor:"pointer",fontSize:15,fontWeight:700}}>🗑️</button>
                 </div>
               </div>
             );
@@ -3824,11 +3824,11 @@ function AccidentScreen({appState,onAppStateUpdate,sitesState,config}){
       {tab==="evolution"&&(
         <div style={{padding:"0 14px"}}>
           <div style={{...S.card(),marginBottom:14}}>
-            <div style={{fontSize:20,fontWeight:800,marginBottom:12}}>📈 Évolution sur 12 mois</div>
+            <div style={{fontSize:22,fontWeight:800,marginBottom:12}}>📈 Évolution sur 12 mois</div>
             <div style={{display:"flex",alignItems:"flex-end",gap:4,height:120}}>
               {months.map(function(m,i){var h=maxMonth>0?Math.max(m.count/maxMonth*100,4):4;return (
                 <div key={i} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:4}}>
-                  <div style={{fontSize:12,fontWeight:800,color:m.count>0?C.red:C.muted}}>{m.count||""}</div>
+                  <div style={{fontSize:14,fontWeight:800,color:m.count>0?C.red:C.muted}}>{m.count||""}</div>
                   <div style={{width:"100%",height:h+"%",background:m.count>0?C.red:C.dim,borderRadius:4,minHeight:3,transition:"height .6s"}}/>
                   <div style={{fontSize:7,color:C.muted,transform:"rotate(-45deg)",whiteSpace:"nowrap"}}>{m.label}</div>
                 </div>
@@ -3836,17 +3836,17 @@ function AccidentScreen({appState,onAppStateUpdate,sitesState,config}){
             </div>
           </div>
           <div style={{...S.card(),marginBottom:14}}>
-            <div style={{fontSize:20,fontWeight:800,marginBottom:6}}>📊 Indicateurs annuels</div>
-            <div style={{fontSize:15,color:C.muted,marginBottom:12}}>Basés sur les heures prestées configurées</div>
+            <div style={{fontSize:22,fontWeight:800,marginBottom:6}}>📊 Indicateurs annuels</div>
+            <div style={{fontSize:17,color:C.muted,marginBottom:12}}>Basés sur les heures prestées configurées</div>
             <div style={{display:"flex",gap:12}}>
               <div style={{flex:1,textAlign:"center",padding:"14px",background:C.surface,borderRadius:10,border:"1px solid "+C.border}}>
                 <div style={{fontSize:24,fontWeight:900,color:tf!==null?C.red:C.muted}}>{tf!==null?tf:"—"}</div>
-                <div style={{fontSize:13,color:C.muted,marginTop:4}}>Taux de fréquence</div>
+                <div style={{fontSize:15,color:C.muted,marginTop:4}}>Taux de fréquence</div>
                 <div style={{fontSize:8,color:C.muted}}>AT×1M / heures</div>
               </div>
               <div style={{flex:1,textAlign:"center",padding:"14px",background:C.surface,borderRadius:10,border:"1px solid "+C.border}}>
                 <div style={{fontSize:24,fontWeight:900,color:tg!==null?C.orange:C.muted}}>{tg!==null?tg:"—"}</div>
-                <div style={{fontSize:13,color:C.muted,marginTop:4}}>Taux de gravité</div>
+                <div style={{fontSize:15,color:C.muted,marginTop:4}}>Taux de gravité</div>
                 <div style={{fontSize:8,color:C.muted}}>Jours×1K / heures</div>
               </div>
             </div>
@@ -3869,8 +3869,8 @@ function AccidentScreen({appState,onAppStateUpdate,sitesState,config}){
             var maxVal=entries[0][1].total;
             return (
               <div style={{...S.card(),marginBottom:14}}>
-                <div style={{fontSize:20,fontWeight:800,marginBottom:4}}>👤 Accidents par catégorie</div>
-                <div style={{fontSize:14,color:C.muted,marginBottom:12}}>Avec détail des causes</div>
+                <div style={{fontSize:22,fontWeight:800,marginBottom:4}}>👤 Accidents par catégorie</div>
+                <div style={{fontSize:16,color:C.muted,marginBottom:12}}>Avec détail des causes</div>
                 {entries.map(function(e,i){
                   var name=e[0],data=e[1];
                   var pct=Math.round(data.total/maxVal*100);
@@ -3878,8 +3878,8 @@ function AccidentScreen({appState,onAppStateUpdate,sitesState,config}){
                   return (
                     <div key={i} style={{marginBottom:14}}>
                       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:4}}>
-                        <span style={{fontSize:15,fontWeight:700}}>{name}</span>
-                        <span style={{fontSize:20,fontWeight:900,color:C.red}}>{data.total}</span>
+                        <span style={{fontSize:17,fontWeight:700}}>{name}</span>
+                        <span style={{fontSize:22,fontWeight:900,color:C.red}}>{data.total}</span>
                       </div>
                       <div style={{background:C.dim,borderRadius:99,height:8,overflow:"hidden",marginBottom:6,display:"flex"}}>
                         {causesArr.map(function(ca,j){
@@ -3889,7 +3889,7 @@ function AccidentScreen({appState,onAppStateUpdate,sitesState,config}){
                       </div>
                       <div style={{display:"flex",gap:4,flexWrap:"wrap"}}>
                         {causesArr.map(function(ca,j){
-                          return <span key={j} style={{fontSize:12,padding:"2px 6px",borderRadius:4,background:(causeColors[ca[0]]||"#888")+"22",color:causeColors[ca[0]]||"#888",fontWeight:700}}>{ca[1]}× {ca[0]}</span>;
+                          return <span key={j} style={{fontSize:14,padding:"2px 6px",borderRadius:4,background:(causeColors[ca[0]]||"#888")+"22",color:causeColors[ca[0]]||"#888",fontWeight:700}}>{ca[1]}× {ca[0]}</span>;
                         })}
                       </div>
                     </div>
@@ -3909,7 +3909,7 @@ function AccidentScreen({appState,onAppStateUpdate,sitesState,config}){
             var maxVal=entries[0][1];
             return (
               <div style={{...S.card(),marginBottom:14}}>
-                <div style={{fontSize:20,fontWeight:800,marginBottom:12}}>🔍 Répartition par cause</div>
+                <div style={{fontSize:22,fontWeight:800,marginBottom:12}}>🔍 Répartition par cause</div>
                 {entries.map(function(e,i){
                   var name=e[0],count=e[1];
                   var pct=Math.round(count/maxVal*100);
@@ -3917,8 +3917,8 @@ function AccidentScreen({appState,onAppStateUpdate,sitesState,config}){
                   return (
                     <div key={i} style={{marginBottom:10}}>
                       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:3}}>
-                        <span style={{fontSize:14,fontWeight:600,flex:1}}>{name}</span>
-                        <span style={{fontSize:16,fontWeight:900,color:col,marginLeft:8}}>{count}</span>
+                        <span style={{fontSize:16,fontWeight:600,flex:1}}>{name}</span>
+                        <span style={{fontSize:18,fontWeight:900,color:col,marginLeft:8}}>{count}</span>
                       </div>
                       <div style={{background:C.dim,borderRadius:99,height:6,overflow:"hidden"}}>
                         <div style={{width:pct+"%",height:"100%",background:col,borderRadius:99,transition:"width .6s"}}/>
@@ -3960,7 +3960,7 @@ function BottomNav({active,onChange,badge,user,config}){
                 </div>
               )}
             </div>
-            <span style={{fontSize:12,fontWeight:isActive?800:400,color:col,letterSpacing:.3}}>{t.l}</span>
+            <span style={{fontSize:14,fontWeight:isActive?800:400,color:col,letterSpacing:.3}}>{t.l}</span>
           </button>
         );
       })}
@@ -4123,7 +4123,7 @@ function App(){
     appName:"SECURA",
     accentColor:"#00E5FF",
     fontFamily:"DM Sans,Segoe UI,sans-serif",
-    fontSize:18,
+    fontSize:20,
     darkMode:true,
     cardRadius:18,
     compactMode:false,
@@ -4189,7 +4189,7 @@ function App(){
     background:bg,
     color:darkMode?C.text:"#1A1E2E",
     fontFamily:(config&&config.fontFamily)||"DM Sans,Segoe UI,sans-serif",
-    fontSize:20,
+    fontSize:22,
     filter:daltonFilter,
   };
 
@@ -4366,7 +4366,7 @@ function App(){
   if(!dbReady) return (
     <div style={{...S.app,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:16,background:"#07090F"}}>
       <div style={{width:48,height:48,border:"3px solid #00E5FF33",borderTop:"3px solid #00E5FF",borderRadius:"50%",animation:"spin 1s linear infinite"}}/>
-      <div style={{color:"#00E5FF",fontSize:20,fontWeight:700}}>Connexion Supabase...</div>
+      <div style={{color:"#00E5FF",fontSize:22,fontWeight:700}}>Connexion Supabase...</div>
     </div>
   );
 
@@ -4383,12 +4383,12 @@ function App(){
     <div style={appStyle}>
       <InjectCSS/>
       {syncMsg&&(
-        <div style={{position:"fixed",top:0,left:0,right:0,zIndex:9998,background:isOnline?C.green+"EE":C.red+"EE",color:"#fff",fontSize:15,fontWeight:700,padding:"8px 16px",textAlign:"center",letterSpacing:0.5}}>
+        <div style={{position:"fixed",top:0,left:0,right:0,zIndex:9998,background:isOnline?C.green+"EE":C.red+"EE",color:"#fff",fontSize:17,fontWeight:700,padding:"8px 16px",textAlign:"center",letterSpacing:0.5}}>
           {syncMsg}
         </div>
       )}
       {!isOnline&&!syncMsg&&(
-        <div style={{position:"fixed",top:0,left:0,right:0,zIndex:9998,background:C.amber+"EE",color:"#000",fontSize:14,fontWeight:700,padding:"6px 16px",textAlign:"center"}}>
+        <div style={{position:"fixed",top:0,left:0,right:0,zIndex:9998,background:C.amber+"EE",color:"#000",fontSize:16,fontWeight:700,padding:"6px 16px",textAlign:"center"}}>
           📵 Hors-ligne — modifications sauvegardées localement
         </div>
       )}
