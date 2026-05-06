@@ -2708,12 +2708,14 @@ function QRCodeDisplay({text, size}){
   );
 }
 
-function RapportsScreen({inspections,onDelete,config}){
+function RapportsScreen({inspections,onDelete,onArchive,config}){
   const [sel,setSel]=useState(null);
   const [printing,setPrinting]=useState(false);
   const [reportHTML,setReportHTML]=useState(null);
   const [publicURL,setPublicURL]=useState(null);
-  const validated=inspections.filter(i=>i.statut==="Validée");
+  const [showArchives,setShowArchives]=useState(false);
+  const validated=inspections.filter(i=>i.statut==="Validée"&&!i.archived);
+  const archived=inspections.filter(i=>i.archived);
   const avg=validated.length?Math.round(validated.reduce((s,i)=>s+i.score,0)/validated.length):100;
   const totalNC=validated.reduce((s,i)=>s+i.nc,0);
 
@@ -2941,9 +2943,12 @@ function RapportsScreen({inspections,onDelete,config}){
           <iframe id="secura-report-frame" srcDoc={reportHTML} style={{flex:1,border:"none",width:"100%"}} title="Rapport"/>
         </div>
       )}
-      <div style={{padding:"20px 16px 12px"}}>
-        <div style={{fontSize:20,fontWeight:900}}>Rapports</div>
-        <div style={{fontSize:12,color:C.muted}}>Export HTML · score pénalité 100→0</div>
+      <div style={{padding:"20px 16px 12px",display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
+        <div>
+          <div style={{fontSize:20,fontWeight:900}}>{showArchives?"Archives":"Rapports"}</div>
+          <div style={{fontSize:12,color:C.muted}}>{showArchives?archived.length+" rapport(s) archivé(s)":"Export HTML · score pénalité 100→0"}</div>
+        </div>
+        <button onClick={function(){setShowArchives(!showArchives);setSel(null);}} style={{background:showArchives?"linear-gradient(135deg,"+C.cyan+",#007799)":"transparent",border:showArchives?"none":"1px solid "+C.amber+"66",borderRadius:10,padding:"7px 12px",color:showArchives?"#000":C.amber,fontSize:11,fontWeight:800,cursor:"pointer"}}>{showArchives?"← Retour":"📦 Archives ("+archived.length+")"}</button>
       </div>
       <div style={{padding:"0 14px 14px",display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:10}}>
         {[{l:"Score moyen",v:avg+"/100",c:scoreColor(avg)},{l:"Total NC",v:totalNC,c:C.red},{l:"Validées",v:validated.length,c:C.green}].map(function(s,i){
@@ -2952,23 +2957,30 @@ function RapportsScreen({inspections,onDelete,config}){
       </div>
       <div style={{padding:"0 14px"}}>
         <div style={{fontSize:10,color:C.muted,marginBottom:10,letterSpacing:2,textTransform:"uppercase"}}>Sélectionner une inspection</div>
-        {validated.length===0&&(
+        {!showArchives&&validated.length===0&&(
           <div style={{textAlign:"center",padding:"40px 20px",color:C.muted}}>
             <div style={{fontSize:32,marginBottom:8}}>📋</div>
             <div style={{fontSize:14,fontWeight:600}}>Aucun rapport validé</div>
             <div style={{fontSize:12,marginTop:4}}>Les rapports apparaissent ici une fois les audits validés et signés.</div>
           </div>
         )}
-        {validated.map(function(ins,i){
+        {showArchives&&archived.length===0&&(
+          <div style={{textAlign:"center",padding:"40px 20px",color:C.muted}}>
+            <div style={{fontSize:32,marginBottom:8}}>📦</div>
+            <div style={{fontSize:14,fontWeight:600}}>Aucune archive</div>
+            <div style={{fontSize:12,marginTop:4}}>Les rapports archivés apparaîtront ici. Le QR code reste accessible même après archivage.</div>
+          </div>
+        )}
+        {(showArchives?archived:validated).map(function(ins,i){
           const pen=(ins.items||[]).filter(function(x){return !x.ok;}).reduce(function(s,x){return s+(PENALITE[x.poids||x.p]||0);},0);
           return (
-            <div key={i} style={{...S.card(sel===i?C.cyan:C.border),marginBottom:10,cursor:"pointer"}} onClick={function(){setSel(i===sel?null:i);}}>
+            <div key={i} style={{...S.card(sel===i?C.cyan:C.border),marginBottom:10,cursor:"pointer",opacity:showArchives?0.85:1}} onClick={function(){setSel(i===sel?null:i);}}>
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
                 <div style={{flex:1}}>
                   <div style={{fontSize:13,fontWeight:700}}>{ins.titre}</div>
                   <div style={{fontSize:11,color:C.muted,marginTop:3}}>📍 {ins.site} · {fmt(ins.date)}</div>
                   <div style={{display:"flex",gap:6,marginTop:8,flexWrap:"wrap"}}>
-                    <StatutBadge s={ins.statut}/>
+                    {showArchives?<span style={{fontSize:9,padding:"2px 7px",borderRadius:5,background:C.amber+"22",color:C.amber,fontWeight:800}}>📦 ARCHIVÉE</span>:<StatutBadge s={ins.statut}/>}
                     <Tag label={((CAT_META[ins.categorie]&&CAT_META[ins.categorie].icon)||"")+" "+ins.categorie} color={(CAT_META[ins.categorie]&&CAT_META[ins.categorie].color)||C.muted}/>
                   </div>
                 </div>
@@ -2994,7 +3006,17 @@ function RapportsScreen({inspections,onDelete,config}){
                       📷 Générer QR code imprimable
                     </button>
                   </div>
-                  <InlineDelete onConfirm={()=>onDelete&&onDelete(ins.id)}/>
+                  {showArchives?(
+                    <div style={{display:"flex",gap:8,marginTop:4}}>
+                      <button onClick={function(e){e.stopPropagation();onArchive&&onArchive(ins.id,false);}} style={{flex:1,background:"transparent",border:"1px solid "+C.green+"44",borderRadius:8,padding:"7px 12px",color:C.green,fontSize:11,fontWeight:700,cursor:"pointer"}}>↩️ Restaurer</button>
+                      <InlineDelete onConfirm={()=>onDelete&&onDelete(ins.id)}/>
+                    </div>
+                  ):(
+                    <div style={{display:"flex",gap:8,marginTop:4}}>
+                      <button onClick={function(e){e.stopPropagation();onArchive&&onArchive(ins.id,true);setSel(null);}} style={{flex:1,background:"transparent",border:"1px solid "+C.amber+"44",borderRadius:8,padding:"7px 12px",color:C.amber,fontSize:11,fontWeight:700,cursor:"pointer"}}>📦 Archiver</button>
+                      <InlineDelete onConfirm={()=>onDelete&&onDelete(ins.id)}/>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -4330,6 +4352,10 @@ function App(){
     setInspections(p=>p.filter(i=>i.id!==id));
     try{ await supa.del("inspections",id); }catch(e){console.error(e);}
   };
+  async function archiveIns(id,archived){
+    setInspections(p=>p.map(function(i){return i.id===id?{...i,archived:archived}:i;}));
+    try{ await supa.upsert("inspections",{id:id,archived:archived}); }catch(e){console.error(e);}
+  };
   const pending=actions.filter(a=>a.statut!=="Clôturée").length;
 
   // ── Notifications - check due actions ───────────────────────
@@ -4420,7 +4446,7 @@ function App(){
         {screen==="inspections" &&<InspectionsScreen inspections={inspections} onOpen={openDetail} onNav={nav} onDelete={deleteIns} user={user} config={config}/>}
         {screen==="actions"     &&<ActionsScreen actions={actions} onUpdate={updateAct} resps={respsState} config={config} onConfigUpdate={saveConfig} user={user}/>}
         {screen==="accidents"   &&<AccidentScreen appState={appState} onAppStateUpdate={handleAppStateUpdate} sitesState={sitesState} config={config}/>}
-        {screen==="rapports"    &&<RapportsScreen inspections={inspections} onDelete={deleteIns} config={config}/>}
+        {screen==="rapports"    &&<RapportsScreen inspections={inspections} onDelete={deleteIns} onArchive={archiveIns} config={config}/>}
         {screen==="settings"    &&<SettingsScreen user={user} onLogout={()=>{setUser(null);setScreen("dashboard");}} config={config} onConfigUpdate={saveConfig} appState={appState} respsState={respsState} sitesState={sitesState} onAppStateUpdate={handleAppStateUpdate}/>}
       </div>
       <BottomNav active={screen} onChange={setScreen} badge={pending} user={user} config={config}/>
