@@ -2712,6 +2712,7 @@ function RapportsScreen({inspections,onDelete,config}){
   const [sel,setSel]=useState(null);
   const [printing,setPrinting]=useState(false);
   const [reportHTML,setReportHTML]=useState(null);
+  const [publicURL,setPublicURL]=useState(null);
   const validated=inspections.filter(i=>i.statut==="Validée");
   const avg=validated.length?Math.round(validated.reduce((s,i)=>s+i.score,0)/validated.length):100;
   const totalNC=validated.reduce((s,i)=>s+i.nc,0);
@@ -2912,6 +2913,19 @@ function RapportsScreen({inspections,onDelete,config}){
 
   return (
     <div style={{paddingBottom:88}}>
+      {publicURL&&(
+        <div style={{position:"fixed",inset:0,zIndex:300,background:"#fff",display:"flex",flexDirection:"column"}}>
+          <div style={{display:"flex",alignItems:"center",gap:8,padding:"12px 14px",background:"#0A0C13",borderBottom:"1px solid #1E2433",flexShrink:0}}>
+            <button onClick={function(){setPublicURL(null);}} style={{background:"transparent",border:"1px solid "+C.cyan+"44",borderRadius:10,padding:"7px 12px",color:C.cyan,cursor:"pointer",fontSize:12,fontWeight:700}}>← Fermer</button>
+            <div style={{flex:1,fontSize:13,fontWeight:700,color:"#fff",minWidth:60}}>Rapport public</div>
+            <button onClick={function(){
+              if(navigator.clipboard) navigator.clipboard.writeText(publicURL).then(function(){alert("Lien copié");});
+              else{var t=document.createElement("textarea");t.value=publicURL;document.body.appendChild(t);t.select();document.execCommand("copy");document.body.removeChild(t);alert("Lien copié");}
+            }} style={{background:"linear-gradient(135deg,"+C.cyan+",#007799)",border:"none",borderRadius:8,padding:"7px 12px",color:"#000",cursor:"pointer",fontSize:11,fontWeight:800}}>📋 Copier lien</button>
+          </div>
+          <iframe src={publicURL} style={{flex:1,border:"none",width:"100%"}} title="Rapport public"/>
+        </div>
+      )}
       {reportHTML&&(
         <div style={{position:"fixed",inset:0,zIndex:300,background:"#fff",display:"flex",flexDirection:"column"}}>
           <div style={{display:"flex",alignItems:"center",gap:8,padding:"12px 14px",background:"#0A0C13",borderBottom:"1px solid #1E2433",flexShrink:0,flexWrap:"wrap"}}>
@@ -2969,9 +2983,9 @@ function RapportsScreen({inspections,onDelete,config}){
                     <span>📄</span>{printing?"Génération PDF...":"📄 Exporter en PDF"}
                   </button>
                   <div style={{display:"flex",flexDirection:"column",gap:8}}>
-                    <a href={window.location.origin+"/rapport.html?site="+encodeURIComponent(ins.site)} target="_blank" style={{...S.btn(C.cyan),textDecoration:"none",display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
+                    <button onClick={function(){setPublicURL(window.location.origin+"/rapport.html?site="+encodeURIComponent(ins.site));}} style={{...S.btn(C.cyan),display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
                       🔗 Voir rapport public
-                    </a>
+                    </button>
                     <button onClick={function(){
                       var url=window.location.origin+"/rapport.html?site="+encodeURIComponent(ins.site);
                       var qrUrl="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data="+encodeURIComponent(url)+"&ecc=H&margin=10";
