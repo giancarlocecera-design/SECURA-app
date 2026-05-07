@@ -3247,16 +3247,17 @@ function SettingsScreen({user,onLogout,appState,onAppStateUpdate,respsState,site
               var email=typeof r==="object"?r.email:"";
               var role=typeof r==="object"?(r.role||"Inspecteur"):"Inspecteur";
               var initials=nom.split(" ").map(function(n){return n[0];}).join("").slice(0,2).toUpperCase();
+              var roleColor=role==="Admin"?C.purple:role==="Inspecteur"?C.cyan:C.amber;
               return (
-                <div key={i} style={{padding:"8px 0",borderBottom:"1px solid "+C.border}}>
-                  <div style={{display:"flex",alignItems:"center",gap:8}}>
-                    <div style={{width:28,height:28,borderRadius:99,background:C.cyan+"15",display:"flex",alignItems:"center",justifyContent:"center",fontSize:13,fontWeight:900,color:C.cyan,flexShrink:0}}>{initials}</div>
-                    <div style={{flex:1}}>
-                      <div style={{fontSize:16,fontWeight:700}}>{nom}</div>
-                      {email&&<div style={{fontSize:13,color:C.muted}}>{email}</div>}
+                <div key={i} style={{padding:"10px 0",borderBottom:"1px solid "+C.border}}>
+                  <div style={{display:"flex",alignItems:"flex-start",gap:10}}>
+                    <div style={{width:34,height:34,borderRadius:99,background:C.cyan+"15",display:"flex",alignItems:"center",justifyContent:"center",fontSize:13,fontWeight:900,color:C.cyan,flexShrink:0}}>{initials}</div>
+                    <div style={{flex:1,minWidth:0,overflow:"hidden"}}>
+                      <div style={{fontSize:15,fontWeight:700,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{nom}</div>
+                      {email&&<div style={{fontSize:11,color:C.muted,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{email}</div>}
+                      <div style={{marginTop:4,display:"inline-block",fontSize:10,padding:"2px 8px",borderRadius:99,background:roleColor+"18",color:roleColor,fontWeight:700}}>{role}</div>
                     </div>
-                    <div style={{fontSize:13,color:C.muted,marginRight:8}}>{role}</div>
-                    <button onClick={()=>removeResp(i)} style={{background:"transparent",border:"none",color:C.red,cursor:"pointer",fontSize:19,padding:"0 4px"}}>×</button>
+                    <button onClick={()=>removeResp(i)} style={{background:"transparent",border:"1px solid "+C.red+"33",borderRadius:8,color:C.red,cursor:"pointer",fontSize:16,padding:"4px 10px",flexShrink:0,fontWeight:700}}>×</button>
                   </div>
                 </div>
               );
@@ -3283,9 +3284,9 @@ function SettingsScreen({user,onLogout,appState,onAppStateUpdate,respsState,site
               return (
                 <div key={i} style={{padding:"8px 0",borderBottom:"1px solid "+C.border}}>
                   <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:4}}>
-                    <span style={{fontSize:19}}>📍</span>
-                    <span style={{flex:1,fontSize:16,fontWeight:700}}>{s}</span>
-                    <button onClick={function(){removeSite(i);}} style={{background:"transparent",border:"none",color:C.red,cursor:"pointer",fontSize:19,padding:"0 4px"}}>×</button>
+                    <span style={{fontSize:19,flexShrink:0}}>📍</span>
+                    <span style={{flex:1,minWidth:0,fontSize:16,fontWeight:700,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{s}</span>
+                    <button onClick={function(){removeSite(i);}} style={{background:"transparent",border:"1px solid "+C.red+"33",borderRadius:8,color:C.red,cursor:"pointer",fontSize:16,padding:"4px 10px",flexShrink:0,fontWeight:700}}>×</button>
                   </div>
                   <input
                     placeholder="Adresse du site..."
