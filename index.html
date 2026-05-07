@@ -1819,6 +1819,7 @@ function InspectionDetailScreen({inspection,onBack,onUpdate,resps,sitesState}){
   const [items,setItems]=useState(inspection.items.map(i=>({...i,poids:i.poids||i.p||'mineur',photos:i.photos||[]})));
 
   const [notes,setNotes]=useState(inspection.notes||"");
+  const [avisSIPPT,setAvisSIPPT]=useState(inspection.avisSIPPT||"");
   const [saved,setSaved]=useState(false);
   const [openSec,setOpenSec]=useState(null);
   const siteOpts=(sitesState&&sitesState.length>0)?sitesState:SITES;
@@ -1838,8 +1839,8 @@ function InspectionDetailScreen({inspection,onBack,onUpdate,resps,sitesState}){
   const [showSig,setShowSig]=useState(false);
   const [sigInsp,setSigInsp]=useState(null);
   const [sigResp,setSigResp]=useState(null);
-  const save=()=>{onUpdate({...inspection,...metaForm,items,notes,score,nc:ncItems.length});setSaved(true);setTimeout(()=>setSaved(false),2000);};
-  const saveMeta=()=>{onUpdate({...inspection,...metaForm,items,notes,score,nc:ncItems.length});setEditMeta(false);setSaved(true);setTimeout(()=>setSaved(false),2000);};
+  const save=()=>{onUpdate({...inspection,...metaForm,items,notes,avisSIPPT,score,nc:ncItems.length});setSaved(true);setTimeout(()=>setSaved(false),2000);};
+  const saveMeta=()=>{onUpdate({...inspection,...metaForm,items,notes,avisSIPPT,score,nc:ncItems.length});setEditMeta(false);setSaved(true);setTimeout(()=>setSaved(false),2000);};
 
   const totalPhotos=items.reduce((s,i)=>s+((i.photos&&i.photos.length)||0),0);
 
@@ -1967,6 +1968,29 @@ function InspectionDetailScreen({inspection,onBack,onUpdate,resps,sitesState}){
       })}
 
       <div style={{margin:"10px 14px 0",...S.card()}}>
+        <label style={S.label}>📋 Avis SIPPT global</label>
+        <div style={{fontSize:13,color:C.muted,marginBottom:10}}>Évaluation globale du conseiller en prévention</div>
+        {(function(){
+          var levels=[
+            {k:"satisfaisant",l:"Satisfaisant",sub:"Conforme aux exigences",icon:"✅",color:C.green},
+            {k:"recommandation",l:"Satisfaisant avec recommandations",sub:"Conforme mais améliorations souhaitées",icon:"⚠️",color:C.amber},
+            {k:"non_satisfaisant",l:"Non satisfaisant",sub:"Mesures correctives nécessaires",icon:"❌",color:C.red}
+          ];
+          return <div style={{display:"flex",flexDirection:"column",gap:8}}>{levels.map(function(lv){
+            var active=avisSIPPT===lv.k;
+            return <button key={lv.k} onClick={function(){setAvisSIPPT(active?"":lv.k);}} style={{display:"flex",alignItems:"center",gap:12,padding:"12px 14px",borderRadius:12,border:"2px solid "+(active?lv.color:C.border),background:active?lv.color+"15":"transparent",cursor:"pointer",textAlign:"left",transition:"all .2s"}}>
+              <span style={{fontSize:24}}>{lv.icon}</span>
+              <div style={{flex:1}}>
+                <div style={{fontSize:15,fontWeight:800,color:active?lv.color:C.text}}>{lv.l}</div>
+                <div style={{fontSize:12,color:C.muted,marginTop:2}}>{lv.sub}</div>
+              </div>
+              {active&&<div style={{width:22,height:22,borderRadius:99,background:lv.color,color:"#000",display:"flex",alignItems:"center",justifyContent:"center",fontSize:13,fontWeight:900}}>✓</div>}
+            </button>;
+          })}</div>;
+        })()}
+      </div>
+
+      <div style={{margin:"10px 14px 0",...S.card()}}>
         <label style={S.label}>Notes & observations générales</label>
         <textarea value={notes} onChange={e=>setNotes(e.target.value)} style={{...S.input,minHeight:80,resize:"vertical"}} placeholder="Observations, contexte, mesures immédiates prises..."/>
       </div>
@@ -1991,7 +2015,7 @@ function InspectionDetailScreen({inspection,onBack,onUpdate,resps,sitesState}){
         <button onClick={()=>{
           setShowSig(true);
           if(sigInsp&&sigResp){
-            onUpdate({...inspection,items,notes,score,nc:ncItems.length,statut:"Validée",sigInspecteur:sigInsp,sigResponsable:sigResp});
+            onUpdate({...inspection,items,notes,avisSIPPT,score,nc:ncItems.length,statut:"Validée",sigInspecteur:sigInsp,sigResponsable:sigResp});
           }
         }} style={{...S.btn(C.green)}}>{sigInsp&&sigResp?"✓ Valider":"Signer & valider"}</button>
       </div>
@@ -2892,6 +2916,16 @@ function RapportsScreen({inspections,onDelete,onArchive,config}){
         +"</div></div></div>"
         +(ncItems.length>0?"<h2 class='nc'>Non-conformites ("+ncItems.length+")</h2>"+ncRows:"")
         +(okItems.length>0?"<h2 class='ok'>Points conformes ("+okItems.length+")</h2>"+okRows:"")
+        +(function(){
+          if(!ins.avisSIPPT) return "";
+          var labels={satisfaisant:["Satisfaisant","Conforme aux exigences","#00C853","✓"],recommandation:["Satisfaisant avec recommandations","Conforme mais ameliorations souhaitees","#FFB300","!"],non_satisfaisant:["Non satisfaisant","Mesures correctives necessaires","#FF1744","X"]};
+          var lv=labels[ins.avisSIPPT];if(!lv) return "";
+          return "<h2 class='avis-sippt' style='background:#fffbf0;color:#664400;border-left:4px solid #FFB300'>Avis SIPPT global</h2>"
+            +"<div style='padding:18px 20px;background:"+lv[2]+"12;border:2px solid "+lv[2]+";border-radius:12px;margin-bottom:16px;display:flex;align-items:center;gap:16px'>"
+            +"<div style='width:50px;height:50px;border-radius:99px;background:"+lv[2]+";color:#fff;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:900;flex-shrink:0'>"+lv[3]+"</div>"
+            +"<div><div style='font-size:16px;font-weight:900;color:"+lv[2]+";margin-bottom:3px'>"+lv[0]+"</div><div style='font-size:12px;color:#666'>"+lv[1]+"</div></div>"
+            +"</div>";
+        })()
         +(ins.notes?"<h2 class='notes'>Notes</h2><div class='notes-box'>"+ins.notes+"</div>":"")
         +sigSection
         +(function(){
