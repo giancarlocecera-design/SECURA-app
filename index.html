@@ -3482,9 +3482,10 @@ function SettingsScreen({user,onLogout,appState,onAppStateUpdate,respsState,site
                 var current=(config&&config.techMode)||"off";
                 var ambiances=[
                   {k:"off",label:"Standard",desc:"Fond sombre par défaut",gradient:"linear-gradient(135deg,#07090F,#0D1825)",border:C.border},
-                  {k:"bordeaux",label:"Bordeaux",desc:"Ambiance chaleureuse",gradient:"linear-gradient(135deg,#1A0A10,#2D0F1A)",border:"#5A1A30"},
-                  {k:"ocean",label:"Bleu Océan",desc:"Ambiance marine profonde",gradient:"linear-gradient(135deg,#081420,#0A1A2D)",border:"#1A3A5A"},
-                  {k:"beton",label:"Gris Béton",desc:"Ambiance urbaine moderne",gradient:"linear-gradient(135deg,#161618,#1E1E22)",border:"#3A3A40"}
+                  {k:"bordeaux",label:"Bordeaux marbré",desc:"Tons rouges chauds avec reflets",gradient:"radial-gradient(circle at 30% 25%,#5A1F2E,transparent 60%),radial-gradient(circle at 70% 70%,#3D1422,transparent 50%),linear-gradient(135deg,#1A0A10,#2D0F1A)",border:"#5A1A30"},
+                  {k:"ocean",label:"Bleu Océan marbré",desc:"Reflets aquatiques profonds",gradient:"radial-gradient(circle at 30% 25%,#2A5F8F,transparent 60%),radial-gradient(circle at 70% 70%,#1A4060,transparent 50%),linear-gradient(135deg,#081420,#0F2540)",border:"#1A3A5A"},
+                  {k:"beton",label:"Gris Béton marbré",desc:"Texture urbaine moderne",gradient:"radial-gradient(circle at 30% 25%,#4A4A52,transparent 60%),radial-gradient(circle at 70% 70%,#36363C,transparent 50%),linear-gradient(135deg,#1E1E22,#28282E)",border:"#3A3A40"},
+                  {k:"blanc",label:"Blanc Ombré",desc:"Ambiance claire et lumineuse",gradient:"radial-gradient(circle at 30% 25%,#E8EEF5,transparent 60%),radial-gradient(circle at 70% 70%,#D8E2EF,transparent 50%),linear-gradient(135deg,#F5F8FC,#E8EEF5)",border:"#C5D0E0"}
                 ];
                 return ambiances.map(function(a,i){
                   var active=current===a.k;
@@ -4212,9 +4213,10 @@ function App(){
 
   const isTech=!!(config&&config.techMode);
   var techBg=C.bg;
-  if(config&&config.techMode==="bordeaux") techBg="linear-gradient(160deg,#0D0508 0%,#1A0A10 30%,#2D0F1A 60%,#1A0A10 100%)";
-  else if(config&&config.techMode==="ocean") techBg="linear-gradient(160deg,#040810 0%,#081420 30%,#0A1A2D 60%,#081420 100%)";
-  else if(config&&config.techMode==="beton") techBg="linear-gradient(160deg,#0D0D0F 0%,#161618 30%,#1E1E22 60%,#161618 100%)";
+  if(config&&config.techMode==="bordeaux") techBg="radial-gradient(ellipse at 20% 15%,#5A1F2E 0%,transparent 40%),radial-gradient(ellipse at 80% 70%,#3D1422 0%,transparent 50%),radial-gradient(ellipse at 50% 90%,#4A1525 0%,transparent 45%),linear-gradient(160deg,#1A0A10 0%,#2D0F1A 50%,#1A0A10 100%)";
+  else if(config&&config.techMode==="ocean") techBg="radial-gradient(ellipse at 25% 20%,#2A5F8F 0%,transparent 40%),radial-gradient(ellipse at 75% 65%,#1A4060 0%,transparent 50%),radial-gradient(ellipse at 50% 90%,#1F4A70 0%,transparent 45%),linear-gradient(160deg,#081420 0%,#0F2540 50%,#081420 100%)";
+  else if(config&&config.techMode==="beton") techBg="radial-gradient(ellipse at 30% 25%,#4A4A52 0%,transparent 40%),radial-gradient(ellipse at 70% 60%,#36363C 0%,transparent 45%),radial-gradient(ellipse at 50% 85%,#42424A 0%,transparent 50%),linear-gradient(160deg,#1E1E22 0%,#28282E 50%,#1E1E22 100%)";
+  else if(config&&config.techMode==="blanc") techBg="radial-gradient(ellipse at 25% 20%,#E8EEF5 0%,transparent 50%),radial-gradient(ellipse at 75% 65%,#D8E2EF 0%,transparent 55%),radial-gradient(ellipse at 50% 90%,#E0E8F2 0%,transparent 50%),linear-gradient(160deg,#F5F8FC 0%,#E8EEF5 50%,#F5F8FC 100%)";
   const bg=isTech?techBg:darkMode?C.bg:"#F0F4FA";
   const daltonFilter=(config&&config.daltonMode)==="deuteranopie"?"url(#dalton-deut)"
     :(config&&config.daltonMode)==="protanopie"?"url(#dalton-prot)"
