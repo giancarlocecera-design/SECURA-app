@@ -4373,7 +4373,15 @@ function App(){
   };
   async function archiveIns(id,archived){
     setInspections(p=>p.map(function(i){return i.id===id?{...i,archived:archived}:i;}));
-    try{ await supa.upsert("inspections",{id:id,archived:archived}); }catch(e){console.error(e);}
+    try{
+      const r=await fetch(SUPA_URL+"/rest/v1/inspections?id=eq."+id,{
+        method:"PATCH",
+        headers:{"apikey":SUPA_KEY,"Authorization":"Bearer "+SUPA_KEY,"Content-Type":"application/json","Prefer":"return=minimal"},
+        body:JSON.stringify({archived:archived})
+      });
+      if(!r.ok) console.error("Archive error:",r.status,await r.text());
+      else console.log("Archive OK:",id,archived);
+    }catch(e){console.error("Archive exception:",e);}
   };
   const pending=actions.filter(a=>a.statut!=="Clôturée").length;
 
