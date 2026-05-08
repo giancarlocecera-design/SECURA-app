@@ -1943,12 +1943,12 @@ function InspectionDetailScreen({inspection,onBack,onUpdate,resps,sitesState}){
       )}
 
       {/* Score */}
-      <div style={{margin:"14px 14px 0",...S.card(`${scoreColor(score)}33`)}}>
+      <div style={{margin:"14px 14px 0",...S.card(`${scoreColor(scoreFinal)}33`)}}>
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
           <div>
             <div style={{fontSize:12,color:C.muted,letterSpacing:1,textTransform:"uppercase"}}>SCORE PÉNALISÉ</div>
-            <div style={{fontSize:40,fontWeight:900,color:scoreColor(score),lineHeight:1}}>{score}<span style={{fontSize:19}}>/100</span></div>
-            <div style={{fontSize:14,color:penTotal>0?C.red:C.green,marginTop:2}}>Pénalité : −{penTotal}pts</div>
+            <div style={{fontSize:40,fontWeight:900,color:scoreColor(scoreFinal),lineHeight:1}}>{scoreFinal}<span style={{fontSize:19}}>/100</span></div>
+            <div style={{fontSize:14,color:(penTotal+zonesPenTotal)>0?C.red:C.green,marginTop:2}}>Pénalité : −{penTotal+zonesPenTotal}pts{zonesPenTotal>0?" (dont −"+zonesPenTotal+" zones MCA)":""}</div>
           </div>
           <div style={{textAlign:"right"}}>
             <div style={{fontSize:12,color:C.muted,marginBottom:4}}>DÉTAIL NC</div>
@@ -1959,10 +1959,11 @@ function InspectionDetailScreen({inspection,onBack,onUpdate,resps,sitesState}){
                     <span key={p} style={{fontSize:14,padding:"2px 7px",borderRadius:6,background:`${poidsColor(p)}18`,color:poidsColor(p),fontWeight:800,marginRight:4}}>{n}x {poidsPen(p)}</span>
                   );
                 })}
-            {ncItems.length===0&&<div style={{fontSize:15,color:C.green,fontWeight:800}}>✓ Aucune NC</div>}
+                {zonesNCCount>0&&<span style={{fontSize:14,padding:"2px 7px",borderRadius:6,background:C.orange+"18",color:C.orange,fontWeight:800,marginRight:4}}>{zonesNCCount}x Zone</span>}
+            {totalNC===0&&<div style={{fontSize:15,color:C.green,fontWeight:800}}>✓ Aucune NC</div>}
           </div>
         </div>
-        <Bar v={score} col={scoreColor(score)} h={10}/>
+        <Bar v={scoreFinal} col={scoreColor(scoreFinal)} h={10}/>
         <div style={{display:"flex",gap:8,marginTop:10,flexWrap:"wrap"}}>
           <StatutBadge s={inspection.statut}/>
           <Tag label={fmt(inspection.date)} color={C.muted}/>
