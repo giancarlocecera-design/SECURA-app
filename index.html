@@ -661,34 +661,22 @@ const CHECKLISTS = {
   {id:"AMI08",s:"3. Localisation intérieure",l:"Faux-plafonds suspects répertoriés et leur état documenté",p:"eleve"},
   {id:"AMI09",s:"3. Localisation intérieure",l:"Dalles vinyle (avant 1998), mastics et colles bitumineuses inspectés",p:"eleve"},
   {id:"AMI10",s:"3. Localisation intérieure",l:"Portes coupe-feu et conduits techniques intérieurs contrôlés",p:"eleve"},
-  // 4. État de conservation
-  {id:"AMI11",s:"4. État de conservation",l:"Matériaux contenant de l'amiante intacts, sans dégradation visible (effritement, fissures)",p:"critique"},
-  {id:"AMI12",s:"4. État de conservation",l:"Aucune trace de fibres libres ou de poussières suspectes détectée",p:"critique"},
-  {id:"AMI13",s:"4. État de conservation",l:"Aucun choc, humidité ou intempérie ne dégrade les matériaux",p:"eleve"},
-  // 5. Accessibilité & exposition
-  {id:"AMI14",s:"5. Accessibilité & exposition",l:"Zones contenant de l'amiante éloignées des postes de travail et circulations principales",p:"critique"},
-  {id:"AMI15",s:"5. Accessibilité & exposition",l:"Zones MCA inaccessibles aux personnes non autorisées (locaux verrouillés/restreints)",p:"critique"},
-  {id:"AMI16",s:"5. Accessibilité & exposition",l:"Locaux fréquentés par le personnel ou public exempts d'amiante directement accessible",p:"critique"},
-  {id:"AMI17",s:"5. Accessibilité & exposition",l:"MCA protégés par encoffrement, cloisonnement ou situés en hauteur (non manipulables)",p:"eleve"},
-  // 6. Signalisation
-  {id:"AMI18",s:"6. Signalisation",l:"Zones contenant de l'amiante signalées avec pictogrammes réglementaires",p:"critique"},
-  {id:"AMI19",s:"6. Signalisation",l:"Pictogrammes amiante visibles, lisibles et non détériorés",p:"eleve"},
-  {id:"AMI20",s:"6. Signalisation",l:"Locaux techniques contenant des MCA balisés (étiquetage des canalisations, etc.)",p:"eleve"},
-  // 7. Information & formation
-  {id:"AMI21",s:"7. Information & formation",l:"Personnel informé de la présence d'amiante dans le bâtiment et des risques",p:"critique"},
-  {id:"AMI22",s:"7. Information & formation",l:"Entreprises extérieures averties avant toute intervention à proximité de MCA",p:"critique"},
-  {id:"AMI23",s:"7. Information & formation",l:"Procédure d'information formalisée et communiquée aux nouveaux travailleurs",p:"eleve"},
-  // 8. Procédures d'intervention
-  {id:"AMI24",s:"8. Procédures d'intervention",l:"Procédure écrite en cas de découverte fortuite d'amiante en place",p:"critique"},
-  {id:"AMI25",s:"8. Procédures d'intervention",l:"Travaux à proximité de MCA encadrés par un plan de prévention spécifique",p:"critique"},
-  {id:"AMI26",s:"8. Procédures d'intervention",l:"Entreprises agréées (Code du bien-être) utilisées pour tous travaux sur MCA",p:"critique"},
-  // 9. Documentation réglementaire
-  {id:"AMI27",s:"9. Documentation réglementaire",l:"Conformité avec l'AR du 16/03/2006 — programme de gestion de l'amiante établi",p:"critique"},
-  {id:"AMI28",s:"9. Documentation réglementaire",l:"Documentation amiante accessible aux travailleurs et représentants du personnel",p:"eleve"},
-  // 10. Mesures préventives & suivi
-  {id:"AMI29",s:"10. Mesures préventives & suivi",l:"Contrôle visuel annuel effectué et tracé dans le registre amiante",p:"critique"},
-  {id:"AMI30",s:"10. Mesures préventives & suivi",l:"Plan de gestion des MCA établi avec actions priorisées (maintenir, encapsuler, retirer)",p:"critique"},
-  {id:"AMI31",s:"10. Mesures préventives & suivi",l:"EPI adaptés disponibles et retrait planifié pour les MCA dégradés ou en fin de vie",p:"eleve"},
+  // 4. Évaluation des zones MCA — gérée par interface dédiée (zonesAmiante)
+  // 5. Information & formation
+  {id:"AMI21",s:"5. Information & formation",l:"Personnel informé de la présence d'amiante dans le bâtiment et des risques",p:"critique"},
+  {id:"AMI22",s:"5. Information & formation",l:"Entreprises extérieures averties avant toute intervention à proximité de MCA",p:"critique"},
+  {id:"AMI23",s:"5. Information & formation",l:"Procédure d'information formalisée et communiquée aux nouveaux travailleurs",p:"eleve"},
+  // 6. Procédures d'intervention
+  {id:"AMI24",s:"6. Procédures d'intervention",l:"Procédure écrite en cas de découverte fortuite d'amiante en place",p:"critique"},
+  {id:"AMI25",s:"6. Procédures d'intervention",l:"Travaux à proximité de MCA encadrés par un plan de prévention spécifique",p:"critique"},
+  {id:"AMI26",s:"6. Procédures d'intervention",l:"Entreprises agréées (Code du bien-être) utilisées pour tous travaux sur MCA",p:"critique"},
+  // 7. Documentation réglementaire
+  {id:"AMI27",s:"7. Documentation réglementaire",l:"Conformité avec l'AR du 16/03/2006 — programme de gestion de l'amiante établi",p:"critique"},
+  {id:"AMI28",s:"7. Documentation réglementaire",l:"Documentation amiante accessible aux travailleurs et représentants du personnel",p:"eleve"},
+  // 8. Mesures préventives & suivi
+  {id:"AMI29",s:"8. Mesures préventives & suivi",l:"Contrôle visuel annuel effectué et tracé dans le registre amiante",p:"critique"},
+  {id:"AMI30",s:"8. Mesures préventives & suivi",l:"Plan de gestion des MCA établi avec actions priorisées (maintenir, encapsuler, retirer)",p:"critique"},
+  {id:"AMI31",s:"8. Mesures préventives & suivi",l:"EPI adaptés disponibles et retrait planifié pour les MCA dégradés ou en fin de vie",p:"eleve"},
 ],
 
 // ──────────────────────────────────────────────────────────────
@@ -1866,6 +1854,13 @@ function InspectionDetailScreen({inspection,onBack,onUpdate,resps,sitesState}){
 
   const [notes,setNotes]=useState(inspection.notes||"");
   const [avisSIPPT,setAvisSIPPT]=useState(inspection.avisSIPPT||"");
+  const [zonesAmiante,setZonesAmiante]=useState(inspection.zonesAmiante||(inspection.categorie==="Amiante - Contrôle visuel"?[
+    {id:1,nom:"Zone 1",photo:null,etat:"intact",accessible:false,frequente:false,signaletique:true},
+    {id:2,nom:"Zone 2",photo:null,etat:"intact",accessible:false,frequente:false,signaletique:true},
+    {id:3,nom:"Zone 3",photo:null,etat:"intact",accessible:false,frequente:false,signaletique:true},
+    {id:4,nom:"Zone 4",photo:null,etat:"intact",accessible:false,frequente:false,signaletique:true},
+    {id:5,nom:"Zone 5",photo:null,etat:"intact",accessible:false,frequente:false,signaletique:true},
+  ]:[]));
   const [saved,setSaved]=useState(false);
   const [openSec,setOpenSec]=useState(null);
   const siteOpts=(sitesState&&sitesState.length>0)?sitesState:SITES;
@@ -1877,6 +1872,21 @@ function InspectionDetailScreen({inspection,onBack,onUpdate,resps,sitesState}){
   const penTotal=ncItems.reduce((s,i)=>s+(PENALITE[i.poids||i.p]||0),0);
   const sections=[...new Set(items.map(i=>i.s))];
 
+  // Pénalité zones amiante
+  function zonePenalty(z){
+    if(!z||z.etat==="intact") return 0;
+    var base=z.etat==="critique"?5:z.etat==="degrade"?3:z.etat==="surveillance"?1:0;
+    var agg=0;
+    if(z.accessible) agg+=1;
+    if(z.frequente) agg+=1;
+    if(!z.signaletique) agg+=2;
+    return base+agg;
+  }
+  var zonesPenTotal=zonesAmiante.reduce(function(s,z){return s+zonePenalty(z);},0);
+  var zonesNCCount=zonesAmiante.filter(function(z){return z.etat&&z.etat!=="intact";}).length;
+  var scoreFinal=Math.max(0,score-zonesPenTotal);
+  var totalNC=ncItems.length+zonesNCCount;
+
   const toggle=(id)=>setItems(p=>p.map(i=>i.id===id?{...i,ok:!i.ok}:i));
   const deleteItem=(id)=>setItems(p=>p.filter(i=>i.id!==id));
   const setComment=(id,v)=>setItems(p=>p.map(i=>i.id===id?{...i,comment:v}:i));
@@ -1885,8 +1895,8 @@ function InspectionDetailScreen({inspection,onBack,onUpdate,resps,sitesState}){
   const [showSig,setShowSig]=useState(false);
   const [sigInsp,setSigInsp]=useState(null);
   const [sigResp,setSigResp]=useState(null);
-  const save=()=>{onUpdate({...inspection,...metaForm,items,notes,avisSIPPT,score,nc:ncItems.length});setSaved(true);setTimeout(()=>setSaved(false),2000);};
-  const saveMeta=()=>{onUpdate({...inspection,...metaForm,items,notes,avisSIPPT,score,nc:ncItems.length});setEditMeta(false);setSaved(true);setTimeout(()=>setSaved(false),2000);};
+  const save=()=>{onUpdate({...inspection,...metaForm,items,notes,avisSIPPT,zonesAmiante,score:scoreFinal,nc:totalNC});setSaved(true);setTimeout(()=>setSaved(false),2000);};
+  const saveMeta=()=>{onUpdate({...inspection,...metaForm,items,notes,avisSIPPT,zonesAmiante,score:scoreFinal,nc:totalNC});setEditMeta(false);setSaved(true);setTimeout(()=>setSaved(false),2000);};
 
   const totalPhotos=items.reduce((s,i)=>s+((i.photos&&i.photos.length)||0),0);
 
@@ -2013,6 +2023,86 @@ function InspectionDetailScreen({inspection,onBack,onUpdate,resps,sitesState}){
         );
       })}
 
+      {inspection.categorie==="Amiante - Contrôle visuel"&&(
+        <div style={{margin:"10px 14px 0",...S.card()}}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
+            <div>
+              <label style={{...S.label,marginBottom:0}}>📍 4. Évaluation des zones MCA</label>
+              <div style={{fontSize:12,color:C.muted,marginTop:2}}>{zonesAmiante.length} zone(s) · Pénalité totale : -{zonesPenTotal}pts</div>
+            </div>
+            <button onClick={function(){
+              var newId=Date.now();
+              setZonesAmiante(function(p){return [...p,{id:newId,nom:"Zone "+(p.length+1),photo:null,etat:"intact",accessible:false,frequente:false,signaletique:true}];});
+            }} style={{background:"linear-gradient(135deg,"+C.cyan+",#007799)",border:"none",borderRadius:10,padding:"7px 12px",color:"#000",fontWeight:800,fontSize:12,cursor:"pointer"}}>+ Zone</button>
+          </div>
+          {zonesAmiante.map(function(z,zi){
+            var etats=[
+              {k:"intact",l:"Intact",emoji:"🟢",color:C.green},
+              {k:"surveillance",l:"À surveiller",emoji:"🟡",color:C.amber},
+              {k:"degrade",l:"Dégradé",emoji:"🟠",color:C.orange},
+              {k:"critique",l:"Critique",emoji:"🔴",color:C.red}
+            ];
+            var pen=zonePenalty(z);
+            return (
+              <div key={z.id} style={{padding:"12px",borderRadius:12,border:"1px solid "+C.border,background:C.surface,marginBottom:10}}>
+                <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:10}}>
+                  <input type="text" value={z.nom} onChange={function(e){var v=e.target.value;setZonesAmiante(function(p){return p.map(function(zz){return zz.id===z.id?{...zz,nom:v}:zz;});});}} style={{...S.input,flex:1,fontSize:14,fontWeight:700,padding:"8px 10px"}}/>
+                  {pen>0&&<span style={{fontSize:11,fontWeight:800,color:C.red,padding:"4px 8px",background:C.red+"15",borderRadius:6}}>−{pen}pts</span>}
+                  <button onClick={function(){if(confirm("Supprimer "+z.nom+" ?")){setZonesAmiante(function(p){return p.filter(function(zz){return zz.id!==z.id;});});}}} style={{background:"transparent",border:"1px solid "+C.red+"33",borderRadius:8,color:C.red,cursor:"pointer",fontSize:14,padding:"4px 10px",fontWeight:700}}>×</button>
+                </div>
+                {/* Photo */}
+                <div style={{marginBottom:10}}>
+                  {z.photo?(
+                    <div style={{position:"relative",display:"inline-block"}}>
+                      <img src={z.photo} alt="Zone" style={{maxWidth:"100%",maxHeight:140,borderRadius:8,border:"1px solid "+C.border}}/>
+                      <button onClick={function(){setZonesAmiante(function(p){return p.map(function(zz){return zz.id===z.id?{...zz,photo:null}:zz;});});}} style={{position:"absolute",top:5,right:5,background:C.red,color:"#fff",border:"none",borderRadius:99,width:24,height:24,fontSize:13,cursor:"pointer",fontWeight:900}}>×</button>
+                    </div>
+                  ):(
+                    <label style={{display:"inline-flex",alignItems:"center",gap:6,padding:"7px 12px",border:"1px dashed "+C.border,borderRadius:8,cursor:"pointer",color:C.muted,fontSize:12}}>
+                      📷 Ajouter photo
+                      <input type="file" accept="image/*" style={{display:"none"}} onChange={function(e){
+                        var file=e.target.files&&e.target.files[0];if(!file)return;
+                        var reader=new FileReader();
+                        reader.onload=function(ev){compressImage(ev.target.result,800,0.6,function(c){setZonesAmiante(function(p){return p.map(function(zz){return zz.id===z.id?{...zz,photo:c}:zz;});});});};
+                        reader.readAsDataURL(file);
+                      }}/>
+                    </label>
+                  )}
+                </div>
+                {/* État */}
+                <div style={{fontSize:11,color:C.muted,marginBottom:5,fontWeight:700,letterSpacing:1}}>ÉTAT</div>
+                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:6,marginBottom:10}}>
+                  {etats.map(function(e){
+                    var active=z.etat===e.k;
+                    return <button key={e.k} onClick={function(){setZonesAmiante(function(p){return p.map(function(zz){return zz.id===z.id?{...zz,etat:e.k}:zz;});});}} style={{padding:"8px 6px",borderRadius:8,border:"2px solid "+(active?e.color:C.border),background:active?e.color+"15":"transparent",color:active?e.color:C.muted,cursor:"pointer",fontSize:12,fontWeight:active?800:600,display:"flex",alignItems:"center",justifyContent:"center",gap:5}}>{e.emoji} {e.l}</button>;
+                  })}
+                </div>
+                {/* Critères */}
+                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:6}}>
+                  {[
+                    {k:"accessible",l:"Accessible",val:z.accessible,colorOn:C.red,labelOn:"Oui",labelOff:"Non"},
+                    {k:"frequente",l:"Fréquenté",val:z.frequente,colorOn:C.red,labelOn:"Oui",labelOff:"Non"},
+                    {k:"signaletique",l:"Signalé",val:z.signaletique,colorOn:C.green,labelOn:"Oui",labelOff:"Non"}
+                  ].map(function(c){
+                    return (
+                      <div key={c.k} style={{padding:"6px 8px",borderRadius:8,background:C.dim,textAlign:"center"}}>
+                        <div style={{fontSize:9,color:C.muted,marginBottom:4,fontWeight:700,letterSpacing:0.5,textTransform:"uppercase"}}>{c.l}</div>
+                        <button onClick={function(){var newVal=!c.val;setZonesAmiante(function(p){return p.map(function(zz){return zz.id===z.id?{...zz,[c.k]:newVal}:zz;});});}} style={{width:"100%",padding:"5px 8px",borderRadius:6,border:"1px solid "+(c.val?c.colorOn:C.border),background:c.val?c.colorOn+"22":"transparent",color:c.val?c.colorOn:C.muted,cursor:"pointer",fontSize:11,fontWeight:800}}>{c.val?c.labelOn:c.labelOff}</button>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })}
+          {zonesAmiante.length===0&&<div style={{textAlign:"center",padding:"20px",color:C.muted,fontSize:12}}>Aucune zone définie. Cliquez sur + Zone pour commencer.</div>}
+          <div style={{marginTop:10,padding:"8px 12px",background:C.dim,borderRadius:8,fontSize:11,color:C.muted,lineHeight:1.5}}>
+            <strong>Cotation</strong> : Intact 0pt · À surveiller -1 · Dégradé -3 · Critique -5<br/>
+            <strong>Aggravants</strong> (si état ≠ Intact) : Accessible +1 · Fréquenté +1 · Non signalé +2
+          </div>
+        </div>
+      )}
+
       <div style={{margin:"10px 14px 0",...S.card()}}>
         <label style={S.label}>📋 Avis SIPPT global</label>
         <div style={{fontSize:13,color:C.muted,marginBottom:10}}>Évaluation globale du conseiller en prévention</div>
@@ -2061,7 +2151,7 @@ function InspectionDetailScreen({inspection,onBack,onUpdate,resps,sitesState}){
         <button onClick={()=>{
           setShowSig(true);
           if(sigInsp&&sigResp){
-            onUpdate({...inspection,items,notes,avisSIPPT,score,nc:ncItems.length,statut:"Validée",sigInspecteur:sigInsp,sigResponsable:sigResp});
+            onUpdate({...inspection,items,notes,avisSIPPT,zonesAmiante,score:scoreFinal,nc:totalNC,statut:"Validée",sigInspecteur:sigInsp,sigResponsable:sigResp});
           }
         }} style={{...S.btn(C.green)}}>{sigInsp&&sigResp?"✓ Valider":"Signer & valider"}</button>
       </div>
@@ -2962,6 +3052,40 @@ function RapportsScreen({inspections,onDelete,onArchive,config}){
         +"</div></div></div>"
         +(ncItems.length>0?"<h2 class='nc'>Non-conformites ("+ncItems.length+")</h2>"+ncRows:"")
         +(okItems.length>0?"<h2 class='ok'>Points conformes ("+okItems.length+")</h2>"+okRows:"")
+        +(function(){
+          if(!ins.zonesAmiante||ins.zonesAmiante.length===0) return "";
+          var stateLabels={intact:["Intact","#00C853"],surveillance:["A surveiller","#FFB300"],degrade:["Degrade","#FF6D00"],critique:["Critique","#FF1744"]};
+          var rows=ins.zonesAmiante.map(function(z,idx){
+            var st=stateLabels[z.etat]||stateLabels.intact;
+            function zPen(z){if(!z||z.etat==="intact")return 0;var b=z.etat==="critique"?5:z.etat==="degrade"?3:z.etat==="surveillance"?1:0;var a=0;if(z.accessible)a+=1;if(z.frequente)a+=1;if(!z.signaletique)a+=2;return b+a;}
+            var pen=zPen(z);
+            return "<tr style='border-bottom:1px solid #eee'>"
+              +"<td style='padding:8px;font-size:11px;font-weight:700'>"+(idx+1)+"</td>"
+              +"<td style='padding:8px;font-size:11px;font-weight:700'>"+(z.nom||"Zone "+(idx+1))+"</td>"
+              +"<td style='padding:8px;text-align:center'>"+(z.photo?"<img src='"+z.photo+"' style='max-width:100px;max-height:70px;border-radius:6px;border:1px solid #ddd;object-fit:cover'/>":"<span style='color:#aaa;font-size:10px'>—</span>")+"</td>"
+              +"<td style='padding:8px;text-align:center'><span style='display:inline-block;padding:3px 10px;border-radius:12px;background:"+st[1]+"20;color:"+st[1]+";font-size:10px;font-weight:800'>"+st[0]+"</span></td>"
+              +"<td style='padding:8px;text-align:center;font-size:10px;color:"+(z.accessible?"#FF1744":"#666")+";font-weight:"+(z.accessible?"800":"500")+"'>"+(z.accessible?"Oui":"Non")+"</td>"
+              +"<td style='padding:8px;text-align:center;font-size:10px;color:"+(z.frequente?"#FF1744":"#666")+";font-weight:"+(z.frequente?"800":"500")+"'>"+(z.frequente?"Oui":"Non")+"</td>"
+              +"<td style='padding:8px;text-align:center;font-size:10px;color:"+(z.signaletique?"#00C853":"#FF1744")+";font-weight:800'>"+(z.signaletique?"Oui":"Non")+"</td>"
+              +"<td style='padding:8px;text-align:center;font-size:11px;font-weight:900;color:"+(pen>0?"#FF1744":"#666")+"'>"+(pen>0?"-"+pen:"0")+"</td>"
+              +"</tr>";
+          }).join("");
+          var totalPen=ins.zonesAmiante.reduce(function(s,z){if(!z||z.etat==="intact")return s;var b=z.etat==="critique"?5:z.etat==="degrade"?3:z.etat==="surveillance"?1:0;var a=0;if(z.accessible)a+=1;if(z.frequente)a+=1;if(!z.signaletique)a+=2;return s+b+a;},0);
+          return "<h2 class='zones' style='background:#f0f8ff;color:#003366;border-left:4px solid #00BFA5'>Evaluation des zones MCA ("+ins.zonesAmiante.length+")</h2>"
+            +"<table style='width:100%;border-collapse:collapse;background:#fff;margin-bottom:16px'>"
+            +"<thead><tr style='background:#0D1825;color:#00E5FF'>"
+            +"<th style='padding:8px;text-align:left;font-size:9px;letter-spacing:1px'>#</th>"
+            +"<th style='padding:8px;text-align:left;font-size:9px;letter-spacing:1px'>NOM</th>"
+            +"<th style='padding:8px;text-align:center;font-size:9px;letter-spacing:1px'>PHOTO</th>"
+            +"<th style='padding:8px;text-align:center;font-size:9px;letter-spacing:1px'>ETAT</th>"
+            +"<th style='padding:8px;text-align:center;font-size:9px;letter-spacing:1px'>ACCES.</th>"
+            +"<th style='padding:8px;text-align:center;font-size:9px;letter-spacing:1px'>FREQ.</th>"
+            +"<th style='padding:8px;text-align:center;font-size:9px;letter-spacing:1px'>SIGNAL.</th>"
+            +"<th style='padding:8px;text-align:center;font-size:9px;letter-spacing:1px'>PEN.</th>"
+            +"</tr></thead><tbody>"+rows+"</tbody>"
+            +"<tfoot><tr style='background:#fffbf0;font-weight:900'><td colspan='7' style='padding:10px;font-size:12px;color:#664400;text-align:right'>Penalite totale zones</td><td style='padding:10px;font-size:14px;color:#FF1744;text-align:center'>-"+totalPen+"pts</td></tr></tfoot>"
+            +"</table>";
+        })()
         +(function(){
           if(!ins.avisSIPPT) return "";
           var labels={satisfaisant:["Satisfaisant","Conforme aux exigences","#00C853","✓"],recommandation:["Satisfaisant avec recommandations","Conforme mais ameliorations souhaitees","#FFB300","!"],non_satisfaisant:["Non satisfaisant","Mesures correctives necessaires","#FF1744","X"]};
