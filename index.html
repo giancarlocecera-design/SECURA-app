@@ -663,20 +663,20 @@ const CHECKLISTS = {
   {id:"AMI10",s:"3. Localisation intérieure",l:"Portes coupe-feu et conduits techniques intérieurs contrôlés",p:"eleve"},
   // 4. Évaluation des zones MCA — gérée par interface dédiée (zonesAmiante)
   // 5. Information & formation
-  {id:"AMI21",s:"5. Information & formation",l:"Personnel informé de la présence d'amiante dans le bâtiment et des risques",p:"critique"},
-  {id:"AMI22",s:"5. Information & formation",l:"Entreprises extérieures averties avant toute intervention à proximité de MCA",p:"critique"},
-  {id:"AMI23",s:"5. Information & formation",l:"Procédure d'information formalisée et communiquée aux nouveaux travailleurs",p:"eleve"},
+  {id:"AMI21",s:"4. Information & formation",l:"Personnel informé de la présence d'amiante dans le bâtiment et des risques",p:"critique"},
+  {id:"AMI22",s:"4. Information & formation",l:"Entreprises extérieures averties avant toute intervention à proximité de MCA",p:"critique"},
+  {id:"AMI23",s:"4. Information & formation",l:"Procédure d'information formalisée et communiquée aux nouveaux travailleurs",p:"eleve"},
   // 6. Procédures d'intervention
-  {id:"AMI24",s:"6. Procédures d'intervention",l:"Procédure écrite en cas de découverte fortuite d'amiante en place",p:"critique"},
-  {id:"AMI25",s:"6. Procédures d'intervention",l:"Travaux à proximité de MCA encadrés par un plan de prévention spécifique",p:"critique"},
-  {id:"AMI26",s:"6. Procédures d'intervention",l:"Entreprises agréées (Code du bien-être) utilisées pour tous travaux sur MCA",p:"critique"},
+  {id:"AMI24",s:"5. Procédures d'intervention",l:"Procédure écrite en cas de découverte fortuite d'amiante en place",p:"critique"},
+  {id:"AMI25",s:"5. Procédures d'intervention",l:"Travaux à proximité de MCA encadrés par un plan de prévention spécifique",p:"critique"},
+  {id:"AMI26",s:"5. Procédures d'intervention",l:"Entreprises agréées (Code du bien-être) utilisées pour tous travaux sur MCA",p:"critique"},
   // 7. Documentation réglementaire
-  {id:"AMI27",s:"7. Documentation réglementaire",l:"Conformité avec l'AR du 16/03/2006 — programme de gestion de l'amiante établi",p:"critique"},
-  {id:"AMI28",s:"7. Documentation réglementaire",l:"Documentation amiante accessible aux travailleurs et représentants du personnel",p:"eleve"},
+  {id:"AMI27",s:"6. Documentation réglementaire",l:"Conformité avec l'AR du 16/03/2006 — programme de gestion de l'amiante établi",p:"critique"},
+  {id:"AMI28",s:"6. Documentation réglementaire",l:"Documentation amiante accessible aux travailleurs et représentants du personnel",p:"eleve"},
   // 8. Mesures préventives & suivi
-  {id:"AMI29",s:"8. Mesures préventives & suivi",l:"Contrôle visuel annuel effectué et tracé dans le registre amiante",p:"critique"},
-  {id:"AMI30",s:"8. Mesures préventives & suivi",l:"Plan de gestion des MCA établi avec actions priorisées (maintenir, encapsuler, retirer)",p:"critique"},
-  {id:"AMI31",s:"8. Mesures préventives & suivi",l:"EPI adaptés disponibles et retrait planifié pour les MCA dégradés ou en fin de vie",p:"eleve"},
+  {id:"AMI29",s:"7. Mesures préventives & suivi",l:"Contrôle visuel annuel effectué et tracé dans le registre amiante",p:"critique"},
+  {id:"AMI30",s:"7. Mesures préventives & suivi",l:"Plan de gestion des MCA établi avec actions priorisées (maintenir, encapsuler, retirer)",p:"critique"},
+  {id:"AMI31",s:"7. Mesures préventives & suivi",l:"EPI adaptés disponibles et retrait planifié pour les MCA dégradés ou en fin de vie",p:"eleve"},
 ],
 
 // ──────────────────────────────────────────────────────────────
@@ -2028,7 +2028,7 @@ function InspectionDetailScreen({inspection,onBack,onUpdate,resps,sitesState}){
         <div style={{margin:"10px 14px 0",...S.card()}}>
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
             <div>
-              <label style={{...S.label,marginBottom:0}}>📍 4. Évaluation des zones MCA</label>
+              <label style={{...S.label,marginBottom:0}}>📍 Évaluation des zones MCA</label>
               <div style={{fontSize:12,color:C.muted,marginTop:2}}>{zonesAmiante.length} zone(s) · Pénalité totale : -{zonesPenTotal}pts</div>
             </div>
             <button onClick={function(){
