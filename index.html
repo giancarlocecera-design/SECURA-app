@@ -647,6 +647,51 @@ const CHECKLISTS = {
 ],
 
 // ──────────────────────────────────────────────────────────────
+"Amiante - Contrôle visuel": [
+  // 1. Inventaire amiante
+  {id:"AMI01",s:"1. Inventaire amiante",l:"Inventaire amiante du bâtiment disponible et à jour (datant de moins de 3 ans)",p:"critique"},
+  {id:"AMI02",s:"1. Inventaire amiante",l:"Identification claire des matériaux contenant de l'amiante (MCA) avec plan de localisation",p:"critique"},
+  {id:"AMI03",s:"1. Inventaire amiante",l:"Rapports d'analyse en laboratoire archivés et consultables",p:"mineur"},
+  // 2. Localisation extérieure
+  {id:"AMI04",s:"2. Localisation extérieure",l:"Toitures et plaques en fibrociment/eternit identifiées et inspectées",p:"critique"},
+  {id:"AMI05",s:"2. Localisation extérieure",l:"Gouttières, descentes d'eau et tuyauteries extérieures vérifiées",p:"eleve"},
+  {id:"AMI06",s:"2. Localisation extérieure",l:"Conduits de cheminée, joints et plaques de façade contrôlés",p:"eleve"},
+  // 3. Localisation intérieure
+  {id:"AMI07",s:"3. Localisation intérieure",l:"Calorifuges (tuyauteries, chaudières, conduits) inspectés visuellement",p:"critique"},
+  {id:"AMI08",s:"3. Localisation intérieure",l:"Faux-plafonds suspects répertoriés et leur état documenté",p:"eleve"},
+  {id:"AMI09",s:"3. Localisation intérieure",l:"Dalles vinyle (avant 1998), mastics et colles bitumineuses inspectés",p:"eleve"},
+  {id:"AMI10",s:"3. Localisation intérieure",l:"Portes coupe-feu et conduits techniques intérieurs contrôlés",p:"eleve"},
+  // 4. État de conservation
+  {id:"AMI11",s:"4. État de conservation",l:"Matériaux contenant de l'amiante intacts, sans dégradation visible (effritement, fissures)",p:"critique"},
+  {id:"AMI12",s:"4. État de conservation",l:"Aucune trace de fibres libres ou de poussières suspectes détectée",p:"critique"},
+  {id:"AMI13",s:"4. État de conservation",l:"Aucun choc, humidité ou intempérie ne dégrade les matériaux",p:"eleve"},
+  // 5. Accessibilité & exposition
+  {id:"AMI14",s:"5. Accessibilité & exposition",l:"Zones contenant de l'amiante éloignées des postes de travail et circulations principales",p:"critique"},
+  {id:"AMI15",s:"5. Accessibilité & exposition",l:"Zones MCA inaccessibles aux personnes non autorisées (locaux verrouillés/restreints)",p:"critique"},
+  {id:"AMI16",s:"5. Accessibilité & exposition",l:"Locaux fréquentés par le personnel ou public exempts d'amiante directement accessible",p:"critique"},
+  {id:"AMI17",s:"5. Accessibilité & exposition",l:"MCA protégés par encoffrement, cloisonnement ou situés en hauteur (non manipulables)",p:"eleve"},
+  // 6. Signalisation
+  {id:"AMI18",s:"6. Signalisation",l:"Zones contenant de l'amiante signalées avec pictogrammes réglementaires",p:"critique"},
+  {id:"AMI19",s:"6. Signalisation",l:"Pictogrammes amiante visibles, lisibles et non détériorés",p:"eleve"},
+  {id:"AMI20",s:"6. Signalisation",l:"Locaux techniques contenant des MCA balisés (étiquetage des canalisations, etc.)",p:"eleve"},
+  // 7. Information & formation
+  {id:"AMI21",s:"7. Information & formation",l:"Personnel informé de la présence d'amiante dans le bâtiment et des risques",p:"critique"},
+  {id:"AMI22",s:"7. Information & formation",l:"Entreprises extérieures averties avant toute intervention à proximité de MCA",p:"critique"},
+  {id:"AMI23",s:"7. Information & formation",l:"Procédure d'information formalisée et communiquée aux nouveaux travailleurs",p:"eleve"},
+  // 8. Procédures d'intervention
+  {id:"AMI24",s:"8. Procédures d'intervention",l:"Procédure écrite en cas de découverte fortuite d'amiante en place",p:"critique"},
+  {id:"AMI25",s:"8. Procédures d'intervention",l:"Travaux à proximité de MCA encadrés par un plan de prévention spécifique",p:"critique"},
+  {id:"AMI26",s:"8. Procédures d'intervention",l:"Entreprises agréées (Code du bien-être) utilisées pour tous travaux sur MCA",p:"critique"},
+  // 9. Documentation réglementaire
+  {id:"AMI27",s:"9. Documentation réglementaire",l:"Conformité avec l'AR du 16/03/2006 — programme de gestion de l'amiante établi",p:"critique"},
+  {id:"AMI28",s:"9. Documentation réglementaire",l:"Documentation amiante accessible aux travailleurs et représentants du personnel",p:"eleve"},
+  // 10. Mesures préventives & suivi
+  {id:"AMI29",s:"10. Mesures préventives & suivi",l:"Contrôle visuel annuel effectué et tracé dans le registre amiante",p:"critique"},
+  {id:"AMI30",s:"10. Mesures préventives & suivi",l:"Plan de gestion des MCA établi avec actions priorisées (maintenir, encapsuler, retirer)",p:"critique"},
+  {id:"AMI31",s:"10. Mesures préventives & suivi",l:"EPI adaptés disponibles et retrait planifié pour les MCA dégradés ou en fin de vie",p:"eleve"},
+],
+
+// ──────────────────────────────────────────────────────────────
 "AMOK - Intrusion malveillante": [
   // 1. Organisation & préparation
   {id:"AMK01",s:"Organisation & préparation",l:"Procédure AMOK existante, formalisée et validée par la direction",p:"critique"},
@@ -751,6 +796,7 @@ const CAT_META = {
   "Risques chimiques":{icon:"⚗️", color:C.red},
   "Premiers secours": {icon:"🚑", color:C.green},
   "Échelles & escabeaux": {icon:"🪜", color:C.blue},
+  "Amiante - Contrôle visuel": {icon:"🦠", color:C.green},
   "AMOK - Intrusion malveillante": {icon:"🚨", color:C.red},
 };
 
