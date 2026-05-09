@@ -1254,9 +1254,12 @@ function DashboardScreen({user,inspections,actions,onNav,config,sitesState,appSt
       <div style={{margin:"14px 14px 0",...S.card()}}>
         <div style={{fontSize:18,fontWeight:800,marginBottom:2}}>{siteFilter==="Tous"?"Score par catégorie & site":"Score par catégorie — "+siteFilter}</div>
         <div style={{fontSize:15,color:C.muted,marginBottom:12}}>Système pénalité : 100 − Σ déductions NC</div>
-        <div style={{display:"flex",gap:5,flexWrap:"wrap",marginBottom:14}}>
-          {CATEGORIES.map(c=>{const m=CAT_META[c]; return (
-            <button key={c} onClick={()=>selectCat(c)} style={{flexShrink:0,padding:"4px 9px",borderRadius:99,border:"1px solid",borderColor:chartTab===c?m.color:C.border,background:chartTab===c?`${m.color}15`:"transparent",color:chartTab===c?m.color:C.muted,fontSize:13,fontWeight:700,cursor:"pointer"}}>{m.icon} {c}</button>
+        <div style={{display:"grid",gridTemplateColumns:"repeat(2,1fr)",gap:6,marginBottom:14}}>
+          {CATEGORIES.map(c=>{const m=CAT_META[c];const active=chartTab===c; return (
+            <button key={c} onClick={()=>selectCat(c)} style={{padding:"8px 10px",borderRadius:10,border:"1px solid",borderColor:active?m.color:C.border,background:active?`${m.color}15`:"transparent",color:active?m.color:C.muted,fontSize:13,fontWeight:active?800:600,cursor:"pointer",display:"flex",alignItems:"center",gap:7,textAlign:"left",overflow:"hidden",whiteSpace:"nowrap",textOverflow:"ellipsis",minWidth:0}}>
+              <span style={{fontSize:15,flexShrink:0}}>{m.icon}</span>
+              <span style={{flex:1,overflow:"hidden",textOverflow:"ellipsis"}}>{c}</span>
+            </button>
           );})}
         </div>
         <div ref={function(el){_chartEl=el;}} style={{overflowX:"scroll",marginBottom:4}}>
