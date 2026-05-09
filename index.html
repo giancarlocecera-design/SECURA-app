@@ -2343,7 +2343,7 @@ function NewInspectionScreen({user,onSave,onBack,resps,sitesState,customTemplate
   const respList=(resps&&resps.length?resps:RESPONSABLES).map(function(r){return typeof r==="object"?r.nom:r;});
   const siteOpts=(sitesState&&sitesState.length>0)?sitesState:SITES;
   const [step,setStep]=useState(1);
-  const [form,setForm]=useState({titre:"",site:siteOpts[0]||SITES[0],categorie:CATEGORIES[0],notes:"",accompagnateurs:[],adresse:(siteAddresses&&siteAddresses[siteOpts[0]])||"",date:new Date().toISOString().split("T")[0],sitePhoto:null});
+  const [form,setForm]=useState({titre:"",site:siteOpts[0]||SITES[0],categorie:CATEGORIES[0],notes:"",accompagnateurs:[],adresse:(siteAddresses&&siteAddresses[siteOpts[0]])||"",date:new Date().toISOString().split("T")[0],sitePhoto:null,refEchelle:""});
   const [items,setItems]=useState([]);
   const [openSec,setOpenSec]=useState(null);
 
@@ -2412,6 +2412,14 @@ function NewInspectionScreen({user,onSave,onBack,resps,sitesState,customTemplate
               })}
             </div>
 
+            {form.categorie==="Échelles & escabeaux"&&(
+              <div style={{padding:"12px 14px",background:C.blue+"10",border:"1px solid "+C.blue+"33",borderRadius:12,marginBottom:14}}>
+                <label style={{...S.label,color:C.blue}}>🪜 Référence de l'échelle/escabeau <span style={{color:C.red}}>*</span></label>
+                <input style={{...S.input,marginBottom:6}} placeholder="Ex : ECH-001, ESC-Cuisine, Échelle atelier #3" value={form.refEchelle||""} onChange={function(e){setForm({...form,refEchelle:e.target.value});}}/>
+                <div style={{fontSize:12,color:C.muted,lineHeight:1.4}}>💡 Identifiant unique permettant de retrouver l'historique de cette échelle. Le QR code généré sera spécifique à cette échelle.</div>
+              </div>
+            )}
+
             <label style={S.label}>Accompagnateurs</label>
             <div style={{display:"flex",flexWrap:"wrap",gap:8,marginBottom:14}}>
               {["SEPP","CPMT","Délégation syndicale","Responsable","Direction"].map(function(a){
@@ -2462,7 +2470,7 @@ function NewInspectionScreen({user,onSave,onBack,resps,sitesState,customTemplate
               )}
             </div>
           </div>
-          <button onClick={next} disabled={!form.titre} style={{...S.btn(C.cyan),opacity:form.titre?1:.45}}>Suivant →</button>
+          <button onClick={next} disabled={!form.titre||(form.categorie==="Échelles & escabeaux"&&!form.refEchelle)} style={{...S.btn(C.cyan),opacity:(form.titre&&(form.categorie!=="Échelles & escabeaux"||form.refEchelle))?1:.45}}>Suivant →</button>
         </div>
       )}
 
@@ -2547,13 +2555,14 @@ function NewInspectionScreen({user,onSave,onBack,resps,sitesState,customTemplate
 
             {[
               ["Titre",form.titre],["Date",form.date||"—"],["Site",form.site],["Adresse",form.adresse||"—"],["Accompagnateurs",(form.accompagnateurs&&form.accompagnateurs.length>0)?form.accompagnateurs.join(", "):"—"],
-              ["Catégorie", ((CAT_META[form.categorie]&&CAT_META[form.categorie].icon)||"")+" "+form.categorie],
+              ["Catégorie", ((CAT_META[form.categorie]&&CAT_META[form.categorie].icon)||"")+" "+form.categorie]
+            ].concat(form.categorie==="Échelles & escabeaux"&&form.refEchelle?[["🪜 Référence échelle",form.refEchelle]]:[]).concat([
               ["Score final", score+"/100"],["Pénalité totale", "-"+penTotal+"pts"],
               ["NC Critiques", ncItems.filter(function(i){return i.poids==="critique";}).length+" ("+ncItems.filter(function(i){return i.poids==="critique";}).length*PENALITE.critique+"pts)"],
               ["NC Élevées", ncItems.filter(function(i){return i.poids==="eleve";}).length+" ("+ncItems.filter(function(i){return i.poids==="eleve";}).length*PENALITE.eleve+"pts)"],
               ["NC Mineures", ncItems.filter(function(i){return i.poids==="mineur";}).length+" ("+ncItems.filter(function(i){return i.poids==="mineur";}).length*PENALITE.mineur+"pts)"],
               ["Photos jointes",totalPhotos],["Inspecteur",user.nom]
-            ].map(function(arr){
+            ]).map(function(arr){
               var k=arr[0]; var v=arr[1];
               return (<div key={k} style={{display:"flex",justifyContent:"space-between",padding:"8px 0",borderBottom:"1px solid "+C.border}}><span style={{fontSize:15,color:C.muted}}>{k}</span><span style={{fontSize:15,fontWeight:700}}>{v}</span></div>);
             })}
@@ -3324,15 +3333,20 @@ function RapportsScreen({inspections,onDelete,onArchive,config}){
                     <span>📄</span>{printing?"Génération PDF...":"📄 Exporter en PDF"}
                   </button>
                   <div style={{display:"flex",flexDirection:"column",gap:8}}>
-                    <button onClick={function(){setPublicURL(window.location.origin+"/rapport.html?site="+encodeURIComponent(ins.site));}} style={{...S.btn(C.cyan),display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
-                      🔗 Voir rapport public
+                    <button onClick={function(){
+                      var url=window.location.origin+"/rapport.html?site="+encodeURIComponent(ins.site);
+                      if(ins.categorie==="Échelles & escabeaux"&&ins.refEchelle) url+="&ref="+encodeURIComponent(ins.refEchelle);
+                      setPublicURL(url);
+                    }} style={{...S.btn(C.cyan),display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
+                      🔗 Voir rapport public{ins.categorie==="Échelles & escabeaux"&&ins.refEchelle?" — "+ins.refEchelle:""}
                     </button>
                     <button onClick={function(){
                       var url=window.location.origin+"/rapport.html?site="+encodeURIComponent(ins.site);
+                      if(ins.categorie==="Échelles & escabeaux"&&ins.refEchelle) url+="&ref="+encodeURIComponent(ins.refEchelle);
                       var qrUrl="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data="+encodeURIComponent(url)+"&ecc=H&margin=10";
                       window.open(qrUrl,"_blank");
                     }} style={{...S.btn(C.muted,true),display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
-                      📷 Générer QR code imprimable
+                      📷 Générer QR code imprimable{ins.categorie==="Échelles & escabeaux"&&ins.refEchelle?" ("+ins.refEchelle+")":""}
                     </button>
                   </div>
                   {showArchives?(
