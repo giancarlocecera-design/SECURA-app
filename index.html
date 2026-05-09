@@ -3643,6 +3643,13 @@ function SettingsScreen({user,onLogout,appState,onAppStateUpdate,respsState,site
               </div>
             )}
           </div>
+          {/* Version de l'application */}
+          <div style={{...S.card(),marginBottom:12,textAlign:"center",padding:"14px"}}>
+            <div style={{fontSize:11,color:C.muted,letterSpacing:1.5,textTransform:"uppercase",marginBottom:4}}>Application</div>
+            <div style={{fontSize:18,fontWeight:900,color:C.cyan,letterSpacing:3}}>SECURA</div>
+            <div style={{fontSize:13,fontWeight:700,color:C.text,marginTop:3}}>Version 1.0.0</div>
+            <div style={{fontSize:11,color:C.muted,marginTop:6}}>© 2026 · Audits HSE · Belgique</div>
+          </div>
           </div>
         )}
         {tab==="apparence"&&(
