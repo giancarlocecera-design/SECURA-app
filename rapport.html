@@ -40,6 +40,40 @@
       padding: 16px;
       margin-bottom: 14px;
     }
+    .photo-card {
+      background: #0E1420;
+      border: 1px solid #1E2535;
+      border-radius: 16px;
+      overflow: hidden;
+      margin-bottom: 14px;
+    }
+    .photo-card img {
+      width: 100%;
+      max-height: 240px;
+      object-fit: cover;
+      display: block;
+    }
+    .photo-label {
+      padding: 10px 14px;
+      font-size: 11px;
+      font-weight: 700;
+      color: #8892A4;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      background: #07090F;
+    }
+    .ref-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      background: linear-gradient(135deg, #00E5FF22, #00BFA522);
+      border: 1px solid #00E5FF44;
+      color: #00E5FF;
+      border-radius: 99px;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+    }
     .score-circle {
       width: 90px; height: 90px;
       border-radius: 50%;
@@ -188,6 +222,7 @@ function poidsLabel(p) {
 async function loadRapport() {
   var params = new URLSearchParams(window.location.search);
   var site = params.get('site');
+  var refEch = params.get('ref');
   var app = document.getElementById('app');
 
   if (!site) {
@@ -195,10 +230,11 @@ async function loadRapport() {
     return;
   }
 
-  document.title = 'SECURA — ' + decodeURIComponent(site);
+  document.title = 'SECURA — ' + decodeURIComponent(site) + (refEch ? ' — ' + decodeURIComponent(refEch) : '');
 
   try {
-    var url = SUPA_URL + '/rest/v1/inspections?site=eq.' + encodeURIComponent(site) + '&order=date.desc&limit=1&select=*';
+    // On charge plusieurs inspections du site pour pouvoir filtrer par ref si demandé
+    var url = SUPA_URL + '/rest/v1/inspections?site=eq.' + encodeURIComponent(site) + '&order=date.desc&limit=20&select=*';
     var r = await fetch(url, {
       headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY }
     });
@@ -209,13 +245,27 @@ async function loadRapport() {
       return;
     }
 
-    var ins = data[0];
+    // Si une référence d'échelle est fournie, filtrer
+    var ins = null;
+    if (refEch) {
+      var refDecoded = decodeURIComponent(refEch);
+      ins = data.find(function(d) { return d.refEchelle === refDecoded || d.refechelle === refDecoded; });
+      if (!ins) {
+        app.innerHTML = '<div class="error">📋 Aucun audit trouvé pour cette échelle.<br><br><span style="color:#8892A4;font-size:12px">Référence : ' + refDecoded + '</span><br><span style="color:#8892A4;font-size:12px">Site : ' + decodeURIComponent(site) + '</span></div>';
+        return;
+      }
+    } else {
+      ins = data[0]; // Plus récent
+    }
+
     var items = ins.items || [];
     var ncItems = items.filter(function(i) { return !i.ok; });
     var okItems = items.filter(function(i) { return i.ok; });
     var col = scoreColor(ins.score);
     var sigInsp = ins.sig_inspecteur || ins.sigInspecteur;
     var sigResp = ins.sig_responsable || ins.sigResponsable;
+    var insRef = ins.refEchelle || ins.refechelle;
+    var isEchelle = ins.categorie === 'Échelles & escabeaux';
 
     // Group NC by section
     var ncBySec = {};
@@ -227,8 +277,21 @@ async function loadRapport() {
 
     var html = '';
 
+    // Photo (échelle ou site)
+    if (ins.sitePhoto || ins.sitephoto) {
+      var photoSrc = ins.sitePhoto || ins.sitephoto;
+      var photoLabel = isEchelle ? '📷 Photo de l\'échelle / escabeau' + (insRef ? ' — ' + insRef : '') : '📷 Photo du site';
+      html += '<div class="photo-card">';
+      html += '<div class="photo-label">' + photoLabel + '</div>';
+      html += '<img src="' + photoSrc + '" alt="' + photoLabel + '"/>';
+      html += '</div>';
+    }
+
     // Site + score
     html += '<div class="card">';
+    if (isEchelle && insRef) {
+      html += '<div style="text-align:center"><span class="ref-badge">🪜 ' + insRef + '</span></div>';
+    }
     html += '<div class="score-circle" style="border-color:' + col + ';color:' + col + '">';
     html += '<span class="score-num">' + ins.score + '</span>';
     html += '<span class="score-label">/100</span>';
@@ -243,6 +306,9 @@ async function loadRapport() {
     html += '<div class="section-title">Informations audit</div>';
     html += '<div class="meta-row"><span class="meta-key">Titre</span><span class="meta-val">' + ins.titre + '</span></div>';
     html += '<div class="meta-row"><span class="meta-key">Catégorie</span><span class="meta-val">' + ins.categorie + '</span></div>';
+    if (isEchelle && insRef) {
+      html += '<div class="meta-row"><span class="meta-key">🪜 Référence</span><span class="meta-val" style="color:#00E5FF">' + insRef + '</span></div>';
+    }
     html += '<div class="meta-row"><span class="meta-key">Date</span><span class="meta-val">' + fmt(ins.date) + '</span></div>';
     html += '<div class="meta-row"><span class="meta-key">Inspecteur</span><span class="meta-val">' + ins.inspecteur + '</span></div>';
     html += '<div class="meta-row"><span class="meta-key">Statut</span><span class="meta-val" style="color:' + (ins.statut==="Validée"?"#00C853":"#FFB300") + '">' + ins.statut + '</span></div>';
