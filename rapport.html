@@ -150,13 +150,6 @@
     .sig-box img { max-width: 100%; max-height: 60px; }
     .sig-label { font-size: 9px; color: #8892A4; margin-bottom: 6px; }
     .no-sig { font-size: 11px; color: #8892A433; }
-    .ok-item {
-      display: flex; align-items: center;
-      gap: 8px; padding: 6px 0;
-      font-size: 12px; color: #8892A4;
-      border-bottom: 1px solid #1E253511;
-    }
-    .ok-item:last-child { border-bottom: none; }
     .progress-bar {
       height: 6px; background: #1E2535;
       border-radius: 99px; overflow: hidden;
@@ -219,6 +212,14 @@ function poidsLabel(p) {
   return 'MODÉRÉ';
 }
 
+// Récupère une valeur en testant plusieurs variantes de nommage (camelCase, lowercase, snake_case)
+function pick(obj, ...names) {
+  for (var i = 0; i < names.length; i++) {
+    if (obj[names[i]] !== undefined && obj[names[i]] !== null) return obj[names[i]];
+  }
+  return null;
+}
+
 async function loadRapport() {
   var params = new URLSearchParams(window.location.search);
   var site = params.get('site');
@@ -233,7 +234,6 @@ async function loadRapport() {
   document.title = 'SECURA — ' + decodeURIComponent(site) + (refEch ? ' — ' + decodeURIComponent(refEch) : '');
 
   try {
-    // On charge plusieurs inspections du site pour pouvoir filtrer par ref si demandé
     var url = SUPA_URL + '/rest/v1/inspections?site=eq.' + encodeURIComponent(site) + '&order=date.desc&limit=20&select=*';
     var r = await fetch(url, {
       headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY }
@@ -245,27 +245,37 @@ async function loadRapport() {
       return;
     }
 
-    // Si une référence d'échelle est fournie, filtrer
+    // Debug : affiche les clés disponibles dans la console
+    console.log('Inspection brute:', data[0]);
+    console.log('Clés disponibles:', Object.keys(data[0]));
+
+    // Filtrage par référence d'échelle si fournie
     var ins = null;
     if (refEch) {
       var refDecoded = decodeURIComponent(refEch);
-      ins = data.find(function(d) { return d.refEchelle === refDecoded || d.refechelle === refDecoded; });
+      ins = data.find(function(d) {
+        var r1 = pick(d, 'refEchelle', 'refechelle', 'ref_echelle');
+        return r1 === refDecoded;
+      });
       if (!ins) {
         app.innerHTML = '<div class="error">📋 Aucun audit trouvé pour cette échelle.<br><br><span style="color:#8892A4;font-size:12px">Référence : ' + refDecoded + '</span><br><span style="color:#8892A4;font-size:12px">Site : ' + decodeURIComponent(site) + '</span></div>';
         return;
       }
     } else {
-      ins = data[0]; // Plus récent
+      ins = data[0];
     }
 
     var items = ins.items || [];
     var ncItems = items.filter(function(i) { return !i.ok; });
-    var okItems = items.filter(function(i) { return i.ok; });
     var col = scoreColor(ins.score);
-    var sigInsp = ins.sig_inspecteur || ins.sigInspecteur;
-    var sigResp = ins.sig_responsable || ins.sigResponsable;
-    var insRef = ins.refEchelle || ins.refechelle;
+    var sigInsp = pick(ins, 'sig_inspecteur', 'sigInspecteur', 'siginspecteur');
+    var sigResp = pick(ins, 'sig_responsable', 'sigResponsable', 'sigresponsable');
+    var insRef = pick(ins, 'refEchelle', 'refechelle', 'ref_echelle');
+    var photoSrc = pick(ins, 'sitePhoto', 'sitephoto', 'site_photo');
     var isEchelle = ins.categorie === 'Échelles & escabeaux';
+
+    console.log('Photo trouvée:', photoSrc ? 'OUI (' + photoSrc.substring(0,50) + '...)' : 'NON');
+    console.log('Référence trouvée:', insRef);
 
     // Group NC by section
     var ncBySec = {};
@@ -278,12 +288,11 @@ async function loadRapport() {
     var html = '';
 
     // Photo (échelle ou site)
-    if (ins.sitePhoto || ins.sitephoto) {
-      var photoSrc = ins.sitePhoto || ins.sitephoto;
+    if (photoSrc) {
       var photoLabel = isEchelle ? '📷 Photo de l\'échelle / escabeau' + (insRef ? ' — ' + insRef : '') : '📷 Photo du site';
       html += '<div class="photo-card">';
       html += '<div class="photo-label">' + photoLabel + '</div>';
-      html += '<img src="' + photoSrc + '" alt="' + photoLabel + '"/>';
+      html += '<img src="' + photoSrc + '" alt="Photo"/>';
       html += '</div>';
     }
 
