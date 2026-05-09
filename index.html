@@ -899,72 +899,144 @@ function HelpScreen({onBack,config}){
   function toggle(i){setOpen(open===i?null:i);}
   var sections=[
     {icon:"🏠",title:"Tableau de bord",sub:"Vue globale de vos audits",color:C.cyan,items:[
-      "Score moyen de conformité calculé automatiquement sur 100 points",
-      "Filtre par site — tapez sur un site pour voir uniquement ses données",
+      "Score moyen de conformité — calculé automatiquement sur 100 points",
+      "Filtre par site — sélectionnez un site pour voir uniquement ses données",
+      "Encadré actions en retard — apparaît automatiquement quand des actions ont dépassé leur échéance, cliquable pour traiter",
+      "4 KPI principaux — Total inspections, Score moyen, Actions critiques, Sites suivis",
       "Top NC récurrentes — les 5 non-conformités les plus fréquentes",
       "Donut de criticité — répartition visuelle Critique / Élevé / Mineur",
       "Suivi des sites — nombre de jours depuis la dernière inspection avec codes couleurs configurables",
-      "Actions urgentes — aperçu des actions critiques en cours"
+      "Score par catégorie & site — sélection des catégories en grille 2 colonnes propre et alignée",
+      "Comparaison N vs N-1 — bouton dédié pour comparer les audits actuels avec les précédents (inclut automatiquement les archives)",
+      "Bouton 🤖 — accès rapide à l'Assistant IA juridique HSE",
+      "Bouton ❓ — accès à cette aide depuis le dashboard"
     ]},
-    {icon:"📋",title:"Audits & Inspections",sub:"Créer et gérer les inspections",color:C.green,items:[
-      "Nouvelle inspection — choisissez un site, une catégorie et lancez l'audit",
-      "8 catégories disponibles : Incendie, Électricité, Sécurité générale, Hygiène, Ergonomie, Risques chimiques, Premiers secours, Échelles",
-      "Checklist de contrôle — répondez OK ou NC à chaque point",
-      "Photos — ajoutez des photos pour documenter chaque observation",
-      "Remarques — commentaire libre sur chaque point de contrôle",
+    {icon:"📋",title:"Audits & Inspections",sub:"10 catégories d'audit disponibles",color:C.green,items:[
+      "🔥 Incendie — 41 questions / 7 thèmes (détection, alarme, extincteurs, évacuation)",
+      "⚡ Électricité — 40 questions / 7 thèmes (RGIE, tableaux, prises, mise à la terre)",
+      "🛡️ Sécurité générale — 64 questions / 10 thèmes (le plus complet, audit annuel)",
+      "🧼 Hygiène & propreté — 40 questions / 6 thèmes (sanitaires, vestiaires, nettoyage)",
+      "🪑 Ergonomie — 40 questions / 6 thèmes (postes, écrans, manutention, lumière)",
+      "⚗️ Risques chimiques — 40 questions / 7 thèmes (FDS, stockage, EPI, ventilation)",
+      "🚑 Premiers secours — 40 questions / 5 thèmes (boîtes, formation, DEA)",
+      "🪜 Échelles & escabeaux — 10 questions / 9 thèmes (audit ciblé rapide)",
+      "🦠 Amiante - Contrôle visuel — 21 questions / 7 thèmes + panel zones MCA",
+      "🚨 AMOK - Intrusion malveillante — 69 questions / 10 thèmes (sécurité bâtiment, alerte)"
+    ]},
+    {icon:"📝",title:"Réaliser un audit",sub:"Du formulaire à la signature",color:C.cyan,items:[
+      "Photo du site — ajoutez une photo de couverture en en-tête de l'audit",
+      "Checklist par thèmes — questions organisées en sections dépliables",
+      "Photos par question — bouton 📷 (caméra ou bibliothèque), compression automatique 800px JPEG 60%",
+      "Remarques — commentaire libre pour chaque point de contrôle",
       "Assignation responsable — attribuez un responsable à chaque NC",
-      "Signature — signez numériquement pour valider l'inspection",
-      "Score automatique — calculé par pénalités (Critique, Élevé, Mineur)"
+      "Avis SIPPT global — 3 niveaux : ✅ Satisfaisant / ⚠️ Avec recommandations / ❌ Non satisfaisant",
+      "Notes & observations générales — zone de texte libre pour le contexte",
+      "Signatures — Inspecteur et Responsable signent numériquement",
+      "Score automatique — calculé par pénalités configurables (Critique, Élevé, Mineur)",
+      "Sauvegarde automatique sur Supabase — accessible sur tous vos appareils"
+    ]},
+    {icon:"🦠",title:"Audit Amiante",sub:"Contrôle visuel non destructif",color:C.green,items:[
+      "Structure — 7 thèmes de checklist (21 questions) + panel d'évaluation des zones MCA",
+      "Thèmes 1-3 — Inventaire amiante, Localisation extérieure, Localisation intérieure",
+      "Panel 📍 Évaluation des zones MCA — formulaire dédié sous la checklist (sans numérotation)",
+      "Thèmes 4-7 — Information & formation, Procédures d'intervention, Documentation, Mesures préventives",
+      "5 zones par défaut — possibilité d'ajouter ou supprimer des zones avec bouton + Zone",
+      "Par zone — nom modifiable, photo unique, état, accessibilité, fréquentation, signalisation",
+      "4 états visuels — 🟢 Intact / 🟡 À surveiller / 🟠 Dégradé / 🔴 Critique",
+      "Cotation par zone — Intact 0pt, À surveiller −1, Dégradé −3, Critique −5",
+      "Aggravants (si état ≠ Intact) — Accessible +1, Fréquenté +1, Non signalé +2",
+      "Pénalité max par zone — 9 pts (Critique + accessible + fréquenté + non signalé)",
+      "Score live — la pénalité totale s'affiche en temps réel dans le header pendant l'évaluation"
     ]},
     {icon:"⚡",title:"Actions correctives",sub:"Suivi et résolution des NC",color:C.orange,items:[
       "Actions générées automatiquement à partir des non-conformités détectées",
+      "Filtre par site — dropdown pour visualiser les actions d'un site spécifique",
+      "Affichage par défaut — uniquement les actions En cours (pas les clôturées)",
       "Priorité — CRITIQUE, ÉLEVÉE ou MODÉRÉE selon la gravité",
       "Échéance — délai de résolution configurable par niveau de criticité",
       "Responsable — assignez la personne en charge de la correction",
       "Statut — En cours, À faire ou Clôturée",
-      "Filtres rapides pour voir les actions par statut"
+      "Bouton 📧 Rappels — envoie des emails groupés par responsable"
     ]},
     {icon:"📧",title:"Rappels email",sub:"Relancer les responsables",color:"#00BCD4",items:[
-      "Bouton Rappels dans l'écran Actions — envoie un email de rappel par responsable",
+      "Bouton 📧 Rappels dans Actions — envoie un email de rappel par responsable",
       "Délai paramétrable — par défaut 7 jours avant échéance",
-      "Email pré-rédigé avec la liste des actions, sites, priorités et retards",
-      "Masquage après envoi — le rappel disparaît une fois envoyé",
-      "Bouton ✕ pour retirer un rappel individuellement",
-      "Bouton Reset pour réafficher tous les rappels envoyés",
-      "Alerte si des actions n'ont pas de responsable assigné"
+      "Email pré-rédigé — liste complète des actions, sites, priorités et retards",
+      "Masquage individuel — bouton ✕ pour retirer un rappel après envoi",
+      "Bouton Reset — pour réafficher tous les rappels masqués",
+      "Encart actions sans responsable cliquable — affiche la liste détaillée avec priorité, site, échéance et retard"
     ]},
-    {icon:"📄",title:"Rapports & Export",sub:"PDF professionnel et tableau global",color:C.purple,items:[
-      "Export PDF individuel — rapport professionnel avec en-tête, logo, score, détail des NC et signatures",
-      "Impression directe depuis l'aperçu du rapport",
-      "Téléchargement PDF ou partage via le menu natif du téléphone",
-      "QR Code imprimable — lien direct vers le rapport du site",
-      "Tableau global — toutes les inspections regroupées par site avec scores moyens",
-      "Rapport public — lien partageable pour chaque site"
-    ]},
-    {icon:"👤",title:"Profil & Paramètres",sub:"Configuration de l'application",color:C.red,items:[
-      "Équipe — ajouter / supprimer des inspecteurs et responsables avec email et mot de passe",
-      "Sites — gérer la liste des sites inspectés avec adresses",
-      "Système — configurer les pénalités par criticité, les délais de résolution et les seuils de suivi des sites",
-      "Style — choisir l'ambiance (Standard, Bordeaux, Bleu Océan, Gris Béton), la couleur principale, la police et la taille du texte",
-      "Permissions — l'Admin peut configurer les accès par rôle (Inspecteur / Responsable) pour chaque fonctionnalité",
-      "Mode daltonien — palettes accessibles pour deutéranopie, protanopie et tritanopie"
-    ]},
-    {icon:"🤖",title:"Assistant IA",sub:"Législation HSE belge",color:C.purple,items:[
-      "Chat intelligent — posez vos questions en langage naturel sur la prévention et la sécurité",
-      "Sources couvertes — Code du bien-être, RGPT, RGIE, CODEX, normes NBN, directives européennes, SEVESO",
-      "Recherche web automatique — uniquement pour les informations postérieures à 2025, signalée par 🌐",
-      "Questions suggérées — exemples de questions courantes pour démarrer",
-      "Accès configurable — l'Admin peut activer ou désactiver l'IA par rôle dans Profil → Accès",
-      "Clé API — à configurer dans Profil → Système par l'Admin"
+    {icon:"📄",title:"Rapports & Export",sub:"PDF professionnel et archivage",color:C.purple,items:[
+      "Export PDF individuel — rapport pro avec en-tête sombre, logo, score, photo site",
+      "NC détaillées — chaque non-conformité avec photos, remarques et responsable",
+      "Points conformes — section dédiée avec tous les contrôles validés",
+      "Évaluation zones MCA — section dédiée dans le PDF Amiante avec photos et indicateurs",
+      "Avis SIPPT — encart coloré dans le PDF avec niveau d'évaluation et description",
+      "Récap actions correctives — tableau en fin de rapport avec criticité, responsable et remarques",
+      "Téléchargement PDF — partage via le menu natif du téléphone (AirDrop, email, Drive...)",
+      "QR Code imprimable — bouton 📷 pour générer un QR code lié au rapport public du site",
+      "Rapport public — vue intégrée dans l'app avec bouton 📋 Copier lien (fonctionne en mode PWA)",
+      "Archives — bouton 📦 Archives en haut à droite pour basculer entre actifs et archivés",
+      "Bouton 📦 Archiver — range un audit ancien sans le supprimer",
+      "Bouton ↩️ Restaurer — remet une archive en actif",
+      "Le QR code et le lien public restent fonctionnels même après archivage",
+      "Tableau global — toutes les inspections regroupées par site avec scores et détail des NC par criticité"
     ]},
     {icon:"🩹",title:"Accidentologie",sub:"Suivi des accidents du travail",color:C.red,items:[
-      "Déclaration — encodez chaque accident avec date, site, type, cause, gravité et jours d'arrêt",
-      "Types d'accidents — AT avec arrêt, AT sans arrêt, presqu'accident, incident, accident de trajet",
-      "Indicateurs automatiques — Taux de fréquence (Tf) et Taux de gravité (Tg) calculés par site",
+      "Onglet 🩹 dans la barre de navigation — accès direct au module accidents",
+      "Déclaration complète — date, date réception déclaration, victime, site, type, cause, statut, partie corps, gravité, jours d'arrêt",
+      "5 types d'accidents — AT avec arrêt, AT sans arrêt, presqu'accident, incident, accident de trajet",
+      "12 causes — Manutention manuelle, Chute, Circulation, Projection, Choc, Coupure, Brûlure, etc.",
+      "7 catégories de personnel — Enseignement, Ouvriers, Employés, Techniciennes de surface, Puéricultrices, Aides-familiales, Autre",
+      "42 parties du corps — détail anatomique pour analyses fines",
+      "3 onglets pleine largeur — Indicateurs / Liste (X) / Évolution",
+      "KPI Indicateurs — Total AT, Jours arrêt, Presqu'accidents, Tf",
       "Jours sans accident — compteur automatique par site avec classement",
-      "Top causes — identification des causes les plus fréquentes pour cibler la prévention",
-      "Évolution mensuelle — graphique sur 12 mois pour suivre la tendance",
-      "Heures prestées — à configurer par catégorie de personnel dans Profil → Système pour les calculs Tf/Tg"
+      "Évolution — graphique sur 12 mois pour suivre la tendance",
+      "Tf et Tg détaillés — Taux de fréquence et de gravité par site",
+      "Graphique multicolore par catégorie — accidents par fonction avec détail des causes (ex: Puéricultrices 5 → 2× Manutention, 1× Circulation, 2× Projection)",
+      "Graphique par cause — répartition globale avec couleurs distinctes",
+      "Bouton 📄 Fiche — export PDF individuel par accident",
+      "Bouton 📊 Rapport — export global anonymisé pour la direction/CPPT",
+      "Heures prestées — à configurer par catégorie de personnel dans Profil → Système pour les calculs Tf/Tg",
+      "Synchronisation Supabase — accidents partagés entre tous les appareils"
+    ]},
+    {icon:"🤖",title:"Assistant IA juridique",sub:"Législation HSE belge",color:C.purple,items:[
+      "Bouton 🤖 dans le dashboard — ouvre le chat avec l'assistant IA",
+      "Chat intelligent — posez vos questions en langage naturel sur la prévention",
+      "Sources couvertes — Code du bien-être, RGPT, RGIE, CODEX, normes NBN, directives EU, SEVESO, BeSWIC, Fedris, VLAREM",
+      "Recherche web automatique — uniquement pour les informations postérieures à 2025, signalée par 🌐",
+      "Questions suggérées — exemples pour démarrer rapidement",
+      "Accès configurable — l'Admin peut activer/désactiver l'IA par rôle dans Profil → Permissions",
+      "Clé API — à configurer dans Profil → Système → 🤖 Clé API IA par l'Admin uniquement"
+    ]},
+    {icon:"👤",title:"Profil & Équipe",sub:"Gestion des utilisateurs et sites",color:C.blue,items:[
+      "Onglet Équipe — ajouter/supprimer membres avec email, mot de passe et rôle",
+      "Badges colorés par rôle — 👑 Admin (violet), 🔍 Inspecteur (cyan), 📋 Responsable (orange)",
+      "Affichage propre — noms et emails longs tronqués proprement avec ellipsis",
+      "Onglet Sites — gérer la liste des sites avec adresses",
+      "Confirmation avant suppression — pour éviter les erreurs sur l'équipe et les sites"
+    ]},
+    {icon:"⚙️",title:"Système & Permissions",sub:"Configuration avancée (Admin)",color:C.amber,items:[
+      "Pénalités par criticité — Critique (−5pts par défaut), Élevé (−3pts), Mineur (−1pt)",
+      "Délais de résolution — Critique (7j par défaut), Élevé (30j), Mineur (90j)",
+      "Seuils de suivi des sites — couleurs vert/orange/rouge selon nb de jours depuis dernière inspection",
+      "Heures prestées — par catégorie de personnel (Enseignement, Ouvriers, Employés, etc.) pour les calculs Tf/Tg",
+      "Templates personnalisés — modifier les checklists de chaque catégorie (questions, criticité)",
+      "Notifications push — alertes échéances actions sur iPhone J-3, J-1 et le jour J",
+      "Clé API IA — configuration de l'assistant Claude",
+      "Permissions par rôle — l'Admin configure finement les accès Inspecteur/Responsable pour chaque fonctionnalité (dashboard, inspections, actions, rapports, rappels, IA, accidents)",
+      "Version 1.0.0 — affichée en bas du menu Système"
+    ]},
+    {icon:"🎨",title:"Apparence & Mode Tec",sub:"Personnalisation visuelle",color:"#FF6D00",items:[
+      "🎭 Mode Tec — 5 ambiances de fond avec motifs marbrés",
+      "Standard — fond sombre par défaut",
+      "🍷 Bordeaux marbré — tons rouges chauds avec reflets brillants",
+      "🌊 Bleu Océan marbré — reflets aquatiques profonds, lumineux",
+      "🏗️ Gris Béton marbré — texture urbaine moderne avec reflets argentés",
+      "✨ Blanc Ombré — ambiance claire et lumineuse avec effets nuageux gris",
+      "Mode daltonien — palettes accessibles pour deutéranopie 🟡, protanopie 🔵 et tritanopie 🟣",
+      "Tous les thèmes utilisent des radial-gradients pour un effet marbré naturel sans impact sur les performances"
     ]}
   ];
   return (
