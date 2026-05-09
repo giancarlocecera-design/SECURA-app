@@ -54,6 +54,13 @@ function mapInspection(ins){
   };
   if(ins.sigInspecteur) m["sig_inspecteur"]=ins.sigInspecteur;
   if(ins.sigResponsable) m["sig_responsable"]=ins.sigResponsable;
+  if(ins.sitePhoto) m["sitePhoto"]=ins.sitePhoto;
+  if(ins.refEchelle) m["refEchelle"]=ins.refEchelle;
+  if(ins.avisSIPPT) m["avisSIPPT"]=ins.avisSIPPT;
+  if(ins.zonesAmiante) m["zonesAmiante"]=ins.zonesAmiante;
+  if(ins.accompagnateurs) m["accompagnateurs"]=ins.accompagnateurs;
+  if(ins.adresse) m["adresse"]=ins.adresse;
+  if(ins.archived!==undefined) m["archived"]=ins.archived;
   return m;
 }
 
