@@ -3,6 +3,7 @@
   "builds": [
     { "src": "index.html", "use": "@vercel/static" },
     { "src": "rapport.html", "use": "@vercel/static" },
+    { "src": "guide.html", "use": "@vercel/static" },
     { "src": "sw.js", "use": "@vercel/static" },
     { "src": "manifest.json", "use": "@vercel/static" },
     { "src": "icon-192.png", "use": "@vercel/static" },
@@ -32,6 +33,10 @@
     {
       "src": "/rapport.html",
       "dest": "/rapport.html"
+    },
+    {
+      "src": "/guide.html",
+      "dest": "/guide.html"
     },
     { "src": "/(.*)", "dest": "/index.html" }
   ]
