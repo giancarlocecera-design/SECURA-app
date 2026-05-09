@@ -1205,7 +1205,31 @@ function DashboardScreen({user,inspections,actions,onNav,config,sitesState,appSt
           <button onClick={function(){setSiteFilter("Tous");}} style={{background:"transparent",border:"1px solid "+C.border,borderRadius:8,padding:"3px 10px",color:C.muted,fontSize:13,cursor:"pointer"}}>✕ Réinitialiser</button>
         </div>
       )}
-      {critActs>0&&<div style={{margin:"14px 14px 0",background:`${C.red}10`,border:`1px solid ${C.red}33`,borderRadius:14,padding:"11px 14px",display:"flex",gap:10,alignItems:"center"}}><span style={{fontSize:18}}>🚨</span><div><div style={{fontSize:16,fontWeight:700,color:C.red}}>{critActs} action(s) critique(s) — pénalité active</div><div style={{fontSize:14,color:C.muted}}>Chaque NC critique retire {(appState&&appState.penalites?appState.penalites.critique:5)} pts du score</div></div></div>}
+      {(function(){
+        var today=new Date();today.setHours(0,0,0,0);
+        var lateActs=fActions.filter(function(a){
+          if(a.statut==="Clôturée"||!a.echeance) return false;
+          var p=a.echeance.split("-");if(p.length!==3) return false;
+          var d=new Date(parseInt(p[0]),parseInt(p[1])-1,parseInt(p[2]));d.setHours(0,0,0,0);
+          return d<today;
+        });
+        if(lateActs.length===0) return null;
+        var maxLate=lateActs.reduce(function(m,a){
+          var p=a.echeance.split("-");var d=new Date(parseInt(p[0]),parseInt(p[1])-1,parseInt(p[2]));d.setHours(0,0,0,0);
+          var diff=Math.floor((today-d)/86400000);
+          return diff>m?diff:m;
+        },0);
+        return (
+          <div onClick={function(){onNav&&onNav("actions");}} style={{margin:"14px 14px 0",background:C.red+"10",border:"1px solid "+C.red+"33",borderRadius:14,padding:"12px 14px",display:"flex",gap:12,alignItems:"center",cursor:"pointer"}}>
+            <div style={{width:48,height:48,borderRadius:12,background:C.red+"18",display:"flex",alignItems:"center",justifyContent:"center",fontSize:24,flexShrink:0}}>⏰</div>
+            <div style={{flex:1,minWidth:0}}>
+              <div style={{fontSize:17,fontWeight:800,color:C.red}}>{lateActs.length} action{lateActs.length>1?"s":""} en retard</div>
+              <div style={{fontSize:13,color:C.muted,marginTop:2}}>Échéance dépassée jusqu&#39;à <strong style={{color:C.red}}>{maxLate} jour{maxLate>1?"s":""}</strong> · Cliquez pour traiter</div>
+            </div>
+            <span style={{fontSize:18,color:C.red,fontWeight:900,flexShrink:0}}>›</span>
+          </div>
+        );
+      })()}
 
       {/* Sites critiques */}
       {siteFilter==="Tous"&&(
