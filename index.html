@@ -2523,6 +2523,7 @@ function NewInspectionScreen({user,onSave,onBack,resps,sitesState,customTemplate
 // RAPPELS SCREEN
 // ═══════════════════════════════════════════════════════════════════════
 function RappelsScreen({actions,resps,config,onConfigUpdate,onBack}){
+  const [showSansResp,setShowSansResp]=useState(false);
   var delai=(config&&config.rappelDelai)||7;
   const [editDelai,setEditDelai]=useState(false);
   const [tempDelai,setTempDelai]=useState(delai);
@@ -2589,9 +2590,32 @@ function RappelsScreen({actions,resps,config,onConfigUpdate,onBack}){
         </div>
       </div>
       {sansResp.length>0&&(
-        <div style={{margin:"0 14px 10px",padding:"10px 14px",background:C.orange+"12",border:"1px solid "+C.orange+"33",borderRadius:12,display:"flex",alignItems:"center",gap:10}}>
+        <div onClick={function(){setShowSansResp(!showSansResp);}} style={{margin:"0 14px 10px",padding:"10px 14px",background:C.orange+"12",border:"1px solid "+C.orange+"33",borderRadius:12,display:"flex",alignItems:"center",gap:10,cursor:"pointer"}}>
           <span style={{fontSize:18}}>⚠️</span>
-          <div><div style={{fontSize:15,fontWeight:700,color:C.orange}}>{sansResp.length} action(s) sans responsable</div><div style={{fontSize:14,color:C.muted,marginTop:2}}>Assignez un responsable dans Actions pour les inclure dans les rappels</div></div>
+          <div style={{flex:1}}>
+            <div style={{fontSize:15,fontWeight:700,color:C.orange}}>{sansResp.length} action(s) sans responsable</div>
+            <div style={{fontSize:14,color:C.muted,marginTop:2}}>{showSansResp?"Cliquez pour masquer la liste":"Cliquez pour voir la liste"}</div>
+          </div>
+          <span style={{fontSize:18,color:C.orange,fontWeight:900,transform:showSansResp?"rotate(90deg)":"none",transition:"transform .2s"}}>›</span>
+        </div>
+      )}
+      {showSansResp&&sansResp.length>0&&(
+        <div style={{margin:"0 14px 14px",padding:"10px 12px",background:C.orange+"06",border:"1px dashed "+C.orange+"44",borderRadius:12}}>
+          {sansResp.map(function(a,ai){
+            var col=a.prio==="CRITIQUE"?C.red:a.prio==="ÉLEVÉE"?C.orange:C.amber;
+            var retard=a.echeance?Math.ceil((parseDateLocal(a.echeance)-today)/86400000):null;
+            return (
+              <div key={ai} style={{display:"flex",alignItems:"flex-start",gap:10,padding:"10px 0",borderBottom:ai<sansResp.length-1?"1px solid "+C.border:"none"}}>
+                <div style={{width:10,height:10,borderRadius:99,background:col,marginTop:6,flexShrink:0}}/>
+                <div style={{flex:1,minWidth:0}}>
+                  <div style={{fontSize:14,fontWeight:700}}>{a.label}</div>
+                  <div style={{fontSize:12,color:C.muted,marginTop:2}}>📍 {a.site}{a.echeance?" · 📅 "+fmt(a.echeance):""}{retard!==null&&retard<0?" · ⏰ retard "+Math.abs(retard)+"j":""}</div>
+                  <span style={{display:"inline-block",fontSize:10,padding:"2px 7px",borderRadius:5,background:col+"22",color:col,fontWeight:800,marginTop:4}}>{a.prio}</span>
+                </div>
+              </div>
+            );
+          })}
+          <div style={{marginTop:10,padding:"8px 10px",background:C.cyan+"10",borderRadius:8,fontSize:12,color:C.cyan,textAlign:"center",fontWeight:700}}>💡 Allez dans Actions pour assigner un responsable à ces actions</div>
         </div>
       )}
       {groups.length===0&&<div style={{textAlign:"center",padding:"50px 20px",color:C.muted}}><div style={{fontSize:36,marginBottom:12}}>✅</div><div style={{fontSize:20,fontWeight:700,marginBottom:6}}>Aucun rappel nécessaire</div><div style={{fontSize:15,marginBottom:16}}>Aucune action n&#39;arrive à échéance dans les {delai} prochains jours.</div>{Object.keys(dismissed).length>0&&<button onClick={function(){saveDismissed({});}} style={{...S.btn(C.muted,true),width:"auto",padding:"8px 16px",fontSize:14,margin:"0 auto"}}>🔄 Réafficher les rappels envoyés</button>}</div>}
