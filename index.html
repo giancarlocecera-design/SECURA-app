@@ -2034,10 +2034,10 @@ function InspectionDetailScreen({inspection,onBack,onUpdate,resps,sitesState}){
         </div>
       )}
 
-      {/* Photo du site */}
+      {/* Photo du site / échelle */}
       {inspection.sitePhoto&&(
         <div style={{margin:"12px 14px 0",...S.card(),overflow:"hidden",padding:0}}>
-          <div style={{fontSize:14,fontWeight:700,padding:"10px 14px",color:C.muted}}>📷 Photo du site</div>
+          <div style={{fontSize:14,fontWeight:700,padding:"10px 14px",color:C.muted}}>📷 {inspection.categorie==="Échelles & escabeaux"?"Photo de l'échelle / escabeau":"Photo du site"}{inspection.categorie==="Échelles & escabeaux"&&inspection.refEchelle?" — "+inspection.refEchelle:""}</div>
           <img src={inspection.sitePhoto} style={{width:"100%",maxHeight:180,objectFit:"cover",display:"block"}}/>
         </div>
       )}
@@ -2445,7 +2445,7 @@ function NewInspectionScreen({user,onSave,onBack,resps,sitesState,customTemplate
             </div>
             <label style={S.label}>Notes préliminaires</label>
             <textarea style={{...S.input,minHeight:60,resize:"vertical"}} placeholder="Contexte, périmètre, objectifs..." value={form.notes} onChange={e=>setForm({...form,notes:e.target.value})}/>
-            <label style={S.label}>Photo du site</label>
+            <label style={S.label}>{form.categorie==="Échelles & escabeaux"?"Photo de l'échelle / escabeau":"Photo du site"}</label>
             <div style={{marginBottom:14}}>
               {form.sitePhoto?(
                 <div style={{position:"relative",borderRadius:12,overflow:"hidden",border:"1px solid "+C.border}}>
@@ -2454,7 +2454,7 @@ function NewInspectionScreen({user,onSave,onBack,resps,sitesState,customTemplate
                 </div>
               ):(
                 <label style={{display:"flex",alignItems:"center",justifyContent:"center",gap:8,padding:"20px",borderRadius:12,border:"2px dashed "+C.border,cursor:"pointer",color:C.muted,fontSize:15}}>
-                  <span style={{fontSize:20}}>📷</span> Ajouter une photo du site
+                  <span style={{fontSize:20}}>📷</span> {form.categorie==="Échelles & escabeaux"?"Ajouter une photo de l'échelle":"Ajouter une photo du site"}
                   <input type="file" accept="image/*" style={{display:"none"}} onChange={function(e){
                     var file=e.target.files&&e.target.files[0];
                     if(!file) return;
@@ -2569,7 +2569,7 @@ function NewInspectionScreen({user,onSave,onBack,resps,sitesState,customTemplate
           </div>
           {form.sitePhoto&&(
             <div style={{...S.card(),marginBottom:12,overflow:"hidden"}}>
-              <div style={{fontSize:15,fontWeight:700,marginBottom:8}}>📷 Photo du site</div>
+              <div style={{fontSize:15,fontWeight:700,marginBottom:8}}>📷 {form.categorie==="Échelles & escabeaux"?"Photo de l'échelle / escabeau":"Photo du site"}{form.categorie==="Échelles & escabeaux"&&form.refEchelle?" — "+form.refEchelle:""}</div>
               <img src={form.sitePhoto} style={{width:"100%",maxHeight:200,objectFit:"cover",borderRadius:10,display:"block"}}/>
             </div>
           )}
@@ -3050,7 +3050,7 @@ function RapportsScreen({inspections,onDelete,onArchive,config}){
       +"</style></head><body>"
       +"<h1>"+((CAT_META[ins.categorie]&&CAT_META[ins.categorie].icon)||"")+" "+ins.titre+"</h1>"
       +"<div class='meta'>"+metaRows.map(function(r){return "<div><div class='mk'>"+r[0]+"</div><strong>"+r[1]+"</strong></div>";}).join("")+"</div>"
-      +(ins.sitePhoto?"<div style='margin:12px 0;border-radius:8px;overflow:hidden;border:1px solid #ddd'><div style='font-size:9px;text-transform:uppercase;letter-spacing:1px;color:#888;padding:6px 10px;background:#f5f8fc'>Photo du site</div><img src='"+ins.sitePhoto+"' style='max-width:50%;max-height:150px;object-fit:contain;display:block;margin:8px auto'/></div>":"")
+      +(ins.sitePhoto?"<div style='margin:12px 0;border-radius:8px;overflow:hidden;border:1px solid #ddd'><div style='font-size:9px;text-transform:uppercase;letter-spacing:1px;color:#888;padding:6px 10px;background:#f5f8fc'>"+(ins.categorie==="Échelles & escabeaux"?"Photo de l'echelle / escabeau"+(ins.refEchelle?" — "+ins.refEchelle:""):"Photo du site")+"<img src='"+ins.sitePhoto+"' style='max-width:50%;max-height:150px;object-fit:contain;display:block;margin:8px auto'/></div>":"")
       +"<div class='score-box'><div class='score-num'>"+ins.score+"<span style='font-size:22px;color:#666'>/100</span></div>"
       +"<div style='color:#666;margin:4px 0'>Score penalise - "+penTotal+"pts de penalite</div>"
       +"<div class='pbar'><div class='pfill' style='width:"+ins.score+"%'></div></div>"
@@ -3178,7 +3178,7 @@ function RapportsScreen({inspections,onDelete,onArchive,config}){
         +"<div class='meta-item'><div class='label'>Score</div><div class='value' style='color:"+scCol+"'>"+ins.score+"/100</div></div>"
         +"<div class='meta-item'><div class='label'>Penalite</div><div class='value' style='color:#FF1744'>-"+penTotal+"pts</div></div>"
         +"</div>"
-        +(ins.sitePhoto?"<div class='site-photo'><div class='site-photo-label'>Photo du site — "+ins.site+"</div><img src='"+ins.sitePhoto+"'/></div>":"")
+        +(ins.sitePhoto?"<div class='site-photo'><div class='site-photo-label'>"+(ins.categorie==="Échelles & escabeaux"?"Photo de l'echelle"+(ins.refEchelle?" — "+ins.refEchelle:""):"Photo du site — "+ins.site)+"</div><img src='"+ins.sitePhoto+"'/></div>":"")
         +"<div class='score-card'><div><div class='score-big'>"+ins.score+"<span style='font-size:22px;color:#999'>/100</span></div></div><div class='score-details'><div style='font-size:12px;color:#666;margin-bottom:6px'>Score de conformite — Depart 100pts, penalite -"+penTotal+"pts</div><div class='score-bar'><div class='score-fill'></div></div><div class='nc-summary'>"
         +(ncCrit>0?"<span class='nc-chip' style='background:#FF174420;color:#FF1744'>"+ncCrit+" Critique"+(ncCrit>1?"s":"")+"</span>":"")
         +(ncElev>0?"<span class='nc-chip' style='background:#FF6D0020;color:#FF6D00'>"+ncElev+" Eleve"+(ncElev>1?"s":"")+"</span>":"")
