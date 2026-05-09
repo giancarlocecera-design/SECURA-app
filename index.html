@@ -1047,7 +1047,8 @@ function HelpScreen({onBack,config}){
       </div>
       <div style={{margin:"0 14px 14px",padding:"14px",background:"linear-gradient(135deg,"+C.cyan+"10,"+C.purple+"10)",border:"1px solid "+C.cyan+"22",borderRadius:14}}>
         <div style={{fontSize:20,fontWeight:800,marginBottom:4}}>Bienvenue dans {appName}</div>
-        <div style={{fontSize:15,color:C.muted,lineHeight:1.6}}>Application de gestion des audits de prévention et sécurité. Consultez les sections ci-dessous pour découvrir toutes les fonctionnalités.</div>
+        <div style={{fontSize:15,color:C.muted,lineHeight:1.6,marginBottom:12}}>Application de gestion des audits de prévention et sécurité. Consultez les sections ci-dessous pour découvrir toutes les fonctionnalités.</div>
+        <a href="/guide.html" target="_blank" rel="noopener" style={{display:"flex",alignItems:"center",justifyContent:"center",gap:8,padding:"12px 14px",borderRadius:10,background:"linear-gradient(135deg,"+C.cyan+","+C.purple+")",color:"#000",fontWeight:800,fontSize:14,textDecoration:"none",border:"none",cursor:"pointer"}}>📖 Guide utilisateur complet (PDF imprimable)</a>
       </div>
       <div style={{padding:"0 14px"}}>
         {sections.map(function(sec,i){
