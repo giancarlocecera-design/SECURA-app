@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<title>Guide utilisateur SECURA</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;800;900&display=swap');
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'DM Sans', -apple-system, sans-serif;
+  background: #f5f7fa;
+  color: #1a1e2e;
+  line-height: 1.6;
+  padding: 40px 20px;
+}
+
+.container {
+  max-width: 880px;
+  margin: 0 auto;
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.08);
+  overflow: hidden;
+}
+
+.cover {
+  background: linear-gradient(135deg, #0D1825 0%, #1A2A4A 50%, #0D1825 100%);
+  color: white;
+  padding: 60px 50px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.cover::before {
+  content: '';
+  position: absolute;
+  top: -50%; left: -50%;
+  width: 200%; height: 200%;
+  background:
+    radial-gradient(circle at 30% 30%, rgba(0, 229, 255, 0.15), transparent 50%),
+    radial-gradient(circle at 70% 70%, rgba(124, 58, 255, 0.15), transparent 50%);
+}
+
+.cover-content { position: relative; z-index: 1; }
+
+.logo {
+  font-size: 48px;
+  font-weight: 900;
+  letter-spacing: 8px;
+  background: linear-gradient(135deg, #00E5FF, #7C3AFF);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 8px;
+}
+
+.subtitle {
+  font-size: 16px;
+  color: rgba(255,255,255,0.7);
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  margin-bottom: 30px;
+}
+
+.cover h1 {
+  font-size: 36px;
+  font-weight: 800;
+  margin-bottom: 12px;
+}
+
+.cover-info {
+  display: inline-flex;
+  gap: 30px;
+  margin-top: 30px;
+  font-size: 13px;
+  color: rgba(255,255,255,0.6);
+  letter-spacing: 1px;
+}
+
+.toc {
+  padding: 40px 50px;
+  background: #f9fafc;
+  border-bottom: 1px solid #e8ecf2;
+}
+
+.toc h2 {
+  font-size: 14px;
+  letter-spacing: 3px;
+  color: #6b7280;
+  margin-bottom: 16px;
+  font-weight: 700;
+}
+
+.toc-list {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  list-style: none;
+}
+
+.toc-list a {
+  color: #1a1e2e;
+  text-decoration: none;
+  padding: 10px 14px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  transition: background 0.15s;
+}
+
+.toc-list a:hover { background: white; }
+
+.section {
+  padding: 50px 50px 30px;
+  border-bottom: 1px solid #e8ecf2;
+}
+
+.section:last-child { border-bottom: none; }
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 2px solid #f0f4fa;
+}
+
+.section-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #00E5FF20, #7C3AFF20);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  flex-shrink: 0;
+}
+
+.section-title {
+  font-size: 26px;
+  font-weight: 900;
+  color: #0D1825;
+  margin-bottom: 2px;
+}
+
+.section-subtitle {
+  font-size: 14px;
+  color: #6b7280;
+}
+
+h3 {
+  font-size: 18px;
+  font-weight: 800;
+  color: #0D1825;
+  margin: 24px 0 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+p { font-size: 15px; color: #2a2e3e; margin-bottom: 12px; }
+
+.tip {
+  background: linear-gradient(135deg, #00E5FF15, #00BFA515);
+  border-left: 4px solid #00BFA5;
+  padding: 14px 18px;
+  border-radius: 0 12px 12px 0;
+  margin: 16px 0;
+}
+
+.tip strong { color: #00857a; }
+
+.warning {
+  background: #fff8e1;
+  border-left: 4px solid #FFB300;
+  padding: 14px 18px;
+  border-radius: 0 12px 12px 0;
+  margin: 16px 0;
+}
+
+.warning strong { color: #b07700; }
+
+ul { margin: 12px 0 16px 22px; }
+li { font-size: 15px; color: #2a2e3e; margin-bottom: 6px; }
+
+.steps {
+  list-style: none;
+  margin: 16px 0;
+  counter-reset: step;
+}
+
+.steps li {
+  counter-increment: step;
+  padding: 14px 14px 14px 60px;
+  margin-bottom: 10px;
+  background: #f9fafc;
+  border-radius: 12px;
+  position: relative;
+  font-size: 14px;
+}
+
+.steps li::before {
+  content: counter(step);
+  position: absolute;
+  left: 14px;
+  top: 14px;
+  width: 32px;
+  height: 32px;
+  background: linear-gradient(135deg, #00E5FF, #7C3AFF);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  font-size: 14px;
+}
+
+.criticality-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 16px 0;
+  background: white;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid #e8ecf2;
+}
+
+.criticality-table th {
+  background: #0D1825;
+  color: white;
+  padding: 12px;
+  text-align: left;
+  font-size: 12px;
+  letter-spacing: 1px;
+}
+
+.criticality-table td {
+  padding: 12px;
+  border-bottom: 1px solid #f0f4fa;
+  font-size: 13px;
+}
+
+.criticality-table tr:last-child td { border-bottom: none; }
+
+.badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.badge-critique { background: #FF174420; color: #FF1744; }
+.badge-eleve { background: #FF6D0020; color: #FF6D00; }
+.badge-mineur { background: #FFB30020; color: #b07700; }
+.badge-good { background: #00C85320; color: #007a30; }
+
+.role-card {
+  display: grid;
+  grid-template-columns: 100px 1fr;
+  gap: 20px;
+  background: #f9fafc;
+  border-radius: 14px;
+  padding: 18px;
+  margin-bottom: 12px;
+  border-left: 4px solid;
+}
+
+.role-card.admin { border-color: #7C3AFF; }
+.role-card.inspecteur { border-color: #00E5FF; }
+.role-card.responsable { border-color: #FFB300; }
+
+.role-icon {
+  background: white;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36px;
+}
+
+.role-name {
+  font-size: 17px;
+  font-weight: 800;
+  margin-bottom: 4px;
+}
+
+.role-desc {
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.footer {
+  background: linear-gradient(135deg, #0D1825, #1A2A4A);
+  color: white;
+  padding: 40px 50px;
+  text-align: center;
+}
+
+.footer-logo {
+  font-size: 22px;
+  font-weight: 900;
+  letter-spacing: 4px;
+  margin-bottom: 8px;
+}
+
+.footer p { color: rgba(255,255,255,0.6); font-size: 13px; margin: 0; }
+
+@media print {
+  body { background: white; padding: 0; }
+  .container { box-shadow: none; border-radius: 0; }
+  .section { page-break-inside: avoid; }
+  .cover { page-break-after: always; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- COUVERTURE -->
+  <div class="cover">
+    <div class="cover-content">
+      <div class="logo">SECURA</div>
+      <div class="subtitle">Audits HSE · Belgique</div>
+      <h1>Guide Utilisateur</h1>
+      <p style="color:rgba(255,255,255,0.7);font-size:16px">Application de gestion des audits<br/>de prévention et sécurité au travail</p>
+      <div class="cover-info">
+        <span>Version 1.0.0</span>
+        <span>·</span>
+        <span>2026</span>
+        <span>·</span>
+        <span>Conforme Code du bien-être</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- TABLE DES MATIÈRES -->
+  <div class="toc">
+    <h2>SOMMAIRE</h2>
+    <ul class="toc-list">
+      <li><a href="#intro">📖 Introduction</a></li>
+      <li><a href="#connexion">🔑 Connexion</a></li>
+      <li><a href="#roles">👥 Rôles utilisateurs</a></li>
+      <li><a href="#dashboard">🏠 Tableau de bord</a></li>
+      <li><a href="#audit">📋 Réaliser un audit</a></li>
+      <li><a href="#amiante">🦠 Audit Amiante</a></li>
+      <li><a href="#actions">⚡ Actions correctives</a></li>
+      <li><a href="#rappels">📧 Rappels email</a></li>
+      <li><a href="#rapports">📄 Rapports & Archives</a></li>
+      <li><a href="#accidents">🩹 Accidentologie</a></li>
+      <li><a href="#ia">🤖 Assistant IA</a></li>
+      <li><a href="#parametres">⚙️ Paramètres</a></li>
+    </ul>
+  </div>
+
+  <!-- INTRODUCTION -->
+  <div class="section" id="intro">
+    <div class="section-header">
+      <div class="section-icon">📖</div>
+      <div>
+        <div class="section-title">Bienvenue dans SECURA</div>
+        <div class="section-subtitle">Guide pour bien démarrer</div>
+      </div>
+    </div>
+    <p>SECURA est une application moderne de gestion des audits de prévention et sécurité au travail, développée pour les conseillers en prévention belges. Elle vous permet de réaliser des inspections, suivre les non-conformités et gérer les accidents du travail.</p>
+
+    <h3>📱 Compatibilité</h3>
+    <p>SECURA fonctionne sur <strong>iPhone, iPad, Android, ordinateurs Windows et Mac</strong>. Pour une utilisation optimale, ajoutez l'application à l'écran d'accueil de votre téléphone (mode PWA).</p>
+
+    <div class="tip">
+      <strong>💡 Astuce :</strong> Sur iPhone, ouvrez l'app dans Safari, appuyez sur l'icône Partager (carré avec flèche), puis sur "Sur l'écran d'accueil". L'app s'ouvrira ensuite comme une app native.
+    </div>
+
+    <h3>🎯 Ce que vous pouvez faire</h3>
+    <ul>
+      <li>Réaliser des audits dans <strong>10 catégories</strong> (Incendie, Électricité, Amiante, etc.)</li>
+      <li>Suivre les <strong>actions correctives</strong> avec échéances et rappels par email</li>
+      <li>Générer des <strong>rapports PDF professionnels</strong> avec photos et signatures</li>
+      <li>Gérer les <strong>accidents du travail</strong> et calculer Tf/Tg</li>
+      <li>Comparer les audits <strong>année N vs N-1</strong></li>
+      <li>Poser des questions à un <strong>assistant IA</strong> spécialisé HSE belge</li>
+    </ul>
+  </div>
+
+  <!-- CONNEXION -->
+  <div class="section" id="connexion">
+    <div class="section-header">
+      <div class="section-icon">🔑</div>
+      <div>
+        <div class="section-title">Connexion</div>
+        <div class="section-subtitle">Première étape : se connecter à l'application</div>
+      </div>
+    </div>
+
+    <ol class="steps">
+      <li>Ouvrez l'app dans votre navigateur ou depuis l'écran d'accueil</li>
+      <li>Saisissez votre <strong>adresse email professionnelle</strong></li>
+      <li>Saisissez votre <strong>mot de passe</strong> (fourni par votre administrateur)</li>
+      <li>Cliquez sur <strong>"Se connecter"</strong></li>
+    </ol>
+
+    <div class="warning">
+      <strong>⚠️ Mot de passe oublié ?</strong> Contactez votre administrateur SECURA. Il pourra réinitialiser votre mot de passe dans Profil → Équipe.
+    </div>
+  </div>
+
+  <!-- RÔLES -->
+  <div class="section" id="roles">
+    <div class="section-header">
+      <div class="section-icon">👥</div>
+      <div>
+        <div class="section-title">Rôles utilisateurs</div>
+        <div class="section-subtitle">Trois niveaux d'accès</div>
+      </div>
+    </div>
+
+    <div class="role-card admin">
+      <div class="role-icon">👑</div>
+      <div>
+        <div class="role-name">Administrateur</div>
+        <div class="role-desc">Accès complet : gestion des comptes, sites, paramètres système, permissions par rôle, configuration de l'IA et toutes les fonctionnalités.</div>
+      </div>
+    </div>
+
+    <div class="role-card inspecteur">
+      <div class="role-icon">🔍</div>
+      <div>
+        <div class="role-name">Inspecteur</div>
+        <div class="role-desc">Réalise les audits, génère les rapports, consulte le tableau de bord, gère les actions correctives et accède à l'accidentologie.</div>
+      </div>
+    </div>
+
+    <div class="role-card responsable">
+      <div class="role-icon">📋</div>
+      <div>
+        <div class="role-name">Responsable</div>
+        <div class="role-desc">Reçoit les actions correctives qui lui sont assignées, peut les marquer comme clôturées et consulter les rapports concernant son site.</div>
+      </div>
+    </div>
+
+    <div class="tip">
+      <strong>💡 Permissions personnalisables :</strong> L'administrateur peut configurer finement les accès de chaque rôle dans Profil → Permissions.
+    </div>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div class="section" id="dashboard">
+    <div class="section-header">
+      <div class="section-icon">🏠</div>
+      <div>
+        <div class="section-title">Tableau de bord</div>
+        <div class="section-subtitle">Vue d'ensemble de vos audits</div>
+      </div>
+    </div>
+
+    <p>L'écran d'accueil regroupe les indicateurs essentiels :</p>
+
+    <h3>📊 Indicateurs en haut</h3>
+    <ul>
+      <li><strong>Score moyen</strong> de conformité sur 100 points</li>
+      <li><strong>Total inspections</strong> effectuées</li>
+      <li><strong>Actions critiques</strong> en cours</li>
+      <li><strong>Sites suivis</strong></li>
+    </ul>
+
+    <h3>⏰ Encadré "Actions en retard"</h3>
+    <p>Apparaît automatiquement quand des actions correctives ont dépassé leur échéance. <strong>Cliquez dessus</strong> pour accéder directement aux actions en retard et les traiter.</p>
+
+    <h3>📈 Sites les plus critiques</h3>
+    <p>Top 5 des sites avec les pénalités les plus importantes. Idéal pour identifier les zones nécessitant une attention particulière.</p>
+
+    <h3>📊 Score par catégorie & site</h3>
+    <p>Graphique en barres permettant de comparer les scores par catégorie d'audit et par site. Sélectionnez une catégorie dans la grille pour ajuster la vue.</p>
+
+    <h3>📊 Bouton "N vs N-1"</h3>
+    <p>Compare automatiquement vos audits récents avec les précédents (même site, même catégorie). Vous voyez immédiatement les améliorations ou dégradations.</p>
+
+    <div class="tip">
+      <strong>💡 Astuce :</strong> Les audits archivés sont inclus dans la comparaison N vs N-1. Pas besoin de les restaurer.
+    </div>
+  </div>
+
+  <!-- AUDIT -->
+  <div class="section" id="audit">
+    <div class="section-header">
+      <div class="section-icon">📋</div>
+      <div>
+        <div class="section-title">Réaliser un audit</div>
+        <div class="section-subtitle">De la création à la signature</div>
+      </div>
+    </div>
+
+    <h3>1. Créer une nouvelle inspection</h3>
+    <ol class="steps">
+      <li>Depuis le tableau de bord, cliquez sur <strong>"Nouvelle inspection"</strong></li>
+      <li>Choisissez la <strong>catégorie</strong> parmi les 10 disponibles</li>
+      <li>Sélectionnez le <strong>site</strong> à auditer</li>
+      <li>Saisissez un <strong>titre</strong> pour l'inspection (ex: "Audit annuel 2026")</li>
+      <li>Vérifiez la <strong>date</strong> et l'<strong>inspecteur</strong></li>
+      <li>Optionnel : ajoutez une <strong>photo du site</strong> en couverture</li>
+    </ol>
+
+    <h3>2. Remplir la checklist</h3>
+    <p>Chaque audit est organisé en <strong>thèmes dépliables</strong>. Pour chaque question :</p>
+    <ul>
+      <li>Cochez <span class="badge badge-good">✓ OK</span> si conforme</li>
+      <li>Cochez <span class="badge badge-critique">✗ NC</span> si non conforme</li>
+      <li>Ajoutez des <strong>photos</strong> en cliquant sur 📷 (caméra ou bibliothèque)</li>
+      <li>Ajoutez des <strong>remarques</strong> dans le champ texte</li>
+      <li>Pour les NC, <strong>assignez un responsable</strong> qui devra corriger</li>
+    </ul>
+
+    <h3>3. Système de cotation</h3>
+    <table class="criticality-table">
+      <thead>
+        <tr><th>Niveau</th><th>Pénalité par défaut</th><th>Délai</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><span class="badge badge-critique">CRITIQUE</span></td><td>−5 pts</td><td>7 jours</td></tr>
+        <tr><td><span class="badge badge-eleve">ÉLEVÉ</span></td><td>−3 pts</td><td>30 jours</td></tr>
+        <tr><td><span class="badge badge-mineur">MINEUR</span></td><td>−1 pt</td><td>90 jours</td></tr>
+      </tbody>
+    </table>
+    <p style="font-size:13px;color:#6b7280">Les pénalités et délais sont configurables dans Profil → Système.</p>
+
+    <h3>4. Avis SIPPT global</h3>
+    <p>En fin d'audit, donnez votre <strong>avis SIPPT global</strong> parmi 3 niveaux :</p>
+    <ul>
+      <li>✅ <strong>Satisfaisant</strong> — Conforme aux exigences</li>
+      <li>⚠️ <strong>Satisfaisant avec recommandations</strong> — Conforme mais améliorations souhaitées</li>
+      <li>❌ <strong>Non satisfaisant</strong> — Mesures correctives nécessaires</li>
+    </ul>
+
+    <h3>5. Notes & observations</h3>
+    <p>Champ libre pour ajouter le contexte général, les mesures immédiates prises ou tout commentaire qualitatif.</p>
+
+    <h3>6. Signatures et validation</h3>
+    <p>Pour valider l'inspection, deux signatures numériques sont nécessaires :</p>
+    <ul>
+      <li><strong>Signature Inspecteur</strong> (vous)</li>
+      <li><strong>Signature Responsable</strong> du site</li>
+    </ul>
+    <p>Une fois signée, l'inspection passe au statut <span class="badge badge-good">Validée</span> et apparaît dans Rapports.</p>
+  </div>
+
+  <!-- AMIANTE -->
+  <div class="section" id="amiante">
+    <div class="section-header">
+      <div class="section-icon">🦠</div>
+      <div>
+        <div class="section-title">Audit Amiante</div>
+        <div class="section-subtitle">Contrôle visuel non destructif</div>
+      </div>
+    </div>
+
+    <p>L'audit Amiante combine une <strong>checklist en 7 thèmes</strong> et un <strong>panel d'évaluation des zones MCA</strong> (Matériaux Contenant de l'Amiante).</p>
+
+    <h3>📍 Évaluation des zones MCA</h3>
+    <p>Section dédiée permettant d'évaluer chaque zone individuellement avec photo et critères. <strong>5 zones par défaut</strong>, ajout/suppression possible.</p>
+
+    <h3>Pour chaque zone :</h3>
+    <ul>
+      <li><strong>Nom modifiable</strong> (ex: "Toiture cour", "Cave technique")</li>
+      <li><strong>Photo unique</strong> avec compression automatique</li>
+      <li><strong>État</strong> sur 4 niveaux : 🟢 Intact / 🟡 À surveiller / 🟠 Dégradé / 🔴 Critique</li>
+      <li><strong>Accessible</strong> — Oui/Non</li>
+      <li><strong>Local fréquenté</strong> — Oui/Non</li>
+      <li><strong>Signalé/étiqueté</strong> — Oui/Non</li>
+    </ul>
+
+    <h3>Cotation des zones</h3>
+    <table class="criticality-table">
+      <thead><tr><th>État</th><th>Pénalité</th></tr></thead>
+      <tbody>
+        <tr><td>🟢 Intact</td><td>0 pt</td></tr>
+        <tr><td>🟡 À surveiller</td><td>−1 pt</td></tr>
+        <tr><td>🟠 Dégradé</td><td>−3 pts</td></tr>
+        <tr><td>🔴 Critique</td><td>−5 pts</td></tr>
+      </tbody>
+    </table>
+
+    <p><strong>Aggravants</strong> (s'ajoutent si état ≠ Intact) :</p>
+    <ul>
+      <li>Accessible : <strong>+1 pt</strong></li>
+      <li>Local fréquenté : <strong>+1 pt</strong></li>
+      <li>Non signalé : <strong>+2 pts</strong></li>
+    </ul>
+    <p style="font-size:13px;color:#6b7280">Pénalité maximum par zone : 9 pts (Critique + accessible + fréquenté + non signalé).</p>
+
+    <div class="tip">
+      <strong>💡 Logique :</strong> Un MCA dégradé en cave verrouillée est moins risqué qu'un MCA dégradé dans un couloir fréquenté sans signalisation.
+    </div>
+  </div>
+
+  <!-- ACTIONS -->
+  <div class="section" id="actions">
+    <div class="section-header">
+      <div class="section-icon">⚡</div>
+      <div>
+        <div class="section-title">Actions correctives</div>
+        <div class="section-subtitle">Suivi et résolution des NC</div>
+      </div>
+    </div>
+
+    <p>Chaque non-conformité génère automatiquement une action corrective. Accédez-y via l'onglet <strong>"Actions"</strong> dans la barre de navigation.</p>
+
+    <h3>Champs d'une action</h3>
+    <ul>
+      <li><strong>Libellé</strong> — Description de la non-conformité</li>
+      <li><strong>Site & catégorie</strong> — Localisation et type d'audit</li>
+      <li><strong>Priorité</strong> — Critique / Élevée / Modérée</li>
+      <li><strong>Échéance</strong> — Date limite de résolution</li>
+      <li><strong>Responsable</strong> — Personne en charge</li>
+      <li><strong>Statut</strong> — En cours / À faire / Clôturée</li>
+      <li><strong>Remarques</strong> — Contexte et observations</li>
+    </ul>
+
+    <h3>🔍 Filtres rapides</h3>
+    <p>Filtrez les actions par <strong>site</strong> grâce au dropdown en haut. Seules les actions <strong>"En cours"</strong> sont affichées par défaut.</p>
+
+    <h3>✅ Clôturer une action</h3>
+    <p>Une fois la correction effectuée, ouvrez l'action et changez son statut en <span class="badge badge-good">Clôturée</span>. Elle disparaîtra de la liste active mais restera accessible dans l'historique.</p>
+  </div>
+
+  <!-- RAPPELS -->
+  <div class="section" id="rappels">
+    <div class="section-header">
+      <div class="section-icon">📧</div>
+      <div>
+        <div class="section-title">Rappels par email</div>
+        <div class="section-subtitle">Relancer les responsables</div>
+      </div>
+    </div>
+
+    <p>Depuis l'écran <strong>Actions</strong>, cliquez sur le bouton <strong>📧 Rappels</strong> pour ouvrir le module de relances.</p>
+
+    <h3>Configuration</h3>
+    <ul>
+      <li><strong>Délai paramétrable</strong> — Par défaut 7 jours avant échéance</li>
+      <li><strong>Email pré-rédigé</strong> — Avec liste des actions, sites, priorités et retards</li>
+      <li><strong>Un email par responsable</strong> — Regroupement intelligent</li>
+    </ul>
+
+    <h3>Actions sans responsable</h3>
+    <p>L'encart orange en haut affiche le nombre d'actions sans responsable assigné. <strong>Cliquez dessus</strong> pour voir la liste détaillée et les corriger.</p>
+
+    <h3>Masquage individuel</h3>
+    <p>Après envoi d'un email, le rappel est masqué automatiquement. Un bouton <strong>Reset</strong> permet de réafficher tous les rappels masqués.</p>
+  </div>
+
+  <!-- RAPPORTS -->
+  <div class="section" id="rapports">
+    <div class="section-header">
+      <div class="section-icon">📄</div>
+      <div>
+        <div class="section-title">Rapports & Archives</div>
+        <div class="section-subtitle">Export PDF et gestion documentaire</div>
+      </div>
+    </div>
+
+    <h3>📥 Export PDF</h3>
+    <p>Depuis un rapport, cliquez sur <strong>📄 Exporter en PDF</strong>. Le rapport contient :</p>
+    <ul>
+      <li>En-tête professionnel avec logo et photo du site</li>
+      <li>Score et statistiques visuelles</li>
+      <li>Détail de toutes les NC avec photos et remarques</li>
+      <li>Points conformes</li>
+      <li>Évaluation des zones MCA (pour les audits Amiante)</li>
+      <li>Avis SIPPT global</li>
+      <li>Notes et observations</li>
+      <li>Signatures Inspecteur et Responsable</li>
+      <li>Récap des actions correctives en fin de document</li>
+    </ul>
+
+    <h3>🔗 Rapport public</h3>
+    <p>Bouton <strong>"Voir rapport public"</strong> ouvre une vue intégrée du rapport accessible via QR code. Utilisez le bouton <strong>📋 Copier lien</strong> pour partager l'URL.</p>
+
+    <h3>📷 QR Code imprimable</h3>
+    <p>Cliquez sur <strong>"Générer QR code imprimable"</strong> pour obtenir un QR code à afficher dans le site (panneau d'affichage, tableau de bord, etc.). Toute personne le scannant accède au dernier rapport.</p>
+
+    <h3>📦 Archives</h3>
+    <p>Bouton <strong>📦 Archives</strong> en haut à droite pour basculer entre rapports actifs et archivés.</p>
+    <ul>
+      <li>Cliquez <strong>📦 Archiver</strong> pour ranger un audit ancien</li>
+      <li>Cliquez <strong>↩️ Restaurer</strong> pour le remettre en actif</li>
+      <li>Le QR code et le lien public <strong>continuent de fonctionner</strong> après archivage</li>
+      <li>Les archives sont incluses dans les comparaisons N vs N-1</li>
+    </ul>
+
+    <div class="tip">
+      <strong>💡 Bonne pratique :</strong> Archivez les audits annuels après l'audit suivant pour garder une liste claire tout en conservant l'historique.
+    </div>
+  </div>
+
+  <!-- ACCIDENTS -->
+  <div class="section" id="accidents">
+    <div class="section-header">
+      <div class="section-icon">🩹</div>
+      <div>
+        <div class="section-title">Accidentologie</div>
+        <div class="section-subtitle">Suivi des accidents du travail</div>
+      </div>
+    </div>
+
+    <p>Module dédié au suivi et à l'analyse des accidents. Accessible via l'icône <strong>🩹</strong> dans la barre de navigation.</p>
+
+    <h3>📝 Déclarer un accident</h3>
+    <p>Bouton <strong>+ Nouveau</strong> et remplissez les champs :</p>
+    <ul>
+      <li>Date de l'accident et date de réception de la déclaration</li>
+      <li>Nom et prénom de la victime</li>
+      <li>Site concerné</li>
+      <li>Type — AT avec arrêt / AT sans arrêt / Presqu'accident / Incident / Trajet</li>
+      <li>Cause — 12 catégories disponibles</li>
+      <li>Statut/Fonction — Enseignement, Ouvriers, Puéricultrices, etc.</li>
+      <li>Partie du corps touchée — 42 choix anatomiques</li>
+      <li>Gravité, jours d'arrêt, description, actions prises</li>
+    </ul>
+
+    <h3>📊 3 onglets d'analyse</h3>
+    <ul>
+      <li><strong>Indicateurs</strong> — KPI principaux + jours sans accident par site</li>
+      <li><strong>Liste</strong> — Tous les accidents avec bouton 📄 pour fiche PDF individuelle</li>
+      <li><strong>Évolution</strong> — Graphiques Tf/Tg, par catégorie de personnel et par cause</li>
+    </ul>
+
+    <h3>📈 Indicateurs Tf et Tg</h3>
+    <p>Calculés automatiquement à partir des heures prestées :</p>
+    <ul>
+      <li><strong>Tf (Taux de fréquence)</strong> = AT × 1.000.000 / heures prestées</li>
+      <li><strong>Tg (Taux de gravité)</strong> = jours d'arrêt × 1.000 / heures prestées</li>
+    </ul>
+
+    <div class="warning">
+      <strong>⚠️ Configuration requise :</strong> Pour calculer Tf et Tg, configurez les heures prestées par catégorie dans Profil → Système → Heures prestées.
+    </div>
+
+    <h3>📊 Rapport global anonymisé</h3>
+    <p>Bouton <strong>📊 Rapport</strong> pour exporter une synthèse PDF anonymisée pour la direction ou le CPPT.</p>
+  </div>
+
+  <!-- IA -->
+  <div class="section" id="ia">
+    <div class="section-header">
+      <div class="section-icon">🤖</div>
+      <div>
+        <div class="section-title">Assistant IA</div>
+        <div class="section-subtitle">Législation HSE belge</div>
+      </div>
+    </div>
+
+    <p>SECURA intègre un assistant intelligent spécialisé dans la <strong>législation HSE belge</strong>. Posez vos questions en langage naturel.</p>
+
+    <h3>🔓 Activation</h3>
+    <p>L'IA nécessite une <strong>clé API Anthropic</strong> à configurer par l'administrateur dans Profil → Système → Clé API IA.</p>
+
+    <h3>📚 Sources couvertes</h3>
+    <ul>
+      <li>Code du bien-être au travail (Loi du 4 août 1996)</li>
+      <li>RGPT, RGIE, CODEX</li>
+      <li>Normes NBN (NBN S 21-100, NBN EN ISO 7010, etc.)</li>
+      <li>Directives européennes transposées</li>
+      <li>Réglementation SEVESO</li>
+      <li>BeSWIC (Belgian Safe Work Information Center)</li>
+      <li>Fedris (accidents du travail)</li>
+      <li>VLAREM (environnement)</li>
+    </ul>
+
+    <h3>💡 Exemples de questions</h3>
+    <ul>
+      <li>"Quelles sont les obligations du SIPPT pour les chantiers temporaires ?"</li>
+      <li>"Quelle est la durée maximale de port d'EPI auditifs ?"</li>
+      <li>"Comment classer un produit chimique dangereux selon le CODEX ?"</li>
+      <li>"Quels sont les critères pour signaler une zone amiante ?"</li>
+    </ul>
+
+    <div class="tip">
+      <strong>💡 Recherche web :</strong> Pour les questions portant sur des informations postérieures à 2025, l'IA effectue automatiquement une recherche web (signalée par 🌐).
+    </div>
+  </div>
+
+  <!-- PARAMÈTRES -->
+  <div class="section" id="parametres">
+    <div class="section-header">
+      <div class="section-icon">⚙️</div>
+      <div>
+        <div class="section-title">Paramètres</div>
+        <div class="section-subtitle">Configuration de l'application</div>
+      </div>
+    </div>
+
+    <p>Accédez aux paramètres via l'onglet <strong>👤 Profil</strong> dans la barre de navigation.</p>
+
+    <h3>👥 Équipe (Admin uniquement)</h3>
+    <p>Ajoutez/supprimez des membres avec :</p>
+    <ul>
+      <li>Nom, email, mot de passe</li>
+      <li>Rôle (Admin / Inspecteur / Responsable) avec badge coloré</li>
+    </ul>
+
+    <h3>📍 Sites (Admin uniquement)</h3>
+    <p>Gérez la liste des sites avec leurs adresses. Les sites apparaissent dans le sélecteur lors de la création d'inspection.</p>
+
+    <h3>🛠️ Système (Admin uniquement)</h3>
+    <ul>
+      <li>Pénalités par criticité (Critique, Élevé, Mineur)</li>
+      <li>Délais de résolution par criticité</li>
+      <li>Seuils de suivi des sites (couleurs vert/orange/rouge)</li>
+      <li>Heures prestées par catégorie de personnel</li>
+      <li>Templates personnalisés (modification des checklists)</li>
+      <li>Notifications push</li>
+      <li>Clé API IA</li>
+    </ul>
+
+    <h3>🎨 Apparence</h3>
+    <ul>
+      <li><strong>Mode Tec</strong> — 5 ambiances : Standard, Bordeaux marbré, Bleu Océan marbré, Gris Béton marbré, Blanc Ombré</li>
+      <li><strong>Mode daltonien</strong> — Palettes accessibles pour deutéranopie, protanopie, tritanopie</li>
+    </ul>
+
+    <h3>🔐 Permissions (Admin uniquement)</h3>
+    <p>Configurez finement les accès de chaque rôle pour chaque fonctionnalité (dashboard, inspections, actions, rapports, rappels, IA, accidents, paramètres).</p>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <div class="footer-logo">SECURA</div>
+    <p>Version 1.0.0 · © 2026 · Audits HSE · Belgique</p>
+    <p style="margin-top:10px">Pour toute question, contactez votre administrateur SECURA</p>
+  </div>
+
+</div>
+</body>
+</html>
