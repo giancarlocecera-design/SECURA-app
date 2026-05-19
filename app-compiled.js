@@ -1,14 +1,41 @@
-const {
-  useState,
-  useRef,
-  useEffect
-} = React;
+import { useState, useRef } from "react";
+import * as React from "react";
 
 // ═══════════════════════════════════════════════════════════════
 // SUPABASE CLIENT
 // ═══════════════════════════════════════════════════════════════
 const SUPA_URL = "https://pozdjdwjuwfwawjjiceb.supabase.co";
 const SUPA_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBvemRqZHdqdXdmd2F3amppY2ViIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5MzUxMDMsImV4cCI6MjA5MTUxMTEwM30.zLntj6aSDffYbflLUPlgiRa21zLspZleNlGUgtkVPGs";
+function mapAction(a) {
+  return {
+    id: a.id,
+    label: a.label || "",
+    site: a.site || "",
+    prio: a.prio || "MODÉRÉE",
+    statut: a.statut || "En cours",
+    echeance: a.echeance || null,
+    resp: a.resp || "",
+    retard: a.retard || false
+  };
+}
+function mapInspection(ins) {
+  var m = {
+    id: ins.id,
+    titre: ins.titre,
+    site: ins.site,
+    categorie: ins.categorie,
+    inspecteur: ins.inspecteur,
+    date: ins.date,
+    statut: ins.statut,
+    score: ins.score,
+    nc: ins.nc,
+    notes: ins.notes || "",
+    items: ins.items || []
+  };
+  if (ins.sigInspecteur) m["sig_inspecteur"] = ins.sigInspecteur;
+  if (ins.sigResponsable) m["sig_responsable"] = ins.sigResponsable;
+  return m;
+}
 const supa = {
   async get(table, opts) {
     let url = SUPA_URL + "/rest/v1/" + table + "?select=*";
@@ -36,13 +63,17 @@ const supa = {
     return r.ok;
   },
   async del(table, id) {
-    const r = await fetch(SUPA_URL + "/rest/v1/" + table + "?id=eq." + id, {
+    const r = await fetch(SUPA_URL + "/rest/v1/" + table + "?id=eq." + String(id), {
       method: "DELETE",
       headers: {
         "apikey": SUPA_KEY,
-        "Authorization": "Bearer " + SUPA_KEY
+        "Authorization": "Bearer " + SUPA_KEY,
+        "Content-Type": "application/json"
       }
     });
+    if (!r.ok) {
+      console.error("DEL failed", table, id, r.status);
+    }
     return r.ok;
   },
   async patch(table, id, data) {
@@ -57,6 +88,44 @@ const supa = {
       body: JSON.stringify(data)
     });
     return r.ok;
+  }
+};
+
+// ═══════════════════════════════════════════════════════════════
+// LOCAL STORAGE - MODE HORS-LIGNE
+// ═══════════════════════════════════════════════════════════════
+const LS = {
+  save: function (key, data) {
+    try {
+      localStorage.setItem("secura_" + key, JSON.stringify(data));
+    } catch (e) {}
+  },
+  load: function (key) {
+    try {
+      var d = localStorage.getItem("secura_" + key);
+      return d ? JSON.parse(d) : null;
+    } catch (e) {
+      return null;
+    }
+  },
+  addPending: function (type, data) {
+    try {
+      var pending = LS.load("pending") || [];
+      pending.push({
+        type: type,
+        data: data,
+        ts: Date.now()
+      });
+      LS.save("pending", pending);
+    } catch (e) {}
+  },
+  getPending: function () {
+    return LS.load("pending") || [];
+  },
+  clearPending: function () {
+    try {
+      localStorage.removeItem("secura_pending");
+    } catch (e) {}
   }
 };
 
@@ -90,7 +159,9 @@ const S = {
     margin: "0 auto",
     position: "relative",
     overflowX: "hidden",
-    fontSize: 15
+    fontSize: 15,
+    touchAction: "pan-y",
+    WebkitUserSelect: "none"
   },
   card: border => ({
     background: C.card,
@@ -152,7 +223,7 @@ const ACCENT = {
 const SHIELD_SRC = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMjAgMTIwIj48ZGVmcz48bGluZWFyR3JhZGllbnQgaWQ9InNnIiB4MT0iMCUiIHkxPSIwJSIgeDI9IjEwMCUiIHkyPSIxMDAlIj48c3RvcCBvZmZzZXQ9IjAlIiBzdG9wLWNvbG9yPSIjMDBFNUZGIi8+PHN0b3Agb2Zmc2V0PSIxMDAlIiBzdG9wLWNvbG9yPSIjMDA1NTc3Ii8+PC9saW5lYXJHcmFkaWVudD48L2RlZnM+PHBvbHlnb24gcG9pbnRzPSI2MCw4IDEwNCwzMiAxMDQsODggNjAsMTEyIDE2LDg4IDE2LDMyIiBmaWxsPSJub25lIiBzdHJva2U9IiMwMEU1RkYiIHN0cm9rZS13aWR0aD0iMiIgb3BhY2l0eT0iMC41Ii8+PHBvbHlnb24gcG9pbnRzPSI2MCwxNCA5OCwzNSA5OCw4NSA2MCwxMDYgMjIsODUgMjIsMzUiIGZpbGw9InVybCgjc2cpIiBvcGFjaXR5PSIwLjk1Ii8+PHBhdGggZD0iTTYwIDMwIEw4MiA0MiBMODIgNjQgQzgyIDc2IDcyIDg0IDYwIDkwIEM0OCA4NCAzOCA3NiAzOCA2NCBMMzggNDIgWiIgZmlsbD0iIzAwMTgyOCIvPjxwYXRoIGQ9Ik00NiA2MSBMNTYgNzEgTDc2IDQ5IiBzdHJva2U9IndoaXRlIiBzdHJva2Utd2lkdGg9IjQuNSIgZmlsbD0ibm9uZSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PC9zdmc+";
 
 // CSS Animations — injected once
-const ANIM_CSS = ["@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}", "@keyframes scaleIn{from{opacity:0;transform:scale(.88)}to{opacity:1;transform:none}}", "@keyframes ringExpand{from{opacity:.7;transform:scale(.5)}to{opacity:0;transform:scale(1.8)}}", "@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}", ".card-hover{transition:transform .2s,box-shadow .2s}", ".card-hover:hover{transform:translateY(-2px)}"].join("\n");
+const ANIM_CSS = ["@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}", "@keyframes scaleIn{from{opacity:0;transform:scale(.88)}to{opacity:1;transform:none}}", "@keyframes ringExpand{0%{opacity:0.7;transform:scale(0.5)}100%{opacity:0;transform:scale(1.9)}}", "@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}", "@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}", ".card-hover{transition:transform .2s,box-shadow .2s}", ".card-hover:hover{transform:translateY(-2px)}"].join("\n");
 function InjectCSS() {
   React.useEffect(() => {
     if (!document.getElementById("sa-css")) {
@@ -171,6 +242,15 @@ function SplashScreen({
 }) {
   const [phase, setPhase] = useState(0);
   const [prog, setProg] = useState(0);
+  // Inject animation CSS immediately so rings work before InjectCSS runs
+  React.useEffect(function () {
+    if (!document.getElementById("splash-css")) {
+      var el = document.createElement("style");
+      el.id = "splash-css";
+      el.textContent = ANIM_CSS;
+      document.head.appendChild(el);
+    }
+  }, []);
   React.useEffect(() => {
     const t1 = setTimeout(() => setPhase(1), 600);
     const t2 = setTimeout(() => setPhase(2), 2200);
@@ -286,8 +366,8 @@ function SplashScreen({
 // Score final = max(0, 100 − Σ pénalités NC)
 // ═══════════════════════════════════════════════════════════════════════
 let PENALITE = {
-  critique: 10,
-  eleve: 5,
+  critique: 5,
+  eleve: 3,
   mineur: 1
 };
 let DELAIS = {
@@ -2100,48 +2180,8 @@ function mkIns(id, titre, site, cat, insp, date, statut, okMap = null) {
     nc: items.filter(i => !i.ok).length
   };
 }
-const initInspections = [mkIns(1, "Audit incendie — Bloc A", "Hôpital central", "Incendie", "Marc Dubois", "2026-04-12", "En cours"), mkIns(2, "Audit hygiène — Cuisine", "Résidence Les Tilleuls", "Hygiène & propreté", "Sophie Martin", "2026-04-13", "À valider"), mkIns(3, "Contrôle électrique — Sous-sol", "Usine Delta", "Électricité", "Louis Bernard", "2026-04-12", "Brouillon"), mkIns(4, "Ergonomie — Open space", "Siège logistique", "Ergonomie", "Marc Dubois", "2026-04-10", "Validée"), mkIns(5, "Risques chimiques — Labo", "Usine Delta", "Risques chimiques", "Louis Bernard", "2026-04-08", "Validée")];
-const initActions = [{
-  id: 1,
-  label: "Libérer chemin d'évacuation",
-  site: "Hôpital central",
-  prio: "CRITIQUE",
-  statut: "En cours",
-  echeance: "2026-04-15",
-  retard: true
-}, {
-  id: 2,
-  label: "Sécuriser tableau électrique B2",
-  site: "Usine Delta",
-  prio: "CRITIQUE",
-  statut: "En cours",
-  echeance: "2026-04-17",
-  retard: false
-}, {
-  id: 3,
-  label: "Remplacer extincteurs expirés",
-  site: "Bureaux sud",
-  prio: "CRITIQUE",
-  statut: "En cours",
-  echeance: "2026-04-20",
-  retard: false
-}, {
-  id: 4,
-  label: "Signalisation sol mouillé",
-  site: "Résidence Les Tilleuls",
-  prio: "ÉLEVÉE",
-  statut: "En cours",
-  echeance: "2026-06-15",
-  retard: false
-}, {
-  id: 5,
-  label: "Mise à jour registre sécurité",
-  site: "Siège logistique",
-  prio: "MODÉRÉE",
-  statut: "En cours",
-  echeance: "2026-08-15",
-  retard: false
-}];
+const initInspections = [];
+const initActions = [];
 
 // ═══════════════════════════════════════════════════════════════════════
 // LOGIN
@@ -2155,7 +2195,9 @@ function LoginScreen({
   const [err, setErr] = useState("");
   const [load, setLoad] = useState(false);
   // Merge static USERS with dynamic respsState users
-  const allUsers = users && users.length && typeof users[0] === "object" && users[0].email ? users : USERS;
+  const allUsers = (users && users.length && typeof users[0] === "object" && users[0].email ? users : USERS).filter(function (u) {
+    return u && u.nom;
+  });
   const handle = () => {
     setLoad(true);
     setErr("");
@@ -2286,7 +2328,7 @@ function LoginScreen({
       gap: 7
     }
   }, allUsers.map(function (u, i) {
-    var initials = (u.avatar || u.nom.split(" ").map(function (n) {
+    var initials = (u.avatar || (u.nom || "?").split(" ").map(function (n) {
       return n[0];
     }).join("").slice(0, 2)).toUpperCase();
     var roleCol = u.role === "Admin" ? C.red : u.role === "Inspecteur" ? C.cyan : C.muted;
@@ -2355,7 +2397,9 @@ function DashboardScreen({
   onNav,
   darkMode,
   onToggleDark,
-  config
+  config,
+  sitesState,
+  appState
 }) {
   const [chartTab, setChartTab] = useState(CATEGORIES[0]);
   const avgScore = inspections.length ? Math.round(inspections.reduce((s, i) => s + i.score, 0) / inspections.length) : 100;
@@ -2363,15 +2407,22 @@ function DashboardScreen({
   const critActs = actions.filter(a => a.prio === "CRITIQUE" && a.statut !== "Clôturée").length;
   const validated = inspections.filter(i => i.statut === "Validée").length;
   const penTotal = inspections.reduce((s, i) => s + (100 - i.score), 0);
-  const sitePens = SITES.map(site => {
-    const ins = inspections.filter(i => i.site === site);
-    const sc = ins.length ? Math.round(ins.reduce((s, i) => s + i.score, 0) / ins.length) : 100;
+  const siteList = sitesState && sitesState.length > 0 ? sitesState : SITES;
+  const sitePens = siteList.map(function (site) {
+    var ins = inspections.filter(function (i) {
+      return i.site === site;
+    });
+    var sc = ins.length ? Math.round(ins.reduce(function (s, i) {
+      return s + i.score;
+    }, 0) / ins.length) : 100;
     return {
-      site,
+      site: site,
       score: sc,
       ins: ins.length
     };
-  }).sort((a, b) => a.score - b.score);
+  }).sort(function (a, b) {
+    return a.score - b.score;
+  });
   const catBarData = inspections.filter(i => i.categorie === chartTab);
   const catColor = CAT_META[chartTab] && CAT_META[chartTab].color || C.cyan;
   return /*#__PURE__*/React.createElement("div", {
@@ -2458,7 +2509,7 @@ function DashboardScreen({
       fontSize: 11,
       color: C.muted
     }
-  }, "Chaque NC critique retire 10 pts du score"))), /*#__PURE__*/React.createElement("div", {
+  }, "Chaque NC critique retire ", appState && appState.penalites ? appState.penalites.critique : 5, " pts du score"))), /*#__PURE__*/React.createElement("div", {
     style: {
       margin: "14px 14px 0",
       ...S.card(`${C.red}25`),
@@ -2526,7 +2577,7 @@ function DashboardScreen({
   }, {
     label: "Actions critiques",
     val: critActs,
-    sub: "Chacune = −10pts",
+    sub: "Chacune = −" + (appState && appState.penalites ? appState.penalites.critique : 5) + "pts",
     col: C.orange,
     prog: null
   }, {
@@ -2663,20 +2714,29 @@ function DashboardScreen({
     }, m.icon, " ", c);
   })), /*#__PURE__*/React.createElement("div", {
     style: {
-      display: "flex",
-      alignItems: "flex-end",
-      gap: 5,
-      height: 130,
+      overflowX: "auto",
+      WebkitOverflowScrolling: "touch",
       marginBottom: 4
     }
-  }, SITES.map((site, i) => {
-    const ins = inspections.find(x => x.site === site && x.categorie === chartTab);
-    const v = ins ? ins.score : 0;
-    const col = scoreColor(v);
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "flex-end",
+      gap: 6,
+      height: 130,
+      minWidth: Math.max(siteList.length * 54, 280) + "px"
+    }
+  }, siteList.map(function (site, i) {
+    var ins = inspections.find(function (x) {
+      return x.site === site && x.categorie === chartTab;
+    });
+    var v = ins ? ins.score : 0;
+    var col = scoreColor(v);
     return /*#__PURE__*/React.createElement("div", {
       key: i,
       style: {
-        flex: 1,
+        width: 50,
+        flexShrink: 0,
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
@@ -2690,12 +2750,12 @@ function DashboardScreen({
         fontWeight: 800,
         color: v > 0 ? col : C.muted
       }
-    }, v > 0 ? `${v}` : "-"), /*#__PURE__*/React.createElement("div", {
+    }, v > 0 ? v : "-"), /*#__PURE__*/React.createElement("div", {
       style: {
         width: "100%",
-        height: `${Math.max(v, 6)}%`,
+        height: Math.max(v, 6) + "%",
         borderRadius: "4px 4px 0 0",
-        background: v > 0 ? `linear-gradient(180deg,${col}BB,${col}22)` : `${C.dim}`,
+        background: v > 0 ? "linear-gradient(180deg," + col + "BB," + col + "22)" : C.dim,
         transition: "height .6s"
       }
     }, v > 0 && /*#__PURE__*/React.createElement("div", {
@@ -2705,13 +2765,15 @@ function DashboardScreen({
       }
     })), /*#__PURE__*/React.createElement("div", {
       style: {
-        fontSize: 8,
+        fontSize: 7,
         color: C.muted,
         textAlign: "center",
-        lineHeight: 1.2
+        lineHeight: 1.1,
+        width: 50,
+        wordBreak: "break-word"
       }
-    }, site.split(" ")[0]));
-  })), /*#__PURE__*/React.createElement("div", {
+    }, site));
+  }))), /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
       gap: 12,
@@ -3524,22 +3586,26 @@ function InspectionsScreen({
       gap: 6,
       overflowX: "auto"
     }
-  }, ["Actifs", "Tout", "Brouillon", "En cours", "À valider", "Validée"].map(s => /*#__PURE__*/React.createElement("button", {
-    key: s,
-    onClick: () => setSf(s),
-    style: {
-      flexShrink: 0,
-      padding: "5px 11px",
-      borderRadius: 99,
-      border: "1px solid",
-      borderColor: sf === s ? C.cyan : C.border,
-      background: sf === s ? `${C.cyan}15` : "transparent",
-      color: sf === s ? C.cyan : C.muted,
-      fontSize: 11,
-      fontWeight: 700,
-      cursor: "pointer"
-    }
-  }, s))), /*#__PURE__*/React.createElement("div", {
+  }, ["Actifs", "Tout", "En cours", "Validée"].map(function (s) {
+    return /*#__PURE__*/React.createElement("button", {
+      key: s,
+      onClick: function () {
+        setSf(s);
+      },
+      style: {
+        flexShrink: 0,
+        padding: "5px 11px",
+        borderRadius: 99,
+        border: "1px solid",
+        borderColor: sf === s ? C.cyan : C.border,
+        background: sf === s ? C.cyan + "15" : "transparent",
+        color: sf === s ? C.cyan : C.muted,
+        fontSize: 11,
+        fontWeight: 700,
+        cursor: "pointer"
+      }
+    }, s);
+  })), /*#__PURE__*/React.createElement("div", {
     style: {
       padding: "0 14px 10px",
       display: "flex",
@@ -3820,6 +3886,9 @@ function ItemCard({
   onPhotoAdd,
   onPhotoRemove,
   onRespChange,
+  onPoidsChange,
+  onPoidsChangeDirect,
+  onSetPoids,
   showPhoto = true,
   resps
 }) {
@@ -3831,13 +3900,28 @@ function ItemCard({
   const [showComment, setShowComment] = useState(!!item.comment);
   return /*#__PURE__*/React.createElement("div", {
     style: {
-      background: item.ok ? `${C.green}06` : `${C.red}06`,
+      background: item.custom ? C.cyan + "08" : item.ok ? C.green + "06" : C.red + "06",
       borderRadius: 12,
       marginBottom: 8,
-      border: `1px solid ${item.ok ? `${C.green}22` : `${C.red}22`}`,
+      border: "1px solid " + (item.custom ? C.cyan + "55" : item.ok ? C.green + "22" : C.red + "22"),
       overflow: "hidden"
     }
-  }, /*#__PURE__*/React.createElement("div", {
+  }, item.custom && /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: "linear-gradient(90deg," + C.cyan + "33,transparent)",
+      padding: "3px 10px",
+      display: "flex",
+      alignItems: "center",
+      gap: 5
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 9,
+      color: C.cyan,
+      fontWeight: 800,
+      letterSpacing: 1
+    }
+  }, "\u2726 QUESTION PERSONNALIS\xC9E")), /*#__PURE__*/React.createElement("div", {
     onClick: onToggle,
     style: {
       display: "flex",
@@ -3868,7 +3952,8 @@ function ItemCard({
   }, /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 12,
-      lineHeight: 1.45
+      lineHeight: 1.45,
+      color: item.custom ? C.cyan : undefined
     }
   }, item.l), /*#__PURE__*/React.createElement("div", {
     style: {
@@ -3925,7 +4010,36 @@ function ItemCard({
       cursor: "pointer",
       fontWeight: 700
     }
-  }, "\uD83D\uDCAC ", showComment ? "Cacher" : "Remarque")), !item.ok && onRespChange && /*#__PURE__*/React.createElement("div", {
+  }, "\uD83D\uDCAC ", showComment ? "Cacher" : "Remarque"), [["critique", "CRIT", C.red], ["eleve", "ÉLEV", C.orange], ["mineur", "MOD", C.amber]].map(function (arr) {
+    var pv = arr[0],
+      pl = arr[1],
+      pc = arr[2];
+    var active = (item.poids || item.p || "mineur") === pv;
+    return /*#__PURE__*/React.createElement("button", {
+      key: pv,
+      onClick: function () {
+        if (onSetPoids) {
+          onSetPoids(pv);
+        } else if (onPoidsChange) {
+          onPoidsChange(pv);
+        } else if (onPoidsChangeDirect) {
+          onPoidsChangeDirect(String(item.id), pv);
+        }
+      },
+      style: {
+        fontSize: 10,
+        padding: "3px 7px",
+        borderRadius: 7,
+        background: active ? pc + "33" : "#1E2535",
+        color: active ? pc : "#8892A4",
+        border: "1px solid " + (active ? pc + "66" : "#2E3545"),
+        fontWeight: active ? 800 : 500,
+        cursor: "pointer",
+        minWidth: 36,
+        textAlign: "center"
+      }
+    }, active ? "✓ " : "", pl);
+  })), !item.ok && onRespChange && /*#__PURE__*/React.createElement("div", {
     style: {
       padding: "0 10px 10px"
     },
@@ -3986,22 +4100,22 @@ function AddQuestionBtn({
       display: "flex",
       alignItems: "center",
       gap: 6,
-      padding: "7px 12px",
+      padding: "9px 14px",
       borderRadius: 10,
-      border: "1px dashed " + C.border,
-      background: "transparent",
-      color: C.muted,
+      border: "1px dashed " + C.cyan + "66",
+      background: C.cyan + "08",
+      color: C.cyan,
       cursor: "pointer",
       fontSize: 12,
       width: "100%",
-      marginTop: 6
+      marginTop: 6,
+      fontWeight: 600
     }
   }, /*#__PURE__*/React.createElement("span", {
     style: {
-      fontSize: 16,
-      color: C.cyan
+      fontSize: 16
     }
-  }, "+"), " Ajouter une question personnalis\xE9e");
+  }, "\u2726"), " Ajouter une question personnalis\xE9e");
   return /*#__PURE__*/React.createElement("div", {
     style: {
       marginTop: 8,
@@ -4033,22 +4147,29 @@ function AddQuestionBtn({
       gap: 6,
       marginBottom: 10
     }
-  }, [["critique", "CRITIQUE", C.red], ["eleve", "ÉLEVÉ", C.orange], ["mineur", "MODÉRÉ", C.amber]].map(([k, l, col]) => /*#__PURE__*/React.createElement("button", {
-    key: k,
-    onClick: () => setPoids(k),
-    style: {
-      flex: 1,
-      padding: "5px",
-      borderRadius: 8,
-      border: "1px solid",
-      borderColor: poids === k ? col : C.border,
-      background: poids === k ? col + "18" : "transparent",
-      color: poids === k ? col : C.muted,
-      fontSize: 11,
-      fontWeight: poids === k ? 800 : 400,
-      cursor: "pointer"
-    }
-  }, l))), /*#__PURE__*/React.createElement("div", {
+  }, [["critique", "CRITIQUE", C.red], ["eleve", "ÉLEVÉ", C.orange], ["mineur", "MODÉRÉ", C.amber]].map(function (arr) {
+    var k = arr[0],
+      l = arr[1],
+      col = arr[2];
+    return /*#__PURE__*/React.createElement("button", {
+      key: k,
+      onClick: function () {
+        setPoids(k);
+      },
+      style: {
+        flex: 1,
+        padding: "5px",
+        borderRadius: 8,
+        border: "1px solid",
+        borderColor: poids === k ? col : C.border,
+        background: poids === k ? col + "18" : "transparent",
+        color: poids === k ? col : C.muted,
+        fontSize: 11,
+        fontWeight: poids === k ? 800 : 400,
+        cursor: "pointer"
+      }
+    }, l);
+  })), /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
       gap: 8
@@ -4086,7 +4207,8 @@ function InspectionDetailScreen({
   inspection,
   onBack,
   onUpdate,
-  resps
+  resps,
+  sitesState
 }) {
   const respList = (resps && resps.length ? resps : RESPONSABLES).map(function (r) {
     return typeof r === "object" ? r.nom : r;
@@ -4099,6 +4221,7 @@ function InspectionDetailScreen({
   const [notes, setNotes] = useState(inspection.notes || "");
   const [saved, setSaved] = useState(false);
   const [openSec, setOpenSec] = useState(null);
+  const siteOpts = sitesState && sitesState.length > 0 ? sitesState : SITES;
   const [editMeta, setEditMeta] = useState(false);
   const [metaForm, setMetaForm] = useState({
     titre: inspection.titre,
@@ -4247,10 +4370,12 @@ function InspectionDetailScreen({
       ...S.input,
       marginBottom: 10
     }
-  }, SITES.map(s => /*#__PURE__*/React.createElement("option", {
-    key: s,
-    value: s
-  }, s))), /*#__PURE__*/React.createElement("label", {
+  }, siteOpts.map(function (s) {
+    return /*#__PURE__*/React.createElement("option", {
+      key: s,
+      value: s
+    }, s);
+  })), /*#__PURE__*/React.createElement("label", {
     style: S.label
   }, "Date"), /*#__PURE__*/React.createElement("input", {
     type: "date",
@@ -4398,26 +4523,31 @@ function InspectionDetailScreen({
       fontWeight: 700,
       width: "100%"
     }
-  }, "P\xC9NALIT\xC9S \xB7 Appuyez sur \u2713/\u2717 pour basculer \xB7 \uD83D\uDCF7 photo par question"), [["critique", "CRITIQUE", 10], ["eleve", "ÉLEVÉ", 5], ["mineur", "MINEUR", 1]].map(([p, l, v]) => /*#__PURE__*/React.createElement("div", {
-    key: p,
-    style: {
-      display: "flex",
-      alignItems: "center",
-      gap: 4
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      width: 8,
-      height: 8,
-      borderRadius: 2,
-      background: poidsColor(p)
-    }
-  }), /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 10,
-      color: C.muted
-    }
-  }, l, " = \u2212", v, "pt")))), sections.map(sec => {
+  }, "P\xC9NALIT\xC9S \xB7 Appuyez sur \u2713/\u2717 pour basculer \xB7 \uD83D\uDCF7 photo par question"), [["critique", "CRITIQUE", 10], ["eleve", "ÉLEVÉ", 5], ["mineur", "MINEUR", 1]].map(function (arr) {
+    var p = arr[0],
+      l = arr[1],
+      v = arr[2];
+    return /*#__PURE__*/React.createElement("div", {
+      key: p,
+      style: {
+        display: "flex",
+        alignItems: "center",
+        gap: 4
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        width: 8,
+        height: 8,
+        borderRadius: 2,
+        background: poidsColor(p)
+      }
+    }), /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 10,
+        color: C.muted
+      }
+    }, l, " = -", v, "pt"));
+  })), sections.map(sec => {
     const ss = secScore(items, sec);
     const snc = secNC(items, sec);
     const sp = secPen(items, sec);
@@ -4474,19 +4604,50 @@ function InspectionDetailScreen({
       style: {
         marginTop: 12
       }
-    }, items.filter(i => i.s === sec).map(item => /*#__PURE__*/React.createElement(ItemCard, {
-      key: item.id,
-      item: item,
-      onToggle: () => toggle(item.id),
-      onComment: v => setComment(item.id, v),
-      onPhotoAdd: src => addPhoto(item.id, src),
-      onPhotoRemove: idx => removePhoto(item.id, idx),
-      onRespChange: v => setItems(p => p.map(i => i.id === item.id ? {
-        ...i,
-        resp: v
-      } : i)),
-      resps: respList
-    })), /*#__PURE__*/React.createElement(AddQuestionBtn, {
+    }, items.filter(function (i) {
+      return i.s === sec;
+    }).map(function (item) {
+      var itemId = item.id;
+      return /*#__PURE__*/React.createElement(ItemCard, {
+        key: itemId,
+        item: item,
+        onToggle: function () {
+          toggle(itemId);
+        },
+        onComment: function (v) {
+          setComment(itemId, v);
+        },
+        onPhotoAdd: function (src) {
+          addPhoto(itemId, src);
+        },
+        onPhotoRemove: function (idx) {
+          removePhoto(itemId, idx);
+        },
+        onRespChange: function (v) {
+          setItems(function (p) {
+            return p.map(function (i) {
+              return i.id === itemId ? {
+                ...i,
+                resp: v
+              } : i;
+            });
+          });
+        },
+        onSetPoids: function (p) {
+          var capturedId = itemId;
+          setItems(function (prev) {
+            return prev.map(function (i) {
+              return i.id === capturedId ? {
+                ...i,
+                poids: p,
+                p: p
+              } : i;
+            });
+          });
+        },
+        resps: respList
+      });
+    }), /*#__PURE__*/React.createElement(AddQuestionBtn, {
       section: sec,
       onAdd: (label, poids) => {
         const newItem = {
@@ -4535,11 +4696,16 @@ function InspectionDetailScreen({
     onSave: d => setSigInsp(d)
   }), sigInsp && !sigResp && /*#__PURE__*/React.createElement(SignaturePad, {
     label: "SIGNATURE RESPONSABLE SITE",
-    onSave: d => setSigResp(d)
+    onSave: function (d) {
+      setSigResp(d);
+    }
   }), sigInsp && sigResp && /*#__PURE__*/React.createElement("div", {
     style: {
       textAlign: "center",
-      padding: "16px 0"
+      padding: "16px 0",
+      background: C.green + "10",
+      borderRadius: 12,
+      border: "1px solid " + C.green + "33"
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
@@ -4549,9 +4715,16 @@ function InspectionDetailScreen({
   }, "\u2705"), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 14,
-      fontWeight: 700
+      fontWeight: 800,
+      color: C.green,
+      marginBottom: 4
     }
-  }, "Signatures compl\xE8tes"))), /*#__PURE__*/React.createElement("div", {
+  }, "Signatures compl\xE8tes"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      color: C.muted
+    }
+  }, "Appuyez sur \"\u2713 Valider\" pour finaliser l'audit"))), /*#__PURE__*/React.createElement("div", {
     style: {
       padding: "12px 14px 0",
       display: "grid",
@@ -4584,43 +4757,48 @@ function InspectionDetailScreen({
     }
   }, sigInsp && sigResp ? "✓ Valider" : "Signer & valider")));
 }
-
-// ═══════════════════════════════════════════════════════════════════════
-// NEW INSPECTION
-// ═══════════════════════════════════════════════════════════════════════
 function QuickVisitScreen({
   user,
   onSave,
-  onBack
+  onBack,
+  sitesState
 }) {
   const cats = CATEGORIES;
+  const siteOpts = sitesState && sitesState.length > 0 ? sitesState : SITES;
   const [form, setForm] = useState({
-    site: SITES[0],
+    site: siteOpts[0] || SITES[0],
     cat: cats[0]
   });
-  const critItems = CHECKLISTS[form.cat] ? CHECKLISTS[form.cat].filter(q => q.p === "critique") : [];
+  const critItems = CHECKLISTS[form.cat] ? CHECKLISTS[form.cat].filter(function (q) {
+    return q.p === "critique";
+  }) : [];
   const [idx, setIdx] = useState(0);
   const [answers, setAnswers] = useState({});
-  const answer = ok => {
-    const newA = {
-      ...answers,
-      [critItems[idx].id]: ok
+  const answer = function (val) {
+    var newA = {
+      ...answers
     };
+    newA[critItems[idx].id] = val;
     setAnswers(newA);
     if (idx < critItems.length - 1) {
       setIdx(idx + 1);
       return;
     }
-    // Save
-    const allItems = CHECKLISTS[form.cat].map(q => ({
-      ...q,
-      poids: q.p,
-      ok: newA[q.id] !== undefined ? newA[q.id] : true,
-      comment: "",
-      photos: []
-    }));
-    const score = calcScore(allItems);
-    const ins = {
+    var allItems = CHECKLISTS[form.cat].map(function (q) {
+      var ans = newA[q.id];
+      var isNA = ans === "na";
+      var isOk = isNA ? true : ans !== undefined ? ans : true;
+      return {
+        ...q,
+        poids: q.p,
+        ok: isOk,
+        na: isNA,
+        comment: isNA ? "N/A" : "",
+        photos: []
+      };
+    });
+    var score = calcScore(allItems);
+    var ins = {
       id: Date.now(),
       titre: "Visite rapide — " + form.cat,
       site: form.site,
@@ -4630,12 +4808,14 @@ function QuickVisitScreen({
       statut: "En cours",
       items: allItems,
       notes: "",
-      score,
-      nc: allItems.filter(i => !i.ok).length
+      score: score,
+      nc: allItems.filter(function (i) {
+        return !i.ok && !i.na;
+      }).length
     };
     onSave(ins);
   };
-  if (idx < critItems.length && Object.keys(answers).length === 0 || idx < critItems.length) {
+  if (idx < critItems.length) {
     const q = critItems[idx];
     return /*#__PURE__*/React.createElement("div", {
       style: {
@@ -4660,7 +4840,11 @@ function QuickVisitScreen({
         fontSize: 13,
         fontWeight: 700
       }
-    }, "\u2190 Retour"), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    }, "\u2190 Retour"), /*#__PURE__*/React.createElement("div", {
+      style: {
+        flex: 1
+      }
+    }, /*#__PURE__*/React.createElement("div", {
       style: {
         fontSize: 18,
         fontWeight: 900
@@ -4712,48 +4896,95 @@ function QuickVisitScreen({
     }, q.l), /*#__PURE__*/React.createElement("div", {
       style: {
         display: "flex",
-        gap: 12
+        gap: 8
       }
     }, /*#__PURE__*/React.createElement("button", {
-      onClick: () => answer(true),
+      onClick: function () {
+        answer(true);
+      },
       style: {
         ...S.btn(C.green),
         flex: 1,
-        fontSize: 18
+        fontSize: 15,
+        padding: "12px 6px"
       }
     }, "\u2705 Conforme"), /*#__PURE__*/React.createElement("button", {
-      onClick: () => answer(false),
+      onClick: function () {
+        answer(false);
+      },
       style: {
         ...S.btn(C.red, true),
         flex: 1,
-        fontSize: 18
+        fontSize: 15,
+        padding: "12px 6px"
       }
-    }, "\u274C NC"))), /*#__PURE__*/React.createElement("div", {
+    }, "\u274C NC"), /*#__PURE__*/React.createElement("button", {
+      onClick: function () {
+        answer("na");
+      },
+      style: {
+        ...S.btn(C.muted, true),
+        flex: 1,
+        fontSize: 15,
+        padding: "12px 6px",
+        opacity: 0.8
+      }
+    }, "\u2796 N/A"))), /*#__PURE__*/React.createElement("div", {
       style: {
         margin: "12px 14px 0",
-        padding: "0 14px 8px",
-        display: "flex",
-        gap: 6,
-        overflowX: "auto"
+        ...S.card(),
+        padding: 12
       }
-    }, SITES.map(s => /*#__PURE__*/React.createElement("button", {
-      key: s,
-      onClick: () => setForm({
-        ...form,
-        site: s
-      }),
+    }, /*#__PURE__*/React.createElement("div", {
       style: {
-        flexShrink: 0,
-        padding: "5px 11px",
-        borderRadius: 99,
-        border: "1px solid",
-        borderColor: form.site === s ? C.cyan : C.border,
-        background: form.site === s ? C.cyan + "15" : "transparent",
-        color: form.site === s ? C.cyan : C.muted,
-        fontSize: 11,
-        cursor: "pointer"
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        marginBottom: 8
       }
-    }, s.split(" ")[0]))));
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 10,
+        color: C.muted,
+        letterSpacing: 1
+      }
+    }, "SITE")), /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: "flex",
+        flexDirection: "column",
+        gap: 6
+      }
+    }, siteOpts.map(function (s) {
+      return /*#__PURE__*/React.createElement("button", {
+        key: s,
+        onClick: function () {
+          setForm({
+            ...form,
+            site: s
+          });
+        },
+        style: {
+          padding: "10px 14px",
+          borderRadius: 10,
+          border: "1px solid",
+          borderColor: form.site === s ? C.cyan : C.border,
+          background: form.site === s ? C.cyan + "18" : "transparent",
+          color: form.site === s ? C.cyan : C.text,
+          fontSize: 13,
+          fontWeight: form.site === s ? 800 : 400,
+          cursor: "pointer",
+          textAlign: "left",
+          display: "flex",
+          alignItems: "center",
+          gap: 8
+        }
+      }, form.site === s && /*#__PURE__*/React.createElement("span", {
+        style: {
+          color: C.cyan,
+          fontSize: 12
+        }
+      }, "\u2713"), s);
+    }))));
   }
   return /*#__PURE__*/React.createElement("div", {
     style: {
@@ -4778,33 +5009,48 @@ function QuickVisitScreen({
     }
   }, "Sauvegarde en cours..."));
 }
+
+// ═══════════════════════════════════════════════════════════════════════
+// NEW INSPECTION
+// ═══════════════════════════════════════════════════════════════════════
 function NewInspectionScreen({
   user,
   onSave,
   onBack,
-  resps
+  resps,
+  sitesState,
+  customTemplates,
+  onSaveTemplate,
+  siteAddresses
 }) {
   const respList = (resps && resps.length ? resps : RESPONSABLES).map(function (r) {
     return typeof r === "object" ? r.nom : r;
   });
+  const siteOpts = sitesState && sitesState.length > 0 ? sitesState : SITES;
   const [step, setStep] = useState(1);
   const [form, setForm] = useState({
     titre: "",
-    site: SITES[0],
+    site: siteOpts[0] || SITES[0],
     categorie: CATEGORIES[0],
-    notes: ""
+    notes: "",
+    accompagnateurs: [],
+    adresse: siteAddresses && siteAddresses[siteOpts[0]] || "",
+    date: new Date().toISOString().split("T")[0]
   });
   const [items, setItems] = useState([]);
   const [openSec, setOpenSec] = useState(null);
   const next = () => {
     if (step === 1) {
-      setItems(CHECKLISTS[form.categorie].map(q => ({
-        ...q,
-        poids: q.p || 'mineur',
-        ok: true,
-        comment: "",
-        photos: []
-      })));
+      var tpl = customTemplates && customTemplates[form.categorie] || CHECKLISTS[form.categorie] || [];
+      setItems(tpl.map(function (q) {
+        return {
+          ...q,
+          poids: q.p || q.poids || 'mineur',
+          ok: true,
+          comment: "",
+          photos: []
+        };
+      }));
       setOpenSec(null);
       setStep(2);
     } else setStep(3);
@@ -4839,9 +5085,10 @@ function NewInspectionScreen({
       score,
       nc: ncItems.length,
       statut: "En cours",
-      date: ds,
+      date: form.date || ds,
       inspecteur: user.nom,
-      items
+      items,
+      accompagnateurs: form.accompagnateurs || []
     });
   };
   const qCrit = CHECKLISTS[form.categorie] && CHECKLISTS[form.categorie].filter(q => q.p === "critique").length || 0 || 0;
@@ -4949,108 +5196,134 @@ function NewInspectionScreen({
     })
   }), /*#__PURE__*/React.createElement("label", {
     style: S.label
+  }, "Date"), /*#__PURE__*/React.createElement("input", {
+    type: "date",
+    style: {
+      ...S.input,
+      marginBottom: 14
+    },
+    value: form.date,
+    onChange: e => setForm({
+      ...form,
+      date: e.target.value
+    })
+  }), /*#__PURE__*/React.createElement("label", {
+    style: S.label
   }, "Site"), /*#__PURE__*/React.createElement("select", {
     style: {
       ...S.input,
       marginBottom: 14
     },
     value: form.site,
-    onChange: e => setForm({
-      ...form,
-      site: e.target.value
-    })
-  }, SITES.map(s => /*#__PURE__*/React.createElement("option", {
-    key: s,
-    value: s
-  }, s))), /*#__PURE__*/React.createElement("label", {
+    onChange: function (e) {
+      setForm({
+        ...form,
+        site: e.target.value,
+        adresse: siteAddresses && siteAddresses[e.target.value] || ""
+      });
+    }
+  }, siteOpts.map(function (s) {
+    return /*#__PURE__*/React.createElement("option", {
+      key: s,
+      value: s
+    }, s);
+  })), /*#__PURE__*/React.createElement("label", {
+    style: S.label
+  }, "Adresse"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      ...S.input,
+      marginBottom: 14,
+      background: C.surface,
+      color: C.muted,
+      fontSize: 12,
+      padding: "10px 14px",
+      minHeight: 36
+    }
+  }, siteAddresses && siteAddresses[form.site] || /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: C.border,
+      fontStyle: "italic"
+    }
+  }, "Aucune adresse configur\xE9e pour ce site")), /*#__PURE__*/React.createElement("label", {
     style: S.label
   }, "Cat\xE9gorie"), /*#__PURE__*/React.createElement("div", {
     style: {
-      display: "flex",
-      gap: 7,
-      flexWrap: "wrap",
-      marginBottom: 12
+      display: "grid",
+      gridTemplateColumns: "1fr 1fr",
+      gap: 8,
+      marginBottom: 14
     }
-  }, CATEGORIES.map(c => {
-    const m = CAT_META[c];
+  }, CATEGORIES.map(function (c) {
+    var m = CAT_META[c];
+    var active = form.categorie === c;
     return /*#__PURE__*/React.createElement("button", {
       key: c,
-      onClick: () => setForm({
-        ...form,
-        categorie: c
-      }),
+      onClick: function () {
+        setForm({
+          ...form,
+          categorie: c
+        });
+      },
       style: {
-        flexShrink: 0,
-        padding: "6px 12px",
-        borderRadius: 99,
+        padding: "10px 8px",
+        borderRadius: 12,
         border: "1px solid",
-        borderColor: form.categorie === c ? C.cyan : C.border,
-        background: form.categorie === c ? `${C.cyan}15` : "transparent",
-        color: form.categorie === c ? C.cyan : C.muted,
+        borderColor: active ? C.cyan : C.border,
+        background: active ? C.cyan + "18" : "transparent",
+        color: active ? C.cyan : C.muted,
         fontSize: 12,
-        fontWeight: 700,
-        cursor: "pointer"
+        fontWeight: active ? 800 : 500,
+        cursor: "pointer",
+        textAlign: "center",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 5
       }
-    }, m && m.icon || "", " ", c);
-  })), /*#__PURE__*/React.createElement("div", {
-    style: {
-      padding: "10px 12px",
-      background: C.surface,
-      borderRadius: 10,
-      marginBottom: 12
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 11,
-      fontWeight: 700,
-      color: C.muted,
-      marginBottom: 6
-    }
-  }, "P\xE9nalit\xE9s maximales possibles"), /*#__PURE__*/React.createElement("div", {
+    }, /*#__PURE__*/React.createElement("span", null, m && m.icon || ""), /*#__PURE__*/React.createElement("span", null, c));
+  })), /*#__PURE__*/React.createElement("label", {
+    style: S.label
+  }, "Accompagnateurs"), /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
-      gap: 10,
-      flexWrap: "wrap"
+      flexWrap: "wrap",
+      gap: 8,
+      marginBottom: 14
     }
-  }, /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 11
-    }
-  }, /*#__PURE__*/React.createElement("span", {
-    style: {
-      color: C.red,
-      fontWeight: 800
-    }
-  }, qCrit), "\xD7Crit \u2212", qCrit * 10, "pts"), /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 11
-    }
-  }, /*#__PURE__*/React.createElement("span", {
-    style: {
-      color: C.orange,
-      fontWeight: 800
-    }
-  }, qElev), "\xD7\xC9lev \u2212", qElev * 5, "pts"), /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 11
-    }
-  }, /*#__PURE__*/React.createElement("span", {
-    style: {
-      color: C.amber,
-      fontWeight: 800
-    }
-  }, qMin), "\xD7Min \u2212", qMin, "pts")), /*#__PURE__*/React.createElement("div", {
-    style: {
-      marginTop: 6,
-      fontSize: 11,
-      color: C.muted
-    }
-  }, "Score min. possible : ", /*#__PURE__*/React.createElement("span", {
-    style: {
-      color: C.red,
-      fontWeight: 800
-    }
-  }, Math.max(0, 100 - maxPen), "/100"))), /*#__PURE__*/React.createElement("label", {
+  }, ["SEPP", "CPMT", "Délégation syndicale", "Responsable", "Direction"].map(function (a) {
+    var checked = (form.accompagnateurs || []).indexOf(a) >= 0;
+    return /*#__PURE__*/React.createElement("button", {
+      key: a,
+      onClick: function () {
+        var cur = form.accompagnateurs || [];
+        var next = checked ? cur.filter(function (x) {
+          return x !== a;
+        }) : cur.concat([a]);
+        setForm({
+          ...form,
+          accompagnateurs: next
+        });
+      },
+      style: {
+        padding: "7px 14px",
+        borderRadius: 99,
+        border: "1px solid",
+        borderColor: checked ? C.cyan : C.border,
+        background: checked ? C.cyan + "18" : "transparent",
+        color: checked ? C.cyan : C.muted,
+        fontSize: 12,
+        fontWeight: checked ? 800 : 400,
+        cursor: "pointer",
+        display: "flex",
+        alignItems: "center",
+        gap: 6
+      }
+    }, checked && /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 10
+      }
+    }, "\u2713"), a);
+  })), /*#__PURE__*/React.createElement("label", {
     style: S.label
   }, "Notes pr\xE9liminaires"), /*#__PURE__*/React.createElement("textarea", {
     style: {
@@ -5200,19 +5473,71 @@ function NewInspectionScreen({
       style: {
         marginTop: 12
       }
-    }, secItems.map(item => /*#__PURE__*/React.createElement(ItemCard, {
-      key: item.id,
-      item: item,
-      onToggle: () => toggle(item.id),
-      onComment: v => setComment(item.id, v),
-      onPhotoAdd: src => addPhoto(item.id, src),
-      onPhotoRemove: idx => removePhoto(item.id, idx),
-      onRespChange: v => setItems(p => p.map(i => i.id === item.id ? {
-        ...i,
-        resp: v
-      } : i)),
-      resps: respList
-    })), /*#__PURE__*/React.createElement(AddQuestionBtn, {
+    }, secItems.map(function (item) {
+      var itemId = item.id;
+      return /*#__PURE__*/React.createElement(ItemCard, {
+        key: itemId,
+        item: item,
+        onToggle: function () {
+          toggle(itemId);
+        },
+        onComment: function (v) {
+          setComment(itemId, v);
+        },
+        onPhotoAdd: function (src) {
+          addPhoto(itemId, src);
+        },
+        onPhotoRemove: function (idx) {
+          removePhoto(itemId, idx);
+        },
+        onRespChange: function (v) {
+          setItems(function (p) {
+            return p.map(function (i) {
+              return i.id === itemId ? {
+                ...i,
+                resp: v
+              } : i;
+            });
+          });
+        },
+        onPoidsChange: function (p) {
+          var id = String(itemId);
+          setItems(function (prev) {
+            return prev.map(function (i) {
+              return String(i.id) === id ? {
+                ...i,
+                poids: p,
+                p: p
+              } : i;
+            });
+          });
+        },
+        onPoidsChangeDirect: function (id, p) {
+          setItems(function (prev) {
+            return prev.map(function (i) {
+              return String(i.id) === String(id) ? {
+                ...i,
+                poids: p,
+                p: p
+              } : i;
+            });
+          });
+        },
+        onSetPoids: function (p) {
+          var capturedId = String(itemId);
+          setItems(function (prev) {
+            return prev.map(function (i) {
+              return String(i.id) === capturedId ? {
+                ...i,
+                poids: p,
+                p: p
+              } : i;
+            });
+          });
+        },
+        resps: respList
+      });
+    }), /*#__PURE__*/React.createElement(AddQuestionBtn, {
       section: sec,
       onAdd: (label, poids) => {
         const newItem = {
@@ -5272,27 +5597,100 @@ function NewInspectionScreen({
     style: {
       fontSize: 13,
       color: C.muted,
-      marginBottom: 20
+      marginBottom: 12
     }
-  }, "R\xE9capitulatif complet"), [["Titre", form.titre], ["Site", form.site], ["Catégorie", `${CAT_META[form.categorie] && CAT_META[form.categorie].icon || ""} ${form.categorie}`], ["Score final", `${score}/100`], ["Pénalité totale", `−${penTotal}pts`], ["NC Critiques", `${ncItems.filter(i => i.poids === "critique").length} (−${ncItems.filter(i => i.poids === "critique").length * 10}pts)`], ["NC Élevées", `${ncItems.filter(i => i.poids === "eleve").length} (−${ncItems.filter(i => i.poids === "eleve").length * 5}pts)`], ["NC Mineures", `${ncItems.filter(i => i.poids === "mineur").length} (−${ncItems.filter(i => i.poids === "mineur").length}pts)`], ["Photos jointes", totalPhotos], ["Inspecteur", user.nom]].map(([k, v]) => /*#__PURE__*/React.createElement("div", {
-    key: k,
+  }, "R\xE9capitulatif complet"), [["Titre", form.titre], ["Date", form.date || "—"], ["Site", form.site], ["Adresse", form.adresse || "—"], ["Accompagnateurs", form.accompagnateurs && form.accompagnateurs.length > 0 ? form.accompagnateurs.join(", ") : "—"], ["Catégorie", (CAT_META[form.categorie] && CAT_META[form.categorie].icon || "") + " " + form.categorie], ["Score final", score + "/100"], ["Pénalité totale", "-" + penTotal + "pts"], ["NC Critiques", ncItems.filter(function (i) {
+    return i.poids === "critique";
+  }).length + " (" + ncItems.filter(function (i) {
+    return i.poids === "critique";
+  }).length * 10 + "pts)"], ["NC Élevées", ncItems.filter(function (i) {
+    return i.poids === "eleve";
+  }).length + " (" + ncItems.filter(function (i) {
+    return i.poids === "eleve";
+  }).length * 5 + "pts)"], ["NC Mineures", ncItems.filter(function (i) {
+    return i.poids === "mineur";
+  }).length + " (" + ncItems.filter(function (i) {
+    return i.poids === "mineur";
+  }).length + "pts)"], ["Photos jointes", totalPhotos], ["Inspecteur", user.nom]].map(function (arr) {
+    var k = arr[0];
+    var v = arr[1];
+    return /*#__PURE__*/React.createElement("div", {
+      key: k,
+      style: {
+        display: "flex",
+        justifyContent: "space-between",
+        padding: "8px 0",
+        borderBottom: "1px solid " + C.border
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 12,
+        color: C.muted
+      }
+    }, k), /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 12,
+        fontWeight: 700
+      }
+    }, v));
+  })), items.filter(function (i) {
+    return i.custom;
+  }).length > 0 && /*#__PURE__*/React.createElement("div", {
+    style: {
+      ...S.card(),
+      marginBottom: 12,
+      background: C.cyan + "10",
+      border: "1px solid " + C.cyan + "33"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      fontWeight: 800,
+      color: C.cyan,
+      marginBottom: 6
+    }
+  }, "\uD83D\uDCA1 ", items.filter(function (i) {
+    return i.custom;
+  }).length, " question(s) personnalis\xE9e(s) ajout\xE9e(s)"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: C.muted,
+      marginBottom: 10
+    }
+  }, "Voulez-vous sauvegarder ces questions comme nouveau standard pour la cat\xE9gorie \"", form.categorie, "\" ?"), /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
-      justifyContent: "space-between",
-      padding: "8px 0",
-      borderBottom: `1px solid ${C.border}`
+      gap: 8
     }
-  }, /*#__PURE__*/React.createElement("span", {
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: function () {
+      var newTpl = items.map(function (i) {
+        return {
+          id: i.id,
+          s: i.s,
+          l: i.l,
+          p: i.poids || i.p || "mineur",
+          poids: i.poids || i.p || "mineur"
+        };
+      });
+      onSaveTemplate && onSaveTemplate(form.categorie, newTpl);
+      save();
+    },
     style: {
+      ...S.btn(C.cyan),
+      flex: 2,
       fontSize: 12,
-      color: C.muted
+      padding: "8px"
     }
-  }, k), /*#__PURE__*/React.createElement("span", {
+  }, "\uD83D\uDCBE Sauvegarder comme standard"), /*#__PURE__*/React.createElement("button", {
+    onClick: save,
     style: {
+      ...S.btn(C.muted, true),
+      flex: 1,
       fontSize: 12,
-      fontWeight: 700
+      padding: "8px"
     }
-  }, v)))), /*#__PURE__*/React.createElement("div", {
+  }, "Non merci"))), /*#__PURE__*/React.createElement("div", {
     style: {
       display: "grid",
       gridTemplateColumns: "1fr 1fr",
@@ -5370,22 +5768,26 @@ function ActionsScreen({
       overflowX: "auto",
       WebkitOverflowScrolling: "touch"
     }
-  }, ["Tout", "À faire", "En cours", "Clôturée"].map(s => /*#__PURE__*/React.createElement("button", {
-    key: s,
-    onClick: () => setFilter(s),
-    style: {
-      flexShrink: 0,
-      padding: "5px 11px",
-      borderRadius: 99,
-      border: "1px solid",
-      borderColor: filter === s ? C.cyan : C.border,
-      background: filter === s ? `${C.cyan}15` : "transparent",
-      color: filter === s ? C.cyan : C.muted,
-      fontSize: 11,
-      fontWeight: 700,
-      cursor: "pointer"
-    }
-  }, s))), /*#__PURE__*/React.createElement("div", {
+  }, ["En cours", "À faire", "Tout"].map(function (s) {
+    return /*#__PURE__*/React.createElement("button", {
+      key: s,
+      onClick: function () {
+        setFilter(s);
+      },
+      style: {
+        flexShrink: 0,
+        padding: "5px 11px",
+        borderRadius: 99,
+        border: "1px solid",
+        borderColor: filter === s ? C.cyan : C.border,
+        background: filter === s ? C.cyan + "15" : "transparent",
+        color: filter === s ? C.cyan : C.muted,
+        fontSize: 11,
+        fontWeight: 700,
+        cursor: "pointer"
+      }
+    }, s);
+  })), /*#__PURE__*/React.createElement("div", {
     style: {
       padding: "0 14px"
     }
@@ -5707,82 +6109,47 @@ function QRCodeDisplay({
   text,
   size
 }) {
-  const sz = size || 160;
-  const ref = React.useRef(null);
-  React.useEffect(() => {
-    if (!ref.current || !text) return;
-    const canvas = ref.current;
-    const ctx = canvas.getContext("2d");
-    // Simple visual placeholder with inspection info encoded as text
-    // We generate a visual QR-like pattern using the text hash
-    ctx.fillStyle = "#ffffff";
-    ctx.fillRect(0, 0, sz, sz);
-    ctx.fillStyle = "#000000";
-
-    // Generate deterministic pattern from text
-    let hash = 0;
-    for (let i = 0; i < text.length; i++) {
-      hash = (hash << 5) - hash + text.charCodeAt(i);
-      hash = hash & hash;
-    }
-    const modules = 21; // QR version 1 = 21x21
-    const cell = Math.floor(sz / modules);
-    const margin = Math.floor((sz - modules * cell) / 2);
-
-    // Draw finder patterns (corners)
-    const drawFinder = (row, col) => {
-      ctx.fillStyle = "#000";
-      ctx.fillRect(margin + col * cell, margin + row * cell, 7 * cell, 7 * cell);
-      ctx.fillStyle = "#fff";
-      ctx.fillRect(margin + (col + 1) * cell, margin + (row + 1) * cell, 5 * cell, 5 * cell);
-      ctx.fillStyle = "#000";
-      ctx.fillRect(margin + (col + 2) * cell, margin + (row + 2) * cell, 3 * cell, 3 * cell);
-    };
-    drawFinder(0, 0);
-    drawFinder(0, 14);
-    drawFinder(14, 0);
-
-    // Data modules (pseudo-random based on text hash)
-    ctx.fillStyle = "#000";
-    for (let r = 0; r < modules; r++) {
-      for (let c = 0; c < modules; c++) {
-        // Skip finder pattern areas
-        if (r < 8 && c < 8 || r < 8 && c > 12 || r > 12 && c < 8) continue;
-        // Use hash + position to determine module
-        const bit = Math.abs(hash * (r * modules + c + 1) * 2654435761) >> 16 & 1;
-        if (bit) {
-          ctx.fillRect(margin + c * cell, margin + r * cell, cell - 1, cell - 1);
-        }
-      }
-    }
-
-    // Border
-    ctx.strokeStyle = "#e5e5e5";
-    ctx.lineWidth = 1;
-    ctx.strokeRect(0, 0, sz, sz);
-  }, [text, sz]);
+  var sz = 220;
+  var qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=" + sz + "x" + sz + "&data=" + encodeURIComponent(text) + "&bgcolor=ffffff&color=000000&margin=10&ecc=H";
   return /*#__PURE__*/React.createElement("div", {
     style: {
-      textAlign: "center"
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      gap: 10
     }
-  }, /*#__PURE__*/React.createElement("canvas", {
-    ref: ref,
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: "#fff",
+      borderRadius: 12,
+      padding: 12,
+      display: "inline-block",
+      boxShadow: "0 0 20px #00E5FF22"
+    }
+  }, /*#__PURE__*/React.createElement("img", {
+    src: qrUrl,
     width: sz,
     height: sz,
+    alt: "QR Code",
     style: {
-      borderRadius: 8,
-      display: "block",
-      margin: "0 auto"
+      display: "block"
     }
-  }), /*#__PURE__*/React.createElement("div", {
+  })), /*#__PURE__*/React.createElement("a", {
+    href: text,
+    target: "_blank",
     style: {
-      fontSize: 9,
-      color: C.muted,
-      marginTop: 4,
+      fontSize: 10,
+      color: C.cyan,
       wordBreak: "break-all",
-      maxWidth: sz
+      textAlign: "center",
+      maxWidth: 240,
+      textDecoration: "none",
+      padding: "6px 10px",
+      background: C.cyan + "11",
+      borderRadius: 8,
+      border: "1px solid " + C.cyan + "33"
     }
-  }, text.slice(0, 40), "..."));
+  }, "\uD83D\uDD17 ", text));
 }
 function RapportsScreen({
   inspections,
@@ -5799,7 +6166,9 @@ function RapportsScreen({
     const okItems = (ins.items || []).filter(i => i.ok);
     const penTotal = ncItems.reduce((s, i) => s + (PENALITE[i.poids || i.p] || 0), 0);
     const scCol = scoreColor(ins.score);
-    const metaRows = [["Site", ins.site], ["Catégorie", ins.categorie], ["Inspecteur", ins.inspecteur], ["Date", fmt(ins.date)], ["Statut", ins.statut], ["Questions", (ins.items || []).length]];
+    const accompStr = ins.accompagnateurs && ins.accompagnateurs.length > 0 ? ins.accompagnateurs.join(", ") : "—";
+    const adresseStr = ins.adresse || "—";
+    const metaRows = [["Site", ins.site], ["Adresse", adresseStr], ["Catégorie", ins.categorie], ["Inspecteur", ins.inspecteur], ["Accompagnateurs", accompStr], ["Date", fmt(ins.date)], ["Statut", ins.statut], ["Questions", (ins.items || []).length]];
     const ncRows = ["critique", "eleve", "mineur"].map(p => {
       const n = ncItems.filter(i => (i.poids || i.p) === p).length;
       const col = p === "critique" ? "#FF1744" : p === "eleve" ? "#FF6D00" : "#FFB300";
@@ -5828,8 +6197,10 @@ function RapportsScreen({
         return s + (PENALITE[i.poids || i.p] || 0);
       }, 0);
       const scCol = ins.score >= 80 ? "#00C853" : ins.score >= 55 ? "#FFB300" : "#FF1744";
-      const metaRows = ["Site", "Catégorie", "Inspecteur", "Date", "Statut", "Questions"].map(function (k, i) {
-        var vals = [ins.site, ins.categorie, ins.inspecteur, fmt(ins.date), ins.statut, "" + (ins.items || []).length];
+      const accompStr2 = ins.accompagnateurs && ins.accompagnateurs.length > 0 ? ins.accompagnateurs.join(", ") : "—";
+      const adresseStr2 = ins.adresse || "—";
+      const metaRows = ["Site", "Adresse", "Catégorie", "Inspecteur", "Accompagnateurs", "Date", "Statut", "Questions"].map(function (k, i) {
+        var vals = [ins.site, adresseStr2, ins.categorie, ins.inspecteur, accompStr2, fmt(ins.date), ins.statut, "" + (ins.items || []).length];
         return "<div class='mk'><span class='ml'>" + k + "</span><span class='mv'>" + vals[i] + "</span></div>";
       }).join("");
       const ncRows = ncItems.map(function (it) {
@@ -6078,17 +6449,37 @@ function RapportsScreen({
         opacity: printing ? 0.55 : 1
       },
       disabled: printing
-    }, /*#__PURE__*/React.createElement("span", null, "\uD83D\uDCC4"), printing ? "Génération PDF..." : "📄 Exporter en PDF"), /*#__PURE__*/React.createElement(QRCodeDisplay, {
-      text: "SECURA|" + ins.id + "|" + ins.titre + "|" + ins.site + "|" + ins.date + "|score:" + ins.score,
-      size: 150
-    }), /*#__PURE__*/React.createElement("div", {
+    }, /*#__PURE__*/React.createElement("span", null, "\uD83D\uDCC4"), printing ? "Génération PDF..." : "📄 Exporter en PDF"), /*#__PURE__*/React.createElement("div", {
       style: {
-        fontSize: 10,
-        color: C.muted,
-        textAlign: "center",
-        marginTop: -4
+        display: "flex",
+        flexDirection: "column",
+        gap: 8
       }
-    }, "QR Code \xB7 acc\xE8s rapide au dossier"), /*#__PURE__*/React.createElement(InlineDelete, {
+    }, /*#__PURE__*/React.createElement("a", {
+      href: window.location.origin + "/rapport.html?site=" + encodeURIComponent(ins.site),
+      target: "_blank",
+      style: {
+        ...S.btn(C.cyan),
+        textDecoration: "none",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 8
+      }
+    }, "\uD83D\uDD17 Voir rapport public"), /*#__PURE__*/React.createElement("button", {
+      onClick: function () {
+        var url = window.location.origin + "/rapport.html?site=" + encodeURIComponent(ins.site);
+        var qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=" + encodeURIComponent(url) + "&ecc=H&margin=10";
+        window.open(qrUrl, "_blank");
+      },
+      style: {
+        ...S.btn(C.muted, true),
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 8
+      }
+    }, "\uD83D\uDCF7 G\xE9n\xE9rer QR code imprimable")), /*#__PURE__*/React.createElement(InlineDelete, {
       onConfirm: () => onDelete && onDelete(ins.id)
     })));
   })), /*#__PURE__*/React.createElement("div", {
@@ -6169,8 +6560,8 @@ function SettingsScreen({
   const resps = respsState || RESPONSABLES_DEFAULT;
   const sites = sitesState || SITES_DEFAULT;
   const penalites = appState && appState.penalites || {
-    critique: 10,
-    eleve: 5,
+    critique: 5,
+    eleve: 3,
     mineur: 1
   };
   const delais = appState && appState.delais || {
@@ -6184,6 +6575,8 @@ function SettingsScreen({
       resps,
       penalites,
       delais,
+      customTemplates: appState && appState.customTemplates || {},
+      siteAddresses: appState && appState.siteAddresses || {},
       ...patch
     };
     SITES.length = 0;
@@ -6243,31 +6636,25 @@ function SettingsScreen({
   const setPen = (k, v) => update({
     penalites: {
       ...penalites,
-      [k]: parseInt(v) || 0
+      [k]: v === "" ? "" : parseInt(v) || 0
     }
   });
   const setDel = (k, v) => update({
     delais: {
       ...delais,
-      [k]: parseInt(v) || 0
+      [k]: v === "" ? "" : parseInt(v) || 0
     }
   });
   const save = () => {
-    // Auto-add pending resp/site if field is not empty
     const pendingResp = (newRespRef.current ? newRespRef.current.value : newResp).trim();
-    // Note: for equipe, pending is handled by addResp button only
     const pendingSite = (newSiteRef.current ? newSiteRef.current.value : newSite).trim();
+    var finalResps = pendingResp ? [...resps, pendingResp] : resps;
+    var finalSites = pendingSite ? [...sites, pendingSite] : sites;
     if (pendingResp) {
-      update({
-        resps: [...resps, pendingResp]
-      });
       setNewResp("");
       if (newRespRef.current) newRespRef.current.value = "";
     }
     if (pendingSite) {
-      update({
-        sites: [...sites, pendingSite]
-      });
       setNewSite("");
       if (newSiteRef.current) newSiteRef.current.value = "";
     }
@@ -6277,6 +6664,13 @@ function SettingsScreen({
     DELAIS.critique = delais.critique;
     DELAIS.eleve = delais.eleve;
     DELAIS.mineur = delais.mineur;
+    // Save everything to Supabase via update()
+    update({
+      sites: finalSites,
+      resps: finalResps,
+      penalites: penalites,
+      delais: delais
+    });
     setSavedMsg(true);
     setTimeout(function () {
       setSavedMsg(false);
@@ -6547,26 +6941,34 @@ function SettingsScreen({
       marginBottom: 10
     }
   }, "Gestion des sites"), sites.map(function (s, i) {
+    var addr = appState && appState.siteAddresses && appState.siteAddresses[s] || "";
     return /*#__PURE__*/React.createElement("div", {
       key: i,
+      style: {
+        padding: "8px 0",
+        borderBottom: "1px solid " + C.border
+      }
+    }, /*#__PURE__*/React.createElement("div", {
       style: {
         display: "flex",
         alignItems: "center",
         gap: 8,
-        padding: "7px 0",
-        borderBottom: "1px solid " + C.border
+        marginBottom: 4
       }
     }, /*#__PURE__*/React.createElement("span", {
       style: {
-        fontSize: 18
+        fontSize: 16
       }
     }, "\uD83D\uDCCD"), /*#__PURE__*/React.createElement("span", {
       style: {
         flex: 1,
-        fontSize: 13
+        fontSize: 13,
+        fontWeight: 700
       }
     }, s), /*#__PURE__*/React.createElement("button", {
-      onClick: () => removeSite(i),
+      onClick: function () {
+        removeSite(i);
+      },
       style: {
         background: "transparent",
         border: "none",
@@ -6575,7 +6977,26 @@ function SettingsScreen({
         fontSize: 16,
         padding: "0 4px"
       }
-    }, "\xD7"));
+    }, "\xD7")), /*#__PURE__*/React.createElement("input", {
+      placeholder: "Adresse du site...",
+      defaultValue: addr,
+      onChange: function (e) {
+        var newAddrs = {
+          ...(appState.siteAddresses || {})
+        };
+        newAddrs[s] = e.target.value;
+        update({
+          siteAddresses: newAddrs
+        });
+      },
+      style: {
+        ...S.input,
+        fontSize: 11,
+        padding: "5px 10px",
+        color: C.muted,
+        marginLeft: 24
+      }
+    }));
   }), /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
@@ -6631,11 +7052,12 @@ function SettingsScreen({
       label: l,
       color: col
     }), /*#__PURE__*/React.createElement("input", {
-      type: "number",
-      min: "0",
-      max: "50",
+      type: "text",
+      inputMode: "numeric",
+      pattern: "[0-9]*",
       value: penalites[k],
-      onChange: e => setPen(k, e.target.value),
+      onFocus: e => e.target.select(),
+      onChange: e => setPen(k, e.target.value.replace(/[^0-9]/g, "")),
       style: {
         ...S.input,
         width: 70,
@@ -6677,11 +7099,12 @@ function SettingsScreen({
       label: l,
       color: col
     }), /*#__PURE__*/React.createElement("input", {
-      type: "number",
-      min: "0",
-      max: "365",
+      type: "text",
+      inputMode: "numeric",
+      pattern: "[0-9]*",
       value: delais[k],
-      onChange: e => setDel(k, e.target.value),
+      onFocus: e => e.target.select(),
+      onChange: e => setDel(k, e.target.value.replace(/[^0-9]/g, "")),
       style: {
         ...S.input,
         width: 70,
@@ -6952,7 +7375,157 @@ function SettingsScreen({
         fontWeight: 900
       }
     }, "\u2713"));
-  }))), savedMsg && /*#__PURE__*/React.createElement("div", {
+  }))), tab === "systeme" && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      ...S.card(),
+      marginBottom: 12
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 13,
+      fontWeight: 800,
+      marginBottom: 10
+    }
+  }, "\uD83D\uDCCB Templates personnalis\xE9s"), Object.keys(appState && appState.customTemplates || {}).length === 0 ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      color: C.muted
+    }
+  }, "Aucun template modifi\xE9 \u2014 checklists d'origine utilis\xE9es") : /*#__PURE__*/React.createElement("div", null, Object.keys(appState.customTemplates || {}).map(function (cat) {
+    var tpl = appState.customTemplates[cat];
+    var orig = CHECKLISTS[cat] || [];
+    var added = (tpl || []).filter(function (q) {
+      return (q.id || "").startsWith("custom_");
+    }).length;
+    return /*#__PURE__*/React.createElement("div", {
+      key: cat,
+      style: {
+        display: "flex",
+        alignItems: "center",
+        gap: 8,
+        padding: "8px 0",
+        borderBottom: "1px solid " + C.border
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        flex: 1
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 12,
+        fontWeight: 700
+      }
+    }, cat), /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 10,
+        color: C.muted
+      }
+    }, (tpl || []).length, " questions (", added, " ajout\xE9e(s))")), /*#__PURE__*/React.createElement("button", {
+      onClick: function () {
+        var newTpls = {
+          ...(appState.customTemplates || {})
+        };
+        delete newTpls[cat];
+        update({
+          customTemplates: newTpls
+        });
+      },
+      style: {
+        background: "transparent",
+        border: "1px solid " + C.red + "44",
+        borderRadius: 8,
+        color: C.red,
+        padding: "4px 10px",
+        fontSize: 11,
+        cursor: "pointer"
+      }
+    }, "\u21A9 Original"));
+  }))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      ...S.card(),
+      marginBottom: 12
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center"
+    }
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 13,
+      fontWeight: 800
+    }
+  }, "\uD83D\uDD14 Notifications push"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: C.muted,
+      marginTop: 2
+    }
+  }, "Alertes \xE9ch\xE9ances actions sur iPhone")), /*#__PURE__*/React.createElement("button", {
+    onClick: function () {
+      var enabled = !(config && config.notificationsEnabled);
+      if (enabled) {
+        if (!("Notification" in window)) {
+          alert("Notifications non supportées sur cet appareil.");
+          return;
+        }
+        Notification.requestPermission().then(function (perm) {
+          if (perm === "granted") {
+            onConfigUpdate && onConfigUpdate({
+              ...config,
+              notificationsEnabled: true
+            });
+            // Show test notification
+            setTimeout(function () {
+              new Notification("🛡️ SECURA", {
+                body: "Notifications activées ! Vous serez alerté des échéances.",
+                icon: "/icon-192.png"
+              });
+            }, 500);
+          } else {
+            alert("Permission refusée. Activez les notifications dans les réglages iPhone → Safari.");
+          }
+        });
+      } else {
+        onConfigUpdate && onConfigUpdate({
+          ...config,
+          notificationsEnabled: false
+        });
+      }
+    },
+    style: {
+      width: 48,
+      height: 28,
+      borderRadius: 99,
+      background: config && config.notificationsEnabled ? ac : C.border,
+      border: "none",
+      cursor: "pointer",
+      transition: "background .2s",
+      position: "relative",
+      flexShrink: 0
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      position: "absolute",
+      top: 3,
+      left: config && config.notificationsEnabled ? 22 : 3,
+      width: 22,
+      height: 22,
+      borderRadius: 99,
+      background: "#fff",
+      transition: "left .2s"
+    }
+  }))), config && config.notificationsEnabled && /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 10,
+      fontSize: 11,
+      color: C.green,
+      padding: "6px 10px",
+      background: C.green + "15",
+      borderRadius: 8
+    }
+  }, "\u2705 Notifications actives \u2014 alertes J-3, J-1 et le jour J"))), savedMsg && /*#__PURE__*/React.createElement("div", {
     style: {
       background: C.green + "18",
       border: "1px solid " + C.green + "44",
@@ -7212,11 +7785,49 @@ export default function App() {
   const [splash, setSplash] = useState(true);
   const [dbReady, setDbReady] = useState(false);
   const [syncMsg, setSyncMsg] = useState(null);
+  const [isOnline, setIsOnline] = useState(typeof navigator !== "undefined" ? navigator.onLine : true);
+
+  // ── Online/Offline detection ─────────────────────────────────
+  React.useEffect(function () {
+    function goOnline() {
+      setIsOnline(true);
+      setSyncMsg("🔄 Synchronisation...");
+      // Sync pending items
+      var pending = LS.getPending();
+      if (pending.length > 0) {
+        Promise.all(pending.map(function (p) {
+          if (p.type === "upsert_inspection") return supa.upsert("inspections", p.data).catch(function () {});
+          if (p.type === "upsert_action") return supa.upsert("actions", p.data).catch(function () {});
+          if (p.type === "del_action") return supa.del("actions", p.data.id).catch(function () {});
+          return Promise.resolve();
+        })).then(function () {
+          LS.clearPending();
+          setSyncMsg("✅ Synchronisé !");
+          setTimeout(function () {
+            setSyncMsg(null);
+          }, 3000);
+        });
+      } else {
+        setSyncMsg(null);
+      }
+    }
+    function goOffline() {
+      setIsOnline(false);
+      setSyncMsg("📵 Hors-ligne — données sauvegardées localement");
+    }
+    window.addEventListener("online", goOnline);
+    window.addEventListener("offline", goOffline);
+    return function () {
+      window.removeEventListener("online", goOnline);
+      window.removeEventListener("offline", goOffline);
+    };
+  }, []);
 
   // ── Supabase: load on mount ──────────────────────────────────
   React.useEffect(function () {
     async function loadFromDB() {
       try {
+        // Try Supabase first
         const [ins, acts, cfg] = await Promise.all([supa.get("inspections", {
           order: "updated_at.desc"
         }), supa.get("actions", {
@@ -7227,17 +7838,41 @@ export default function App() {
             val: "default"
           }
         })]);
-        if (ins && ins.length) setInspections(ins.map(function (i) {
-          return {
-            ...i,
-            items: i.items || []
-          };
-        }));
-        if (acts && acts.length) setActions(acts);
+        if (ins && ins.length) {
+          setInspections(ins.map(function (i) {
+            return {
+              ...i,
+              items: i.items || [],
+              sigInspecteur: i.sigInspecteur || i["sig_inspecteur"] || null,
+              sigResponsable: i.sigResponsable || i["sig_responsable"] || null
+            };
+          }));
+          LS.save("inspections", ins);
+        }
+        var deletedIds = LS.load("deletedActionIds") || [];
+        if (acts && acts.length) {
+          // Supabase has actions - use them, filter deleted ones
+          var activeActs = acts.filter(function (a) {
+            return a.statut !== "Clôturée" && deletedIds.indexOf(String(a.id)) === -1;
+          });
+          setActions(activeActs);
+          LS.save("actions", activeActs);
+        } else {
+          // Supabase empty - use localStorage but still filter deleted
+          var localActsFallback = LS.load("actions") || [];
+          var activeLocal = localActsFallback.filter(function (a) {
+            return a.statut !== "Clôturée" && deletedIds.indexOf(String(a.id)) === -1;
+          });
+          setActions(activeLocal);
+        }
         if (cfg && cfg[0]) {
           var c = cfg[0];
-          if (c.resps && c.resps.length) setRespsState(c.resps);
-          if (c.sites && c.sites.length) setSitesState(c.sites);
+          if (c.resps && c.resps.length) {
+            setRespsState(c.resps);
+          }
+          if (c.sites && c.sites.length) {
+            setSitesState(c.sites);
+          }
           if (c.config && Object.keys(c.config).length) setConfig(c.config);
           if (c.penalites) {
             PENALITE.critique = c.penalites.critique;
@@ -7249,11 +7884,49 @@ export default function App() {
             DELAIS.eleve = c.delais.eleve;
             DELAIS.mineur = c.delais.mineur;
           }
+          // Load appState with all fields
+          setAppState(function (prev) {
+            return {
+              ...prev,
+              resps: c.resps && c.resps.length ? c.resps : prev.resps,
+              sites: c.sites && c.sites.length ? c.sites : prev.sites,
+              penalites: c.penalites || prev.penalites,
+              delais: c.delais || prev.delais,
+              customTemplates: c["customtemplates"] || c["custom_templates"] || c.customTemplates || LS.load("customTemplates") || prev.customTemplates || {},
+              siteAddresses: c["siteaddresses"] || c.siteAddresses || prev.siteAddresses || {}
+            };
+          });
+          LS.save("config", cfg[0]);
+          LS.save("appState", c);
         }
         setDbReady(true);
       } catch (e) {
-        console.error("DB load error:", e);
-        setDbReady(true); // fallback to local data
+        console.error("DB load error — loading from localStorage:", e);
+        // Fallback to localStorage
+        var localIns = LS.load("inspections");
+        var localActs = LS.load("actions");
+        var localCfg = LS.load("config");
+        if (localIns && localIns.length) setInspections(localIns.map(function (i) {
+          return {
+            ...i,
+            items: i.items || []
+          };
+        }));
+        if (localActs && localActs.length) {
+          var deletedIds2 = LS.load("deletedActionIds") || [];
+          var localActive = localActs.filter(function (a) {
+            return a.statut !== "Clôturée" && deletedIds2.indexOf(String(a.id)) === -1;
+          });
+          setActions(localActive);
+        }
+        if (localCfg) {
+          var c = localCfg;
+          if (c.resps && c.resps.length) setRespsState(c.resps);
+          if (c.sites && c.sites.length) setSitesState(c.sites);
+          if (c.config && Object.keys(c.config).length) setConfig(c.config);
+        }
+        setDbReady(true);
+        setSyncMsg("📵 Chargement local — reconnectez-vous pour synchroniser");
       }
     }
     loadFromDB();
@@ -7266,41 +7939,58 @@ export default function App() {
     darkMode: true,
     cardRadius: 18,
     compactMode: false,
-    daltonMode: "normal"
+    daltonMode: "normal",
+    notificationsEnabled: false
   });
   const [appState, setAppState] = useState({
     sites: SITES_DEFAULT,
     resps: RESPONSABLES_DEFAULT,
     penalites: {
-      critique: 10,
-      eleve: 5,
+      critique: 5,
+      eleve: 3,
       mineur: 1
     },
     delais: {
       critique: 0,
       eleve: 60,
       mineur: 120
-    }
+    },
+    customTemplates: {},
+    siteAddresses: {}
   });
   const [respsState, setRespsState] = useState([...RESPONSABLES_DEFAULT]);
   const [sitesState, setSitesState] = useState([...SITES_DEFAULT]);
-  const handleAppStateUpdate = async s => {
-    setAppState(s);
-    if (s.resps) setRespsState(s.resps);
-    if (s.sites) setSitesState(s.sites);
-    try {
-      await supa.upsert("app_config", {
-        id: "default",
-        resps: s.resps || respsState,
-        sites: s.sites || sitesState,
-        penalites: s.penalites || appState.penalites,
-        delais: s.delais || appState.delais
-      });
-    } catch (e) {
-      console.error(e);
+  async function handleAppStateUpdate(s) {
+    // Always merge with current state to avoid overwriting fields
+    var merged = {
+      ...appState,
+      ...s
+    };
+    setAppState(merged);
+    if (merged.resps) setRespsState(merged.resps);
+    if (merged.sites) setSitesState(merged.sites);
+    // Save everything to Supabase
+    var payload = {
+      id: "default",
+      resps: merged.resps || respsState,
+      sites: merged.sites || sitesState,
+      penalites: merged.penalites || appState.penalites,
+      delais: merged.delais || appState.delais
+    };
+    if (merged.siteAddresses) payload["siteaddresses"] = merged.siteAddresses;
+    if (merged.customTemplates && Object.keys(merged.customTemplates).length > 0) {
+      payload["customtemplates"] = merged.customTemplates;
     }
-  };
-  const saveConfig = async cfg => {
+    try {
+      await supa.upsert("app_config", payload);
+    } catch (e) {
+      console.error("appState save error:", e);
+    }
+    // Also save to localStorage as backup
+    LS.save("appState", merged);
+    LS.save("customTemplates", merged.customTemplates || {});
+  }
+  async function saveConfig(cfg) {
     setConfig(cfg);
     try {
       await supa.upsert("app_config", {
@@ -7310,7 +8000,8 @@ export default function App() {
     } catch (e) {
       console.error(e);
     }
-  };
+  }
+  ;
   const bg = darkMode ? C.bg : "#F0F4FA";
   const daltonFilter = (config && config.daltonMode) === "deuteranopie" ? "url(#dalton-deut)" : (config && config.daltonMode) === "protanopie" ? "url(#dalton-prot)" : (config && config.daltonMode) === "tritanopie" ? "url(#dalton-trit)" : "none";
   const appStyle = {
@@ -7341,42 +8032,264 @@ export default function App() {
     setOpenIns(ins);
     setSub("detail");
   };
-  const saveNew = async ins => {
-    setInspections(p => [ins, ...p]);
+  async function saveNew(ins) {
+    setInspections(function (p) {
+      return [ins].concat(p);
+    });
+    // Always save to localStorage immediately
+    LS.save("inspections", [ins].concat(inspections));
     setScreen("inspections");
     setSub(null);
-    try {
-      await supa.upsert("inspections", ins);
-    } catch (e) {
-      console.error(e);
+    if (isOnline) {
+      try {
+        await supa.upsert("inspections", mapInspection(ins));
+      } catch (e) {
+        console.error(e);
+        LS.addPending("upsert_inspection", ins);
+      }
+    } else {
+      LS.addPending("upsert_inspection", ins);
+      setSyncMsg("📵 Sauvegardé localement — sera synchronisé dès la reconnexion");
     }
-  };
-  const updateIns = async ins => {
-    setInspections(p => p.map(i => i.id === ins.id ? ins : i));
-    setSub(null);
-    try {
-      await supa.upsert("inspections", ins);
-    } catch (e) {
-      console.error(e);
+    var ncItems = (ins.items || []).filter(function (it) {
+      return !it.ok;
+    });
+    if (ncItems.length > 0) {
+      var dynDel = appState && appState.delais ? appState.delais : DELAIS;
+      var newActs = ncItems.map(function (nc) {
+        var p = nc.poids || nc.p || "mineur";
+        var prio = p === "critique" ? "CRITIQUE" : p === "eleve" ? "ÉLEVÉE" : "MODÉRÉE";
+        var days = dynDel[p] != null ? Number(dynDel[p]) : DELAIS[p] || 120;
+        var d = new Date();
+        if (days > 0) d.setDate(d.getDate() + days);
+        // Use inspectionId+ncId as unique key to prevent regeneration
+        return {
+          id: Date.now() + Math.floor(Math.random() * 9999),
+          label: nc.l,
+          site: ins.site,
+          prio: prio,
+          statut: "En cours",
+          echeance: d.toISOString().split("T")[0],
+          retard: false,
+          resp: nc.resp || "",
+          inspectionId: ins.id,
+          ncId: nc.id
+        };
+      });
+      setActions(function (prev) {
+        // Deduplicate by inspectionId+ncId to avoid regenerating deleted actions
+        var existKeys = prev.map(function (a) {
+          return (a.inspectionId || "") + "__" + (a.ncId || a.label + "__" + a.site);
+        });
+        var toAdd = newActs.filter(function (a) {
+          return existKeys.indexOf(a.inspectionId + "__" + a.ncId) === -1;
+        });
+        return prev.concat(toAdd);
+      });
+      newActs.forEach(function (a) {
+        supa.upsert("actions", mapAction(a)).catch(function (e) {
+          console.error(e);
+        });
+      });
     }
-  };
-  const updateAct = async a => {
-    setActions(p => p.map(x => x.id === a.id ? a : x));
-    try {
-      await supa.upsert("actions", a);
-    } catch (e) {
-      console.error(e);
+  }
+  async function updateIns(ins) {
+    var updated = inspections.map(function (i) {
+      return i.id === ins.id ? ins : i;
+    });
+    setInspections(function () {
+      return updated;
+    });
+    LS.save("inspections", updated);
+    if (ins.statut !== "Validée") setSub(null);
+    // Generate actions from new NC items (that don't already have an action)
+    var ncItems = (ins.items || []).filter(function (it) {
+      return !it.ok && !it.na;
+    });
+    if (ncItems.length > 0) {
+      var dynDel = appState && appState.delais ? appState.delais : DELAIS;
+      var deletedIds = LS.load("deletedActionIds") || [];
+      setActions(function (prev) {
+        // Build multiple dedup keys to catch all duplicates
+        var existByKey = {};
+        prev.forEach(function (a) {
+          // Key 1: inspectionId + ncId
+          existByKey[String(a.inspectionId || "") + "__" + String(a.ncId || "")] = true;
+          // Key 2: label + site (legacy)
+          existByKey[(a.label || "") + "__" + (a.site || "")] = true;
+        });
+        var toAdd = [];
+        ncItems.forEach(function (nc) {
+          var k1 = String(ins.id) + "__" + String(nc.id);
+          var k2 = (nc.l || "") + "__" + (ins.site || "");
+          // Skip if action already exists (any key match)
+          if (existByKey[k1]) return;
+          if (existByKey[k2]) return;
+          // Skip if explicitly deleted
+          if (deletedIds.indexOf(k1) >= 0) return;
+          var p = nc.poids || nc.p || "mineur";
+          var prio = p === "critique" ? "CRITIQUE" : p === "eleve" ? "ÉLEVÉE" : "MODÉRÉE";
+          var days = dynDel[p] != null ? Number(dynDel[p]) : DELAIS[p] || 120;
+          var d = new Date();
+          if (days > 0) d.setDate(d.getDate() + days);
+          var newAct = {
+            id: Date.now() + Math.floor(Math.random() * 9999),
+            label: nc.l,
+            site: ins.site,
+            prio: prio,
+            statut: "En cours",
+            echeance: d.toISOString().split("T")[0],
+            retard: false,
+            resp: nc.resp || "",
+            inspectionId: ins.id,
+            ncId: nc.id
+          };
+          toAdd.push(newAct);
+          supa.upsert("actions", mapAction(newAct)).catch(function (e) {
+            console.error(e);
+          });
+        });
+        if (toAdd.length === 0) return prev;
+        var allActs = prev.concat(toAdd);
+        LS.save("actions", allActs);
+        return allActs;
+      });
     }
-  };
-  const deleteIns = async id => {
+    if (isOnline) {
+      try {
+        var patchBody = {
+          "statut": ins.statut,
+          "score": ins.score,
+          "nc": ins.nc,
+          "notes": ins.notes || ""
+        };
+        if (ins.sigInspecteur) patchBody["sig_inspecteur"] = ins.sigInspecteur;
+        if (ins.sigResponsable) patchBody["sig_responsable"] = ins.sigResponsable;
+        if (ins.items) patchBody["items"] = ins.items;
+        var r = await fetch(SUPA_URL + "/rest/v1/inspections?id=eq." + String(ins.id), {
+          method: "PATCH",
+          headers: {
+            "apikey": SUPA_KEY,
+            "Authorization": "Bearer " + SUPA_KEY,
+            "Content-Type": "application/json",
+            "Prefer": "return=minimal"
+          },
+          body: JSON.stringify(patchBody)
+        });
+        if (!r.ok) {
+          var errText = await r.text();
+          console.error("PATCH failed:", r.status, errText);
+        } else {
+          console.log("PATCH ok:", ins.id, "statut:", ins.statut);
+        }
+      } catch (e) {
+        console.error("updateIns error:", e);
+        LS.addPending("upsert_inspection", ins);
+      }
+    } else {
+      LS.addPending("upsert_inspection", ins);
+    }
+    if (ins.statut === "Validée") setSub(null);
+  }
+  async function updateAct(a) {
+    if (a.statut === "Clôturée") {
+      var filtered = actions.filter(function (x) {
+        return x.id !== a.id;
+      });
+      setActions(function () {
+        return filtered;
+      });
+      LS.save("actions", filtered);
+      // Track deleted ID to prevent regeneration on reload
+      var deletedIds = LS.load("deletedActionIds") || [];
+      if (deletedIds.indexOf(String(a.id)) === -1) {
+        deletedIds.push(String(a.id));
+      }
+      LS.save("deletedActionIds", deletedIds);
+      if (isOnline) {
+        try {
+          await supa.del("actions", a.id);
+        } catch (e) {
+          LS.addPending("del_action", {
+            id: a.id
+          });
+        }
+      } else {
+        LS.addPending("del_action", {
+          id: a.id
+        });
+      }
+    } else {
+      var updated2 = actions.map(function (x) {
+        return x.id === a.id ? a : x;
+      });
+      setActions(function () {
+        return updated2;
+      });
+      LS.save("actions", updated2);
+      if (isOnline) {
+        try {
+          await supa.upsert("actions", mapAction(a));
+        } catch (e) {
+          LS.addPending("upsert_action", a);
+        }
+      } else {
+        LS.addPending("upsert_action", a);
+      }
+    }
+  }
+  async function deleteIns(id) {
     setInspections(p => p.filter(i => i.id !== id));
     try {
       await supa.del("inspections", id);
     } catch (e) {
       console.error(e);
     }
-  };
+  }
+  ;
   const pending = actions.filter(a => a.statut !== "Clôturée").length;
+
+  // ── Notifications - check due actions ───────────────────────
+  React.useEffect(function () {
+    if (!config || !config.notificationsEnabled) return undefined;
+    if (!("Notification" in window) || Notification.permission !== "granted") return undefined;
+    var today = new Date();
+    today.setHours(0, 0, 0, 0);
+    actions.filter(function (a) {
+      return a.statut !== "Clôturée" && a.echeance;
+    }).forEach(function (a) {
+      var due = new Date(a.echeance);
+      due.setHours(0, 0, 0, 0);
+      var diff = Math.ceil((due - today) / (1000 * 60 * 60 * 24));
+      var notifKey = "secura_notif_" + a.id + "_" + a.echeance;
+      if (localStorage.getItem(notifKey)) return;
+      var title = "",
+        body = "";
+      if (diff < 0) {
+        title = "🚨 Action en retard — " + a.site;
+        body = a.label + " (" + Math.abs(diff) + "j de retard)";
+      } else if (diff === 0) {
+        title = "🔴 À traiter aujourd'hui — " + a.site;
+        body = a.label;
+      } else if (diff === 1) {
+        title = "⚠️ Urgente demain — " + a.site;
+        body = a.label;
+      } else if (diff <= 3) {
+        title = "⏰ Dans " + diff + " jours — " + a.site;
+        body = a.label;
+      }
+      if (title) {
+        try {
+          new Notification(title, {
+            body: body,
+            icon: "/icon-192.png"
+          });
+          localStorage.setItem(notifKey, "1");
+        } catch (e) {}
+      }
+    });
+    return undefined;
+  }, [actions, config]);
 
   // Show loading while DB loads
   if (!dbReady) return /*#__PURE__*/React.createElement("div", {
@@ -7424,7 +8337,36 @@ export default function App() {
   }));
   return /*#__PURE__*/React.createElement("div", {
     style: appStyle
-  }, /*#__PURE__*/React.createElement(InjectCSS, null), /*#__PURE__*/React.createElement("svg", {
+  }, /*#__PURE__*/React.createElement(InjectCSS, null), syncMsg && /*#__PURE__*/React.createElement("div", {
+    style: {
+      position: "fixed",
+      top: 0,
+      left: 0,
+      right: 0,
+      zIndex: 9998,
+      background: isOnline ? C.green + "EE" : C.red + "EE",
+      color: "#fff",
+      fontSize: 12,
+      fontWeight: 700,
+      padding: "8px 16px",
+      textAlign: "center",
+      letterSpacing: 0.5
+    }
+  }, syncMsg), !isOnline && !syncMsg && /*#__PURE__*/React.createElement("div", {
+    style: {
+      position: "fixed",
+      top: 0,
+      left: 0,
+      right: 0,
+      zIndex: 9998,
+      background: C.amber + "EE",
+      color: "#000",
+      fontSize: 11,
+      fontWeight: 700,
+      padding: "6px 16px",
+      textAlign: "center"
+    }
+  }, "\uD83D\uDCF5 Hors-ligne \u2014 modifications sauvegard\xE9es localement"), /*#__PURE__*/React.createElement("svg", {
     style: {
       position: "absolute",
       width: 0,
@@ -7461,7 +8403,8 @@ export default function App() {
     inspection: openIns,
     onBack: () => setSub(null),
     onUpdate: updateIns,
-    resps: respsState
+    resps: respsState,
+    sitesState: sitesState
   })), sub === "new-inspection" && /*#__PURE__*/React.createElement("div", {
     style: {
       position: "fixed",
@@ -7477,7 +8420,21 @@ export default function App() {
     user: user,
     onSave: saveNew,
     onBack: () => setSub(null),
-    resps: respsState
+    resps: respsState,
+    sitesState: sitesState,
+    customTemplates: appState.customTemplates || {},
+    siteAddresses: appState.siteAddresses || {},
+    onSaveTemplate: function (cat, items) {
+      handleAppStateUpdate({
+        ...appState,
+        customTemplates: {
+          ...(appState.customTemplates || {}),
+          [cat]: items
+        },
+        sites: sitesState,
+        resps: respsState
+      });
+    }
   })), sub === "quick-visit" && /*#__PURE__*/React.createElement("div", {
     style: {
       position: "fixed",
@@ -7492,7 +8449,8 @@ export default function App() {
   }, /*#__PURE__*/React.createElement(QuickVisitScreen, {
     user: user,
     onSave: saveNew,
-    onBack: () => setSub(null)
+    onBack: () => setSub(null),
+    sitesState: sitesState
   })), sub === "comparison" && /*#__PURE__*/React.createElement("div", {
     style: {
       position: "fixed",
@@ -7520,7 +8478,9 @@ export default function App() {
     onNav: nav,
     darkMode: darkMode,
     onToggleDark: () => setDarkMode(d => !d),
-    config: config
+    config: config,
+    sitesState: sitesState,
+    appState: appState
   }), screen === "inspections" && /*#__PURE__*/React.createElement(InspectionsScreen, {
     inspections: inspections,
     onOpen: openDetail,
@@ -7551,4 +8511,3 @@ export default function App() {
     badge: pending
   }));
 }
-ReactDOM.createRoot(document.getElementById("root")).render(React.createElement(App));
