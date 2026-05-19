@@ -1331,18 +1331,50 @@ function DashboardScreen({user,inspections,actions,onNav,config,sitesState,appSt
       {/* 4 KPIs */}
       <div style={{padding:"14px 14px 0",display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
         {[
-          {label:"Score moyen",val:`${avgScore}/100`,sub:`−${100-avgScore}pts de pénalité moy.`,col:scoreColor(avgScore),prog:avgScore},
-          {label:"Total pénalités",val:`−${penTotal}`,sub:`${totalNC} NC au total`,col:C.red,prog:null},
-          {label:"Actions critiques",val:critActs,sub:"Chacune = −"+(appState&&appState.penalites?appState.penalites.critique:5)+"pts",col:C.orange,prog:null},
-          {label:"Inspections",val:`${validated}/${fInspections.length}`,sub:"validées",col:C.cyan,prog:fInspections.length?Math.round(validated/fInspections.length*100):0},
-        ].map((k,i)=>(
-          <div key={i} style={{...S.card(`${k.col}22`)}}>
-            <div style={{fontSize:13,color:C.muted,letterSpacing:1,textTransform:"uppercase",marginBottom:6}}>{k.label}</div>
-            <div style={{fontSize:30,fontWeight:900,color:k.col,lineHeight:1}}>{k.val}</div>
-            {k.prog!==null&&<div style={{marginTop:8}}><Bar v={k.prog} col={k.col}/></div>}
-            <div style={{fontSize:14,color:k.col,marginTop:6,opacity:.8}}>{k.sub}</div>
-          </div>
-        ))}
+          {label:"Score moyen",val:`${avgScore}/100`,sub:`−${100-avgScore}pts de pénalité moy.`,col:scoreColor(avgScore),prog:avgScore,type:"normal"},
+          {label:"Audits par catégorie",col:C.purple,type:"categories"},
+          {label:"Actions critiques",val:critActs,sub:"Chacune = −"+(appState&&appState.penalites?appState.penalites.critique:5)+"pts",col:C.orange,prog:null,type:"normal"},
+          {label:"Inspections",val:`${validated}/${fInspections.length}`,sub:"validées",col:C.cyan,prog:fInspections.length?Math.round(validated/fInspections.length*100):0,type:"normal"},
+        ].map((k,i)=>{
+          if(k.type==="categories"){
+            var catCount={};
+            fInspections.forEach(function(ins){
+              var c=ins.categorie;
+              if(!catCount[c]) catCount[c]=0;
+              catCount[c]++;
+            });
+            var catEntries=Object.entries(catCount).sort(function(a,b){return b[1]-a[1];});
+            return (
+              <div key={i} style={{...S.card(`${k.col}22`)}}>
+                <div style={{fontSize:13,color:C.muted,letterSpacing:1,textTransform:"uppercase",marginBottom:8}}>{k.label}</div>
+                {catEntries.length===0?(
+                  <div style={{fontSize:14,color:C.muted,opacity:.7}}>Aucun audit</div>
+                ):(
+                  <div style={{display:"flex",flexWrap:"wrap",gap:6}}>
+                    {catEntries.map(function(e){
+                      var cat=e[0],n=e[1];
+                      var m=CAT_META[cat]||{icon:"📋",color:C.muted};
+                      return (
+                        <div key={cat} title={cat} style={{display:"flex",alignItems:"center",gap:4,padding:"4px 8px",borderRadius:8,background:m.color+"18",border:"1px solid "+m.color+"33"}}>
+                          <span style={{fontSize:16}}>{m.icon}</span>
+                          <span style={{fontSize:15,fontWeight:900,color:m.color}}>{n}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            );
+          }
+          return (
+            <div key={i} style={{...S.card(`${k.col}22`)}}>
+              <div style={{fontSize:13,color:C.muted,letterSpacing:1,textTransform:"uppercase",marginBottom:6}}>{k.label}</div>
+              <div style={{fontSize:30,fontWeight:900,color:k.col,lineHeight:1}}>{k.val}</div>
+              {k.prog!==null&&<div style={{marginTop:8}}><Bar v={k.prog} col={k.col}/></div>}
+              <div style={{fontSize:14,color:k.col,marginTop:6,opacity:.8}}>{k.sub}</div>
+            </div>
+          );
+        })}
       </div>
 
       {/* CTA */}
