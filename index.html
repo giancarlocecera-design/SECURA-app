@@ -3638,12 +3638,35 @@ function SettingsScreen({user,onLogout,appState,onAppStateUpdate,respsState,site
         <div style={{fontSize:14,color:C.muted,marginTop:2}}>{user.email}</div>
         <div style={{marginTop:6}}><Tag label={user.role} color={rc[user.role]||C.muted}/></div>
       </div>
-      <div style={{padding:"0 14px 12px",display:"flex",gap:6,overflowX:"auto"}}>
-        <button style={tabStyle("equipe")} onClick={()=>setTab("equipe")}>👥 Équipe</button>
-        <button style={tabStyle("sites")} onClick={()=>setTab("sites")}>📍 Sites</button>
-        <button style={tabStyle("systeme")} onClick={()=>setTab("systeme")}>⚙️ Système</button>
-        <button style={tabStyle("apparence")} onClick={()=>setTab("apparence")}>🎨 Style</button>
-        {user.role==="Admin"&&<button style={tabStyle("permissions")} onClick={()=>setTab("permissions")}>🔐 Accès</button>}
+      <div style={{padding:"0 14px 12px",display:"flex",gap:8}}>
+        {[
+          {k:"equipe",l:"Équipe",icon:"👥"},
+          {k:"sites",l:"Sites",icon:"📍"},
+          {k:"systeme",l:"Système",icon:"⚙️"},
+          {k:"apparence",l:"Style",icon:"🎨"}
+        ].concat(user.role==="Admin"?[{k:"permissions",l:"Accès",icon:"🔐"}]:[]).map(function(t){
+          var active=tab===t.k;
+          return (
+            <button key={t.k} onClick={function(){setTab(t.k);}} style={{
+              flex:1,
+              display:"flex",
+              flexDirection:"column",
+              alignItems:"center",
+              gap:5,
+              padding:"12px 4px",
+              borderRadius:14,
+              border:"1px solid "+(active?C.cyan:C.border),
+              background:active?"linear-gradient(135deg,"+C.cyan+",#0090aa)":"linear-gradient(135deg,"+C.surface+","+C.dim+")",
+              cursor:"pointer",
+              boxShadow:active?"0 4px 16px "+C.cyan+"55":"0 2px 8px rgba(0,0,0,0.25)",
+              transform:active?"translateY(-1px)":"none",
+              transition:"all .15s"
+            }}>
+              <span style={{fontSize:20,lineHeight:1}}>{t.icon}</span>
+              <span style={{fontSize:13,fontWeight:active?900:600,color:active?"#021016":C.text,letterSpacing:0.3}}>{t.l}</span>
+            </button>
+          );
+        })}
       </div>
       <div style={{padding:"0 14px"}}>
         {tab==="permissions"&&user.role==="Admin"&&<PermissionsScreen config={config} onConfigUpdate={onConfigUpdate} onBack={function(){setTab("equipe");}}/>}
