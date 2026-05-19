@@ -3355,18 +3355,31 @@ function RapportsScreen({inspections,onDelete,onArchive,config}){
       </div>
       <div style={{padding:"0 14px 14px"}}>
         <div style={{fontSize:12,color:C.muted,marginBottom:8,letterSpacing:1.5,textTransform:"uppercase"}}>Trier par</div>
-        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
           {[
-            {k:"date",l:"📅 Date",sub:"Plus récent d'abord"},
-            {k:"score",l:"📊 Score",sub:"Plus faible d'abord"},
-            {k:"site",l:"📍 Site",sub:"Ordre alphabétique"},
-            {k:"categorie",l:"🗂️ Catégorie",sub:"Ordre alphabétique"}
+            {k:"date",l:"Date"},
+            {k:"score",l:"Score"},
+            {k:"site",l:"Site"},
+            {k:"categorie",l:"Catégorie"}
           ].map(function(s){
             var active=sortBy===s.k;
             return (
-              <button key={s.k} onClick={function(){setSortBy(s.k);setSel(null);}} style={{padding:"10px 12px",borderRadius:12,border:"1px solid "+(active?C.cyan:C.border),background:active?C.cyan+"18":"transparent",cursor:"pointer",textAlign:"left"}}>
-                <div style={{fontSize:14,fontWeight:800,color:active?C.cyan:C.text}}>{s.l}</div>
-                <div style={{fontSize:11,color:C.muted,marginTop:2}}>{s.sub}</div>
+              <button key={s.k} onClick={function(){setSortBy(s.k);setSel(null);}} style={{
+                padding:"15px 12px",
+                borderRadius:14,
+                border:"1px solid "+(active?C.cyan:C.border),
+                background:active?"linear-gradient(135deg,"+C.cyan+",#0090aa)":"linear-gradient(135deg,"+C.surface+","+C.dim+")",
+                color:active?"#021016":C.text,
+                cursor:"pointer",
+                fontSize:17,
+                fontWeight:900,
+                letterSpacing:0.5,
+                textAlign:"center",
+                boxShadow:active?"0 4px 16px "+C.cyan+"55":"0 2px 8px rgba(0,0,0,0.25)",
+                transform:active?"translateY(-1px)":"none",
+                transition:"all .15s"
+              }}>
+                {s.l}
               </button>
             );
           })}
