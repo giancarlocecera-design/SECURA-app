@@ -235,7 +235,7 @@ function delaiLabel(poids){
 
 function calcScore(items){
   if(!items||!items.length) return 100;
-  const pen = items.filter(i=>!i.ok).reduce((s,i)=>s+(PENALITE[i.poids||i.p]||0),0);
+  const pen = items.filter(i=>!i.ok&&!i.na).reduce((s,i)=>s+(PENALITE[i.poids||i.p]||0),0);
   return Math.max(0, 100 - pen);
 }
 function scoreColor(s){ if(s===null||s===undefined||isNaN(s)) return C.muted; return s>=80?C.green:s>=55?C.amber:C.red; }
@@ -848,7 +848,7 @@ function ScoreRing({score,size=64}){
 // ═══════════════════════════════════════════════════════════════════════
 function mkIns(id,titre,site,cat,insp,date,statut,okMap=null){
   const items=(CHECKLISTS[cat]||[]).map((q,i)=>({...q,poids:q.p,ok:okMap?okMap[i]:i%4!==0,comment:"",photos:[]}));
-  return {id,titre,site,categorie:cat,inspecteur:insp,date,statut,items,notes:"",score:calcScore(items),nc:items.filter(i=>!i.ok).length};
+  return {id,titre,site,categorie:cat,inspecteur:insp,date,statut,items,notes:"",score:calcScore(items),nc:items.filter(i=>!i.ok&&!i.na).length};
 }
 const initInspections=[];
 const initActions=[];
@@ -1893,41 +1893,47 @@ function PhotoBtn({photos=[], onAdd, onRemove}){
 }
 
 // ── Checklist item card (shared) ────────────────────────────────
-function ItemCard({item, onToggle, onComment, onPhotoAdd, onPhotoRemove, onRespChange, onPoidsChange, onPoidsChangeDirect, onSetPoids, onDelete, showPhoto=true, resps}){
+function ItemCard({item, onToggle, onToggleNA, onComment, onPhotoAdd, onPhotoRemove, onRespChange, onPoidsChange, onPoidsChangeDirect, onSetPoids, onDelete, showPhoto=true, resps}){
   // Normalize to string names for display
   var rawList=(resps&&resps.length>0)?resps:RESPONSABLES;
   const respList=rawList.map(function(r){return typeof r==="object"?r.nom:r;});
-  const [showComment,setShowComment]=useState(!!item.comment);
+  const [showComment,setShowComment]=useState(!!item.comment&&!item.na);
+  var isNA=!!item.na;
   return (
-    <div style={{background:item.custom?(C.cyan+"08"):(item.ok?C.green+"06":C.red+"06"),borderRadius:12,marginBottom:8,border:"1px solid "+(item.custom?(C.cyan+"55"):(item.ok?C.green+"22":C.red+"22")),overflow:"hidden"}}>
+    <div style={{background:isNA?C.muted+"08":item.custom?(C.cyan+"08"):(item.ok?C.green+"06":C.red+"06"),borderRadius:12,marginBottom:8,border:"1px solid "+(isNA?C.muted+"33":item.custom?(C.cyan+"55"):(item.ok?C.green+"22":C.red+"22")),overflow:"hidden",opacity:isNA?0.7:1}}>
       {item.custom&&<div style={{background:"linear-gradient(90deg,"+C.cyan+"33,transparent)",padding:"3px 10px",display:"flex",alignItems:"center",gap:5}}><span style={{fontSize:12,color:C.cyan,fontWeight:800,letterSpacing:1}}>✦ QUESTION PERSONNALISÉE</span></div>}
+      {isNA&&<div style={{background:"linear-gradient(90deg,"+C.muted+"33,transparent)",padding:"3px 10px"}}><span style={{fontSize:12,color:C.muted,fontWeight:800,letterSpacing:1}}>🚫 NON APPLICABLE — exclue du score</span></div>}
       {/* Header cliquable */}
-      <div onClick={onToggle} style={{display:"flex",alignItems:"flex-start",gap:10,padding:"11px 10px",cursor:"pointer"}}>
-        <div style={{width:24,height:24,borderRadius:7,background:item.ok?C.green:C.red,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,fontSize:16,color:"#000",fontWeight:900,marginTop:1}}>{item.ok?"✓":"✗"}</div>
+      <div onClick={isNA?undefined:onToggle} style={{display:"flex",alignItems:"flex-start",gap:10,padding:"11px 10px",cursor:isNA?"default":"pointer"}}>
+        <div style={{width:24,height:24,borderRadius:7,background:isNA?C.muted:item.ok?C.green:C.red,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,fontSize:16,color:"#000",fontWeight:900,marginTop:1}}>{isNA?"–":item.ok?"✓":"✗"}</div>
         <div style={{flex:1}}>
-          <div style={{fontSize:15,lineHeight:1.45,color:item.custom?C.cyan:undefined}}>{item.l}</div>
+          <div style={{fontSize:15,lineHeight:1.45,color:isNA?C.muted:item.custom?C.cyan:undefined,textDecoration:isNA?"line-through":"none"}}>{item.l}</div>
           <div style={{marginTop:5,display:"flex",gap:4,alignItems:"center",flexWrap:"wrap"}}>
-            <Tag label={poidsLabel(item.poids)} color={poidsColor(item.poids)} small/>
-            {!item.ok&&<span style={{fontSize:12,color:C.red,fontWeight:800}}>{poidsPen(item.poids)}</span>}
-            {item.ok&&<span style={{fontSize:12,color:C.green}}>conforme</span>}
+            {!isNA&&<Tag label={poidsLabel(item.poids)} color={poidsColor(item.poids)} small/>}
+            {!isNA&&!item.ok&&<span style={{fontSize:12,color:C.red,fontWeight:800}}>{poidsPen(item.poids)}</span>}
+            {!isNA&&item.ok&&<span style={{fontSize:12,color:C.green}}>conforme</span>}
+            {isNA&&<span style={{fontSize:12,color:C.muted,fontWeight:700}}>non applicable</span>}
             {(item.photos&&item.photos.length)>0&&<span style={{fontSize:12,color:C.cyan}}>📷 {item.photos.length}</span>}
-            {item.comment&&<span style={{fontSize:12,color:C.amber}}>💬</span>}
+            {item.comment&&!isNA&&<span style={{fontSize:12,color:C.amber}}>💬</span>}
           </div>
         </div>
         {onDelete&&<button onClick={function(e){e.stopPropagation();if(window.confirm("Supprimer cette question ?"))onDelete();}} style={{background:"transparent",border:"none",color:C.muted,fontSize:19,cursor:"pointer",padding:"2px 4px",flexShrink:0,lineHeight:1}} title="Supprimer cette question">✕</button>}
       </div>
       {/* Tools row */}
       <div style={{padding:"0 10px 8px",display:"flex",gap:8,flexWrap:"wrap"}}>
-        <button onClick={e=>{e.stopPropagation();setShowComment(v=>!v);}} style={{fontSize:13,padding:"4px 8px",borderRadius:7,background:`${C.amber}12`,border:`1px solid ${C.amber}33`,color:C.amber,cursor:"pointer",fontWeight:700}}>
+        {onToggleNA&&<button onClick={function(e){e.stopPropagation();onToggleNA();}} style={{fontSize:13,padding:"4px 8px",borderRadius:7,background:isNA?C.muted+"33":"#1E2535",border:"1px solid "+(isNA?C.muted+"66":"#2E3545"),color:isNA?C.text:C.muted,cursor:"pointer",fontWeight:700}}>
+          🚫 {isNA?"Réactiver la question":"Non applicable"}
+        </button>}
+        {!isNA&&<button onClick={e=>{e.stopPropagation();setShowComment(v=>!v);}} style={{fontSize:13,padding:"4px 8px",borderRadius:7,background:`${C.amber}12`,border:`1px solid ${C.amber}33`,color:C.amber,cursor:"pointer",fontWeight:700}}>
           💬 {showComment?"Cacher":"Remarque"}
-        </button>
-        {[["critique","CRIT",C.red],["eleve","ÉLEV",C.orange],["mineur","MOD",C.amber]].map(function(arr){
+        </button>}
+        {!isNA&&[["critique","CRIT",C.red],["eleve","ÉLEV",C.orange],["mineur","MOD",C.amber]].map(function(arr){
           var pv=arr[0],pl=arr[1],pc=arr[2];
           var active=(item.poids||item.p||"mineur")===pv;
           return <button key={pv} onClick={function(){if(onSetPoids){onSetPoids(pv);}else if(onPoidsChange){onPoidsChange(pv);}else if(onPoidsChangeDirect){onPoidsChangeDirect(String(item.id),pv);}}} style={{fontSize:13,padding:"3px 7px",borderRadius:7,background:active?pc+"33":"#1E2535",color:active?pc:"#8892A4",border:"1px solid "+(active?pc+"66":"#2E3545"),fontWeight:active?800:500,cursor:"pointer",minWidth:36,textAlign:"center"}}>{active?"✓ ":""}{pl}</button>;
         })}
       </div>
-      {!item.ok&&onRespChange&&(
+      {!isNA&&!item.ok&&onRespChange&&(
         <div style={{padding:"0 10px 10px"}} onClick={e=>e.stopPropagation()}>
           <select
             value={item.resp||""}
@@ -1939,12 +1945,12 @@ function ItemCard({item, onToggle, onComment, onPhotoAdd, onPhotoRemove, onRespC
           </select>
         </div>
       )}
-      {showComment&&(
+      {!isNA&&showComment&&(
         <div style={{padding:"0 10px 10px"}} onClick={e=>e.stopPropagation()}>
           <textarea value={item.comment||""} onChange={e=>onComment(e.target.value)} placeholder="Remarque, mesure corrective, référence..." style={{...S.input,minHeight:60,fontSize:15,resize:"vertical"}}/>
         </div>
       )}
-      {showPhoto&&(
+      {!isNA&&showPhoto&&(
         <div style={{padding:"0 10px 10px"}} onClick={e=>e.stopPropagation()}>
           <PhotoBtn photos={item.photos||[]} onAdd={onPhotoAdd} onRemove={onPhotoRemove}/>
         </div>
@@ -2007,7 +2013,7 @@ function InspectionDetailScreen({inspection,onBack,onUpdate,resps,sitesState}){
   const [metaForm,setMetaForm]=useState({titre:inspection.titre,site:inspection.site,date:inspection.date,categorie:inspection.categorie,inspecteur:inspection.inspecteur});
 
   const score=calcScore(items);
-  const ncItems=items.filter(i=>!i.ok);
+  const ncItems=items.filter(i=>!i.ok&&!i.na);
   const penTotal=ncItems.reduce((s,i)=>s+(PENALITE[i.poids||i.p]||0),0);
   const sections=[...new Set(items.map(i=>i.s))];
 
@@ -2143,6 +2149,7 @@ function InspectionDetailScreen({inspection,onBack,onUpdate,resps,sitesState}){
                   return (
                   <ItemCard key={itemId} item={item}
                     onToggle={function(){toggle(itemId);}}
+                    onToggleNA={function(){setItems(function(p){return p.map(function(i){return i.id===itemId?{...i,na:!i.na}:i;});});}}
                     onComment={function(v){setComment(itemId,v);}}
                     onPhotoAdd={function(src){addPhoto(itemId,src);}}
                     onPhotoRemove={function(idx){removePhoto(itemId,idx);}}
@@ -2399,7 +2406,7 @@ function NewInspectionScreen({user,onSave,onBack,resps,sitesState,customTemplate
   const removePhoto=(id,idx)=>setItems(p=>p.map(i=>i.id===id?{...i,photos:(i.photos||[]).filter((_,j)=>j!==idx)}:i));
 
   const score=calcScore(items);
-  const ncItems=items.filter(i=>!i.ok);
+  const ncItems=items.filter(i=>!i.ok&&!i.na);
   const penTotal=ncItems.reduce((s,i)=>s+(PENALITE[i.poids||i.p]||0),0);
   const sections=[...new Set(items.map(i=>i.s))];
   const totalPhotos=items.reduce((s,i)=>s+((i.photos&&i.photos.length)||0),0);
@@ -2559,6 +2566,7 @@ function NewInspectionScreen({user,onSave,onBack,resps,sitesState,customTemplate
                       return (
                       <ItemCard key={itemId} item={item}
                         onToggle={function(){toggle(itemId);}}
+                        onToggleNA={function(){setItems(function(p){return p.map(function(i){return i.id===itemId?{...i,na:!i.na}:i;});});}}
                         onComment={function(v){setComment(itemId,v);}}
                         onPhotoAdd={function(src){addPhoto(itemId,src);}}
                         onPhotoRemove={function(idx){removePhoto(itemId,idx);}}
@@ -3053,8 +3061,9 @@ function RapportsScreen({inspections,onDelete,onArchive,config}){
   const totalNC=validated.reduce((s,i)=>s+i.nc,0);
 
   const buildHTML=(ins)=>{
-    const ncItems=(ins.items||[]).filter(i=>!i.ok);
-    const okItems=(ins.items||[]).filter(i=>i.ok);
+    const ncItems=(ins.items||[]).filter(i=>!i.ok&&!i.na);
+    const okItems=(ins.items||[]).filter(i=>i.ok&&!i.na);
+    const naItems=(ins.items||[]).filter(i=>i.na);
     const penTotal=ncItems.reduce((s,i)=>s+(PENALITE[i.poids||i.p]||0),0);
     const scCol=scoreColor(ins.score);
     const accompStr=(ins.accompagnateurs&&ins.accompagnateurs.length>0)?ins.accompagnateurs.join(", "):"—";
@@ -3107,8 +3116,9 @@ function RapportsScreen({inspections,onDelete,onArchive,config}){
     try{
       var appName=(config&&config.appName)||"SECURA";
       
-      var ncItems=(ins.items||[]).filter(function(i){return !i.ok;});
-      var okItems=(ins.items||[]).filter(function(i){return i.ok;});
+      var ncItems=(ins.items||[]).filter(function(i){return !i.ok&&!i.na;});
+      var okItems=(ins.items||[]).filter(function(i){return i.ok&&!i.na;});
+      var naItems=(ins.items||[]).filter(function(i){return i.na;});
       var penTotal=ncItems.reduce(function(s,i){return s+(PENALITE[i.poids||i.p]||0);},0);
       var scCol=ins.score>=80?"#00C853":ins.score>=55?"#FFB300":"#FF1744";
       var accompStr=(ins.accompagnateurs&&ins.accompagnateurs.length>0)?ins.accompagnateurs.join(", "):"—";
@@ -3131,6 +3141,9 @@ function RapportsScreen({inspections,onDelete,onArchive,config}){
         var photos=(it.photos||[]).map(function(src){return "<img src='"+src+"' style='width:80px;height:80px;object-fit:cover;border-radius:6px;border:1px solid #ddd;margin:2px'/>";}).join("");
         var photosHTML=photos?"<div style='display:flex;flex-wrap:wrap;gap:4px;margin-top:6px'>"+photos+"</div>":"";
         return "<div class='row ok'><div class='num ok-num'>OK</div><div class='rt'><div class='rl'>"+it.l+"</div>"+(it.comment?"<div class='rc'>"+it.comment+"</div>":"")+photosHTML+"</div></div>";
+      }).join("");
+      var naRows=naItems.map(function(it){
+        return "<div class='row' style='opacity:0.7'><div class='num' style='background:#9aa;border-color:#9aa;color:#fff'>N/A</div><div class='rt'><div class='rl' style='text-decoration:line-through;color:#888'>"+it.l+"</div></div><span class='badge' style='color:#888;border-color:#aaa'>NON APPLICABLE</span></div>";
       }).join("");
       var sigSection="";
       if(ins.sig_inspecteur||ins.sig_responsable){
@@ -3225,6 +3238,7 @@ function RapportsScreen({inspections,onDelete,onArchive,config}){
         +"</div></div></div>"
         +(ncItems.length>0?"<h2 class='nc'>Non-conformites ("+ncItems.length+")</h2>"+ncRows:"")
         +(okItems.length>0?"<h2 class='ok'>Points conformes ("+okItems.length+")</h2>"+okRows:"")
+        +(naItems.length>0?"<h2 style='background:#f0f0f0;color:#666;border-left:4px solid #999'>Questions non applicables ("+naItems.length+")</h2>"+naRows:"")
         +(function(){
           if(!ins.zonesAmiante||ins.zonesAmiante.length===0) return "";
           var stateLabels={intact:["Intact","#00C853"],surveillance:["A surveiller","#FFB300"],degrade:["Degrade","#FF6D00"],critique:["Critique","#FF1744"]};
@@ -3349,7 +3363,7 @@ function RapportsScreen({inspections,onDelete,onArchive,config}){
           </div>
         )}
         {(showArchives?archived:validated).map(function(ins,i){
-          const pen=(ins.items||[]).filter(function(x){return !x.ok;}).reduce(function(s,x){return s+(PENALITE[x.poids||x.p]||0);},0);
+          const pen=(ins.items||[]).filter(function(x){return !x.ok&&!x.na;}).reduce(function(s,x){return s+(PENALITE[x.poids||x.p]||0);},0);
           return (
             <div key={i} style={{...S.card(sel===i?C.cyan:C.border),marginBottom:10,cursor:"pointer",opacity:showArchives?0.85:1}} onClick={function(){setSel(i===sel?null:i);}}>
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
@@ -4606,7 +4620,7 @@ function App(){
       LS.addPending("upsert_inspection",ins);
       setSyncMsg("📵 Sauvegardé localement — sera synchronisé dès la reconnexion");
     }
-    var ncItems=(ins.items||[]).filter(function(it){return !it.ok;});
+    var ncItems=(ins.items||[]).filter(function(it){return !it.ok&&!it.na;});
     if(ncItems.length>0){
       var dynDel=appState&&appState.delais?appState.delais:DELAIS;
       var newActs=ncItems.map(function(nc){
