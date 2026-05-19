@@ -4203,10 +4203,34 @@ function AccidentScreen({appState,onAppStateUpdate,sitesState,config}){
       )}
 
       {/* Tabs */}
-      <div style={{padding:"0 14px 12px",display:"flex",gap:6}}>
-        <button style={{...tabStyle("kpi"),flex:1,textAlign:"center"}} onClick={function(){setTab("kpi");}}>Indicateurs</button>
-        <button style={{...tabStyle("liste"),flex:1,textAlign:"center"}} onClick={function(){setTab("liste");}}>Liste ({sorted.length})</button>
-        <button style={{...tabStyle("evolution"),flex:1,textAlign:"center"}} onClick={function(){setTab("evolution");}}>Évolution</button>
+      <div style={{padding:"0 14px 12px",display:"flex",gap:10}}>
+        {[
+          {k:"kpi",l:"Indicateurs"},
+          {k:"liste",l:"Liste ("+sorted.length+")"},
+          {k:"evolution",l:"Évolution"}
+        ].map(function(t){
+          var active=tab===t.k;
+          return (
+            <button key={t.k} onClick={function(){setTab(t.k);}} style={{
+              flex:1,
+              padding:"15px 8px",
+              borderRadius:14,
+              border:"1px solid "+(active?C.cyan:C.border),
+              background:active?"linear-gradient(135deg,"+C.cyan+",#0090aa)":"linear-gradient(135deg,"+C.surface+","+C.dim+")",
+              color:active?"#021016":C.text,
+              cursor:"pointer",
+              fontSize:17,
+              fontWeight:900,
+              letterSpacing:0.5,
+              textAlign:"center",
+              boxShadow:active?"0 4px 16px "+C.cyan+"55":"0 2px 8px rgba(0,0,0,0.25)",
+              transform:active?"translateY(-1px)":"none",
+              transition:"all .15s"
+            }}>
+              {t.l}
+            </button>
+          );
+        })}
       </div>
 
       {/* KPI */}
