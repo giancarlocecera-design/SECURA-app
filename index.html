@@ -3056,10 +3056,21 @@ function RapportsScreen({inspections,onDelete,onArchive,config}){
   const [reportHTML,setReportHTML]=useState(null);
   const [publicURL,setPublicURL]=useState(null);
   const [showArchives,setShowArchives]=useState(false);
-  const validated=inspections.filter(i=>i.statut==="Validée"&&!i.archived);
-  const archived=inspections.filter(i=>i.archived);
-  const avg=validated.length?Math.round(validated.reduce((s,i)=>s+i.score,0)/validated.length):100;
-  const totalNC=validated.reduce((s,i)=>s+i.nc,0);
+  const [sortBy,setSortBy]=useState("date");
+  const validatedRaw=inspections.filter(i=>i.statut==="Validée"&&!i.archived);
+  const archivedRaw=inspections.filter(i=>i.archived);
+  function sortList(list){
+    var arr=list.slice();
+    if(sortBy==="date") arr.sort(function(a,b){return (b.date||"").localeCompare(a.date||"");});
+    else if(sortBy==="score") arr.sort(function(a,b){return (a.score||0)-(b.score||0);});
+    else if(sortBy==="site") arr.sort(function(a,b){return (a.site||"").localeCompare(b.site||"");});
+    else if(sortBy==="categorie") arr.sort(function(a,b){return (a.categorie||"").localeCompare(b.categorie||"");});
+    return arr;
+  }
+  const validated=sortList(validatedRaw);
+  const archived=sortList(archivedRaw);
+  const avg=validatedRaw.length?Math.round(validatedRaw.reduce((s,i)=>s+i.score,0)/validatedRaw.length):100;
+  const totalNC=validatedRaw.reduce((s,i)=>s+i.nc,0);
 
   const buildHTML=(ins)=>{
     const ncItems=(ins.items||[]).filter(i=>!i.ok&&!i.na);
@@ -3342,10 +3353,24 @@ function RapportsScreen({inspections,onDelete,onArchive,config}){
         </div>
         <button onClick={function(){setShowArchives(!showArchives);setSel(null);}} style={{background:showArchives?"linear-gradient(135deg,"+C.cyan+",#007799)":"transparent",border:showArchives?"none":"1px solid "+C.amber+"66",borderRadius:10,padding:"7px 12px",color:showArchives?"#000":C.amber,fontSize:14,fontWeight:800,cursor:"pointer"}}>{showArchives?"← Retour":"📦 Archives ("+archived.length+")"}</button>
       </div>
-      <div style={{padding:"0 14px 14px",display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:10}}>
-        {[{l:"Score moyen",v:avg+"/100",c:scoreColor(avg)},{l:"Total NC",v:totalNC,c:C.red},{l:"Validées",v:validated.length,c:C.green}].map(function(s,i){
-          return <div key={i} style={{...S.card(s.c+"22"),textAlign:"center"}}><div style={{fontSize:20,fontWeight:900,color:s.c}}>{s.v}</div><div style={{fontSize:13,color:C.muted,marginTop:4}}>{s.l}</div></div>;
-        })}
+      <div style={{padding:"0 14px 14px"}}>
+        <div style={{fontSize:12,color:C.muted,marginBottom:8,letterSpacing:1.5,textTransform:"uppercase"}}>Trier par</div>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
+          {[
+            {k:"date",l:"📅 Date",sub:"Plus récent d'abord"},
+            {k:"score",l:"📊 Score",sub:"Plus faible d'abord"},
+            {k:"site",l:"📍 Site",sub:"Ordre alphabétique"},
+            {k:"categorie",l:"🗂️ Catégorie",sub:"Ordre alphabétique"}
+          ].map(function(s){
+            var active=sortBy===s.k;
+            return (
+              <button key={s.k} onClick={function(){setSortBy(s.k);setSel(null);}} style={{padding:"10px 12px",borderRadius:12,border:"1px solid "+(active?C.cyan:C.border),background:active?C.cyan+"18":"transparent",cursor:"pointer",textAlign:"left"}}>
+                <div style={{fontSize:14,fontWeight:800,color:active?C.cyan:C.text}}>{s.l}</div>
+                <div style={{fontSize:11,color:C.muted,marginTop:2}}>{s.sub}</div>
+              </button>
+            );
+          })}
+        </div>
       </div>
       <div style={{padding:"0 14px"}}>
         <div style={{fontSize:13,color:C.muted,marginBottom:10,letterSpacing:2,textTransform:"uppercase"}}>Sélectionner une inspection</div>
