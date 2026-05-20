@@ -1837,7 +1837,7 @@ function InspectionsScreen({inspections,onOpen,onNav,onDelete,user,config}){
                 </div>
               </div>
               <div style={{marginTop:8}}><Bar v={ins.score} col={scoreColor(ins.score)}/></div>
-              <InlineDelete onConfirm={()=>onDelete&&onDelete(ins.id)}/>
+              <InlineDelete onConfirm={()=>{onDelete&&onDelete(ins.id);}}/>
             </div>
           );
         })}
@@ -3454,12 +3454,12 @@ function RapportsScreen({inspections,onDelete,onArchive,config}){
                   {showArchives?(
                     <div style={{display:"flex",gap:8,marginTop:4}}>
                       <button onClick={function(e){e.stopPropagation();onArchive&&onArchive(ins.id,false);}} style={{flex:1,background:"transparent",border:"1px solid "+C.green+"44",borderRadius:8,padding:"7px 12px",color:C.green,fontSize:14,fontWeight:700,cursor:"pointer"}}>↩️ Restaurer</button>
-                      <InlineDelete onConfirm={()=>onDelete&&onDelete(ins.id)}/>
+                      <InlineDelete onConfirm={()=>{onDelete&&onDelete(ins.id);setSel(null);}}/>
                     </div>
                   ):(
                     <div style={{display:"flex",gap:8,marginTop:4}}>
                       <button onClick={function(e){e.stopPropagation();onArchive&&onArchive(ins.id,true);setSel(null);}} style={{flex:1,background:"transparent",border:"1px solid "+C.amber+"44",borderRadius:8,padding:"7px 12px",color:C.amber,fontSize:14,fontWeight:700,cursor:"pointer"}}>📦 Archiver</button>
-                      <InlineDelete onConfirm={()=>onDelete&&onDelete(ins.id)}/>
+                      <InlineDelete onConfirm={()=>{onDelete&&onDelete(ins.id);setSel(null);}}/>
                     </div>
                   )}
                 </div>
