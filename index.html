@@ -1,31 +1,29 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-  <meta name="theme-color" content="#07090F"/>
-  <meta name="apple-mobile-web-app-capable" content="yes"/>
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
-  <title>SECURA</title>
-  <link rel="manifest" href="/manifest.json"/>
-  <link rel="apple-touch-icon" href="/icon-final-192.png"/>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;800;900&display=swap" rel="stylesheet"/>
-  <style>
-    *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-    body{background:#07090F;overflow-x:hidden;}
-    input,button,select,textarea{font-family:inherit;}
-    @keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" />
+<meta name="theme-color" content="#0a2540" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="mobile-web-app-capable" content="yes" />
+<link rel="manifest" href="/manifest.json" />
+<title>SECURA — Audit HSE</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  html,body,#root{height:100%;width:100%;overflow:hidden;background:#f4f6f8;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen,Ubuntu,sans-serif;color:#0a2540}
+  body{overscroll-behavior:none}
+  input,textarea,select,button{font-family:inherit;font-size:16px}
+  ::-webkit-scrollbar{width:0;height:0}
+</style>
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 </head>
 <body>
-  <div id="root"></div>
-  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
-  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-  <script type="text/babel" data-presets="react">
-const { useState, useRef } = React;
-
+<div id="root"></div>
+<script type="text/babel" data-presets="react">
+const { useState, useRef, useEffect, useMemo, useCallback } = React;
 
 // ═══════════════════════════════════════════════════════════════
 // SUPABASE CLIENT
@@ -259,6 +257,8 @@ const CHECKLISTS = {
   {id:"INC05",s:"Détection & alarme",l:"Sirène/avertisseur audible dans l'ensemble des locaux y compris sanitaires et caves",p:"critique"},
   {id:"INC06",s:"Détection & alarme",l:"Report d'alarme vers télésurveillance ou poste de gardiennage 24h/24",p:"eleve"},
   {id:"INC07",s:"Détection & alarme",l:"Alimentation secourue (batteries) de la CDI en état — autonomie ≥ 72h vérifiée",p:"eleve"},
+  {id:"INC42",s:"Détection & alarme",l:"Asservissements détection ↔ portes coupe-feu, clapets CVC, ascenseur et contrôle d'accès fonctionnels",p:"critique"},
+  {id:"INC43",s:"Détection & alarme",l:"Manuel d'instructions et schéma de zone (localisation des détecteurs) affichés près de la centrale",p:"mineur"},
   // Extinction
   {id:"INC08",s:"Moyens d'extinction",l:"Extincteurs présents à chaque poste conformément au plan d'implantation validé",p:"critique"},
   {id:"INC09",s:"Moyens d'extinction",l:"Extincteurs vérifiés annuellement par organisme agréé — étiquette à jour",p:"critique"},
@@ -267,6 +267,7 @@ const CHECKLISTS = {
   {id:"INC12",s:"Moyens d'extinction",l:"Sprinklers : tête de commande opérationnelle, réserve d'eau conforme, pression nominale maintenue",p:"critique"},
   {id:"INC13",s:"Moyens d'extinction",l:"Système CO₂/inertage locaux spéciaux : alarme d'évacuation préalable fonctionnelle",p:"critique"},
   {id:"INC14",s:"Moyens d'extinction",l:"Couvertures anti-feu disponibles dans cuisines et locaux à risque",p:"eleve"},
+  {id:"INC44",s:"Moyens d'extinction",l:"Extincteurs correctement suspendus (hauteur réglementaire, pas posés au sol) — accès libre, jamais obstrués",p:"eleve"},
   // Évacuation
   {id:"INC15",s:"Évacuation",l:"Toutes issues de secours dégagées sur toute leur longueur — aucun stockage dans les dégagements",p:"critique"},
   {id:"INC16",s:"Évacuation",l:"Issues de secours déverrouillables de l'intérieur sans clé (barre anti-panique ou poignée)",p:"critique"},
@@ -276,6 +277,9 @@ const CHECKLISTS = {
   {id:"INC20",s:"Évacuation",l:"Exercice d'évacuation réalisé ≥ 1x/an — PV avec chronométrage disponible",p:"critique"},
   {id:"INC21",s:"Évacuation",l:"Procédure d'évacuation des personnes à mobilité réduite (PMR) établie et affichée",p:"critique"},
   {id:"INC22",s:"Évacuation",l:"Chaise d'évacuation PMR disponible et personnel formé à son usage",p:"eleve"},
+  {id:"INC45",s:"Évacuation",l:"Distance d'évacuation ≤ 50 m vers une issue / temps d'évacuation théorique ≤ 5 minutes",p:"critique"},
+  {id:"INC46",s:"Évacuation",l:"Nombre et largeur des sorties dimensionnés selon l'occupation (analyse type NBN S21-100)",p:"critique"},
+  {id:"INC47",s:"Évacuation",l:"Accès véhicules de secours dégagé, signalé, gabarit conforme — voie pompiers utilisable en permanence",p:"critique"},
   // Éclairage de sécurité
   {id:"INC23",s:"Éclairage de sécurité",l:"BAES (blocs autonomes d'éclairage de sécurité) présents dans chaque zone et couloir",p:"critique"},
   {id:"INC24",s:"Éclairage de sécurité",l:"Test mensuel 1 heure et test annuel 8 heures documentés pour tous les BAES",p:"eleve"},
@@ -286,11 +290,17 @@ const CHECKLISTS = {
   {id:"INC28",s:"Compartimentage",l:"Joints intumescents intacts sur tous les passages de câbles, conduits et gaines",p:"eleve"},
   {id:"INC29",s:"Compartimentage",l:"Cloisonnements coupe-feu sans perforation non rebouchée ni dommage structurel",p:"eleve"},
   {id:"INC30",s:"Compartimentage",l:"Registres coupe-feu dans les gaines CVC testés et fonctionnels",p:"eleve"},
+  {id:"INC48",s:"Compartimentage",l:"Cage d'escalier traitée comme volume protégé : parois EI 60, portes EI1 30 avec ferme-porte, exutoire de fumée ≥ 1 m² en toiture avec commande accessible",p:"critique"},
+  {id:"INC49",s:"Compartimentage",l:"Exutoires de fumée présents et contrôlés annuellement — commande manuelle accessible (boîtier prioritaire pompiers)",p:"critique"},
+  {id:"INC50",s:"Compartimentage",l:"Résistance au feu de la structure et des planchers évaluée et conforme (attention bâtiments anciens à structure bois)",p:"eleve"},
+  {id:"INC51",s:"Compartimentage",l:"Identification claire des zones techniques (chaufferie, local gaz, TGBT, archives) — pictogrammes + code couleurs canalisations (gaz RAL1004, incendie RAL3000)",p:"eleve"},
   // Stockage & matériaux
   {id:"INC31",s:"Stockage & matériaux",l:"Substances inflammables stockées en armoire de sécurité agréée, ventilée et fermée à clé",p:"critique"},
   {id:"INC32",s:"Stockage & matériaux",l:"Quantités de matières combustibles limitées sur les postes — pas de stockage sauvage",p:"critique"},
   {id:"INC33",s:"Stockage & matériaux",l:"Permis de feu délivré et affiché pour tout travail générant des points chauds",p:"critique"},
   {id:"INC34",s:"Stockage & matériaux",l:"Zones de stockage séparées des locaux à risque d'inflammation (distances réglementaires)",p:"eleve"},
+  {id:"INC52",s:"Stockage & matériaux",l:"Inventaire produits inflammables avec FDS — au-delà de 50 L : armoire anti-feu agréée obligatoire",p:"critique"},
+  {id:"INC53",s:"Stockage & matériaux",l:"Politique tabagisme appliquée : interdiction de fumer affichée, zones fumeurs désignées extérieures avec cendriers",p:"eleve"},
   // Documentation & formation
   {id:"INC35",s:"Documentation & formation",l:"Registre de sécurité incendie tenu à jour, signé par le responsable désigné",p:"critique"},
   {id:"INC36",s:"Documentation & formation",l:"Consignes générales d'incendie affichées — numéros 112, plan de situation joint",p:"eleve"},
@@ -299,6 +309,17 @@ const CHECKLISTS = {
   {id:"INC39",s:"Documentation & formation",l:"Rapport de la dernière visite de contrôle par organisme accrédité disponible",p:"eleve"},
   {id:"INC40",s:"Documentation & formation",l:"Attestation de conformité initiale ou rapport de mise en service disponible",p:"mineur"},
   {id:"INC41",s:"Documentation & formation",l:"Programme annuel de maintenance préventive incendie établi et suivi",p:"mineur"},
+  {id:"INC54",s:"Documentation & formation",l:"Dossier d'intervention pompier disponible à l'entrée (CBET art III.3-21) : SLCI, plans, vannes fluides, centrale détection",p:"critique"},
+  {id:"INC55",s:"Documentation & formation",l:"Dossier de prévention incendie compilé (CBET art III.3-24) : analyse risques + SLCI + PUI + plans + dossier pompier + exercices + équipements",p:"critique"},
+  {id:"INC56",s:"Documentation & formation",l:"Procédure d'accueil sécurité des nouveaux collaborateurs avec consignes d'urgence (CBET art III.3-25)",p:"eleve"},
+  {id:"INC57",s:"Documentation & formation",l:"Suivi documenté des remarques émises dans les rapports précédents (SIPPT, pompiers, organismes externes)",p:"eleve"},
+  // Locaux à risque spécifique
+  {id:"INC58",s:"Locaux à risque spécifique",l:"Chaufferie mazout : ventilation suffisante, rétention/bac à sable sous brûleur, extinction automatique dégoupillée et opérationnelle",p:"critique"},
+  {id:"INC59",s:"Locaux à risque spécifique",l:"Chaufferie gaz : détection gaz couplée à électrovanne de coupure, vannes localisées et accessibles, ventilation conforme",p:"critique"},
+  {id:"INC60",s:"Locaux à risque spécifique",l:"Appareils de chauffage individuels (convecteurs/chauffe-eau gaz) : modèles étanches récents, entretien périodique, détection CO si chauffe-eau gaz",p:"critique"},
+  {id:"INC61",s:"Locaux à risque spécifique",l:"Local archives / forte charge calorifique : aucun branchement, aucune source d'ignition, détection incendie renforcée",p:"eleve"},
+  {id:"INC62",s:"Locaux à risque spécifique",l:"Réfectoire/kitchenette : entretien régulier (grille-pain, frigo, micro-ondes), pas d'équipements personnels non contrôlés",p:"mineur"},
+  {id:"INC63",s:"Locaux à risque spécifique",l:"Bureaux : pas de chargeurs branchés en permanence inutilisés, multiprises en cascade prohibées",p:"mineur"},
 ],
 
 // ──────────────────────────────────────────────────────────────
@@ -920,7 +941,7 @@ function HelpScreen({onBack,config}){
       "Bouton ❓ — accès à cette aide depuis le dashboard"
     ]},
     {icon:"📋",title:"Audits & Inspections",sub:"10 catégories d'audit disponibles",color:C.green,items:[
-      "🔥 Incendie — 41 questions / 7 thèmes (détection, alarme, extincteurs, évacuation)",
+      "🔥 Incendie — 63 questions / 8 thèmes (détection, extinction, évacuation, compartimentage, locaux à risque)",
       "⚡ Électricité — 40 questions / 7 thèmes (RGIE, tableaux, prises, mise à la terre)",
       "🛡️ Sécurité générale — 64 questions / 10 thèmes (le plus complet, audit annuel)",
       "🧼 Hygiène & propreté — 40 questions / 6 thèmes (sanitaires, vestiaires, nettoyage)",
@@ -4989,18 +5010,16 @@ function App(){
   );
 }
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
-root.render(React.createElement(App, null));
-  </script>
-  <script>
-    if('serviceWorker' in navigator){
-      navigator.serviceWorker.getRegistrations().then(function(registrations){
-        registrations.forEach(function(sw){sw.unregister();});
-      });
-      caches.keys().then(function(names){
-        names.forEach(function(name){caches.delete(name);});
-      });
-    }
-  </script>
+
+ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(App));
+
+</script>
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function() {
+      navigator.serviceWorker.register('/sw.js').catch(function(e){ console.log('SW registration failed:', e); });
+    });
+  }
+</script>
 </body>
 </html>
