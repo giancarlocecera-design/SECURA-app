@@ -3612,7 +3612,17 @@ function RapportsScreen({inspections,onDelete,onArchive,config,appState}){
                   var totN=critN+elevN+minN;
                   if(totN===0) return "";
                   var pctC=Math.round(critN/totN*100),pctE=Math.round(elevN/totN*100),pctM=Math.round(minN/totN*100);
-                  return "<h3 style='font-size:12px;color:#07090F;margin:18px 0 6px 0;letter-spacing:2px;text-transform:uppercase;border-left:3px solid #00E5FF;padding-left:8px'>Repartition NC par criticite</h3>"
+                  // Période couverte (de la plus ancienne à la plus récente inspection validée)
+                  var months=["Janvier","Fevrier","Mars","Avril","Mai","Juin","Juillet","Aout","Septembre","Octobre","Novembre","Decembre"];
+                  var insDates=validated.map(function(i){return i.date;}).filter(Boolean).sort();
+                  var periode="";
+                  if(insDates.length>0){
+                    var minP=insDates[0].split("-"),maxP=insDates[insDates.length-1].split("-");
+                    var minLbl=months[parseInt(minP[1])-1]+" "+minP[0];
+                    var maxLbl=months[parseInt(maxP[1])-1]+" "+maxP[0];
+                    periode=minLbl===maxLbl?minLbl:minLbl+" — "+maxLbl;
+                  }
+                  return "<h3 style='font-size:12px;color:#07090F;margin:18px 0 6px 0;letter-spacing:2px;text-transform:uppercase;border-left:3px solid #00E5FF;padding-left:8px'>Repartition NC par criticite"+(periode?" <span style=\"font-size:10px;color:#888;font-weight:400;letter-spacing:1px;text-transform:none\">— "+periode+"</span>":"")+"</h3>"
                     +"<table style='width:100%;border-collapse:collapse;margin-bottom:14px;font-size:11px'>"
                     +"<tr><th style='background:#0D1825;color:#00E5FF;padding:8px;text-align:left;letter-spacing:1px;text-transform:uppercase;font-size:10px'>Criticite</th><th style='background:#0D1825;color:#00E5FF;padding:8px;text-align:right;letter-spacing:1px;text-transform:uppercase;font-size:10px'>Nombre</th><th style='background:#0D1825;color:#00E5FF;padding:8px;text-align:right;letter-spacing:1px;text-transform:uppercase;font-size:10px'>Pourcentage</th></tr>"
                     +"<tr><td style='padding:7px 8px;border-bottom:1px solid #eee;font-weight:700;color:#FF1744'>● Critique</td><td style='padding:7px 8px;border-bottom:1px solid #eee;text-align:right;font-weight:800'>"+critN+"</td><td style='padding:7px 8px;border-bottom:1px solid #eee;text-align:right;color:#666'>"+pctC+"%</td></tr>"
@@ -3624,17 +3634,29 @@ function RapportsScreen({inspections,onDelete,onArchive,config,appState}){
                 +(function(){
                   var accidents=(appState&&appState.accidents)||[];
                   if(accidents.length===0) return "";
-                  var byMet={};
-                  accidents.forEach(function(a){var m=a.statut||"Autre";if(!byMet[m])byMet[m]=0;byMet[m]++;});
+                  var byMet={},datesByMet={};
+                  accidents.forEach(function(a){
+                    var m=a.statut||"Autre";
+                    if(!byMet[m]){byMet[m]=0;datesByMet[m]=[];}
+                    byMet[m]++;
+                    if(a.date){
+                      var d=a.date.split("-");
+                      if(d.length===3) datesByMet[m].push(d[2]+"/"+d[1]+"/"+d[0].slice(-2));
+                    }
+                  });
                   var metColors={"Enseignement":"#00E5FF","Ouvriers":"#FFB300","Employés":"#D500F9","Techniciennes de surface":"#1DE9B6","Puéricultrices":"#FF6D00","Aides-familiales":"#00C853","Autre":"#888"};
                   var sorted=Object.entries(byMet).sort(function(a,b){return b[1]-a[1];});
                   var tot=accidents.length;
-                  var rows=sorted.map(function(e){var m=e[0],n=e[1],pct=Math.round(n/tot*100),col=metColors[m]||"#888";return "<tr><td style='padding:7px 8px;border-bottom:1px solid #eee;font-weight:700;color:"+col+"'>● "+m+"</td><td style='padding:7px 8px;border-bottom:1px solid #eee;text-align:right;font-weight:800'>"+n+"</td><td style='padding:7px 8px;border-bottom:1px solid #eee;text-align:right;color:#666'>"+pct+"%</td></tr>";}).join("");
+                  var rows=sorted.map(function(e){
+                    var m=e[0],n=e[1],pct=Math.round(n/tot*100),col=metColors[m]||"#888";
+                    var dates=(datesByMet[m]||[]).sort().join(", ")||"—";
+                    return "<tr><td style='padding:7px 8px;border-bottom:1px solid #eee;font-weight:700;color:"+col+"'>● "+m+"</td><td style='padding:7px 8px;border-bottom:1px solid #eee;text-align:right;font-weight:800'>"+n+"</td><td style='padding:7px 8px;border-bottom:1px solid #eee;text-align:right;color:#666'>"+pct+"%</td><td style='padding:7px 8px;border-bottom:1px solid #eee;font-size:10px;color:#555;white-space:normal'>"+dates+"</td></tr>";
+                  }).join("");
                   return "<h3 style='font-size:12px;color:#07090F;margin:18px 0 6px 0;letter-spacing:2px;text-transform:uppercase;border-left:3px solid #FF1744;padding-left:8px'>Repartition accidents par metier</h3>"
                     +"<table style='width:100%;border-collapse:collapse;margin-bottom:14px;font-size:11px'>"
-                    +"<tr><th style='background:#0D1825;color:#00E5FF;padding:8px;text-align:left;letter-spacing:1px;text-transform:uppercase;font-size:10px'>Metier</th><th style='background:#0D1825;color:#00E5FF;padding:8px;text-align:right;letter-spacing:1px;text-transform:uppercase;font-size:10px'>Nombre</th><th style='background:#0D1825;color:#00E5FF;padding:8px;text-align:right;letter-spacing:1px;text-transform:uppercase;font-size:10px'>Pourcentage</th></tr>"
+                    +"<tr><th style='background:#0D1825;color:#00E5FF;padding:8px;text-align:left;letter-spacing:1px;text-transform:uppercase;font-size:10px'>Metier</th><th style='background:#0D1825;color:#00E5FF;padding:8px;text-align:right;letter-spacing:1px;text-transform:uppercase;font-size:10px'>Nombre</th><th style='background:#0D1825;color:#00E5FF;padding:8px;text-align:right;letter-spacing:1px;text-transform:uppercase;font-size:10px'>%</th><th style='background:#0D1825;color:#00E5FF;padding:8px;text-align:left;letter-spacing:1px;text-transform:uppercase;font-size:10px'>Dates des accidents</th></tr>"
                     +rows
-                    +"<tr><td style='padding:8px;background:#f5f8fc;font-weight:900'>Total accidents</td><td style='padding:8px;background:#f5f8fc;text-align:right;font-weight:900'>"+tot+"</td><td style='padding:8px;background:#f5f8fc;text-align:right;font-weight:900'>100%</td></tr>"
+                    +"<tr><td style='padding:8px;background:#f5f8fc;font-weight:900'>Total accidents</td><td style='padding:8px;background:#f5f8fc;text-align:right;font-weight:900'>"+tot+"</td><td style='padding:8px;background:#f5f8fc;text-align:right;font-weight:900'>100%</td><td style='padding:8px;background:#f5f8fc'></td></tr>"
                     +"</table>";
                 })()
                 +"<h3 style='font-size:12px;color:#07090F;margin:18px 0 6px 0;letter-spacing:2px;text-transform:uppercase;border-left:3px solid #00C853;padding-left:8px'>Detail des audits</h3>"
