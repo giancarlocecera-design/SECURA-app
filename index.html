@@ -3559,6 +3559,8 @@ function SettingsScreen({user,onLogout,appState,onAppStateUpdate,respsState,site
   const [newRespEmail,setNewRespEmail]=useState("");
   const [newRespPass,setNewRespPass]=useState("");
   const [newRespRole,setNewRespRole]=useState("Inspecteur");
+  const [editingResp,setEditingResp]=useState(null);
+  const [editForm,setEditForm]=useState({nom:"",email:"",password:"",role:"Inspecteur"});
   const newRespRef=useRef(null);
   const newRespEmailRef=useRef(null);
   const newRespPassRef=useRef(null);
@@ -3601,6 +3603,26 @@ function SettingsScreen({user,onLogout,appState,onAppStateUpdate,respsState,site
     if(!confirm("Supprimer "+nom+" de l'équipe ?\n\nCette action est irréversible.")) return;
     update({resps:resps.filter(function(_,j){return j!==i;})});
   };
+  const startEditResp=(i)=>{
+    var r=resps[i];
+    setEditingResp(i);
+    setEditForm({
+      nom: typeof r==="object"?(r.nom||""):(r||""),
+      email: typeof r==="object"?(r.email||""):"",
+      password: typeof r==="object"?(r.password||r.mdp||""):"",
+      role: typeof r==="object"?(r.role||"Inspecteur"):"Inspecteur"
+    });
+  };
+  const saveEditResp=()=>{
+    if(!editForm.nom.trim()){ alert("Le nom est obligatoire"); return; }
+    var newResps=resps.map(function(r,j){
+      if(j!==editingResp) return r;
+      return {nom:editForm.nom.trim(),email:editForm.email.trim(),password:editForm.password.trim()||"1234",role:editForm.role};
+    });
+    update({resps:newResps});
+    setEditingResp(null);
+  };
+  const cancelEditResp=()=>{ setEditingResp(null); };
   const removeSite=(i)=>{
     var site=sites[i]||"ce site";
     if(!confirm("Supprimer le site \""+site+"\" ?\n\nCette action est irréversible.")) return;
@@ -3691,8 +3713,27 @@ function SettingsScreen({user,onLogout,appState,onAppStateUpdate,respsState,site
                       {email&&<div style={{fontSize:11,color:C.muted,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{email}</div>}
                       <div style={{marginTop:4,display:"inline-block",fontSize:10,padding:"2px 8px",borderRadius:99,background:roleColor+"18",color:roleColor,fontWeight:700}}>{role}</div>
                     </div>
+                    <button onClick={function(){startEditResp(i);}} style={{background:"transparent",border:"1px solid "+C.cyan+"33",borderRadius:8,color:C.cyan,cursor:"pointer",fontSize:14,padding:"4px 10px",flexShrink:0,fontWeight:700}}>✏️</button>
                     <button onClick={()=>removeResp(i)} style={{background:"transparent",border:"1px solid "+C.red+"33",borderRadius:8,color:C.red,cursor:"pointer",fontSize:16,padding:"4px 10px",flexShrink:0,fontWeight:700}}>×</button>
                   </div>
+                  {editingResp===i&&(
+                    <div style={{marginTop:10,padding:12,background:C.surface,borderRadius:10,border:"1px solid "+C.cyan+"44"}}>
+                      <div style={{fontSize:13,color:C.cyan,fontWeight:800,marginBottom:10,letterSpacing:0.5}}>✏️ Modifier {nom}</div>
+                      <input value={editForm.nom} onChange={function(e){setEditForm({...editForm,nom:e.target.value});}} placeholder="Nom complet" style={{...S.input,marginBottom:8,padding:"8px 12px",fontSize:15}}/>
+                      <input value={editForm.email} onChange={function(e){setEditForm({...editForm,email:e.target.value});}} placeholder="Email" style={{...S.input,marginBottom:8,padding:"8px 12px",fontSize:15}}/>
+                      <input value={editForm.password} onChange={function(e){setEditForm({...editForm,password:e.target.value});}} placeholder="Mot de passe" type="text" style={{...S.input,marginBottom:10,padding:"8px 12px",fontSize:15}}/>
+                      <div style={{display:"flex",gap:6,marginBottom:10}}>
+                        {["Admin","Inspecteur","Responsable"].map(function(rr){
+                          var act=editForm.role===rr;
+                          return <button key={rr} onClick={function(){setEditForm({...editForm,role:rr});}} style={{flex:1,padding:"6px",borderRadius:8,border:"1px solid",borderColor:act?C.cyan:C.border,background:act?C.cyan+"18":"transparent",color:act?C.cyan:C.muted,fontSize:14,cursor:"pointer",fontWeight:act?700:400}}>{rr}</button>;
+                        })}
+                      </div>
+                      <div style={{display:"flex",gap:8}}>
+                        <button onClick={cancelEditResp} style={{flex:1,padding:"9px",borderRadius:10,border:"1px solid "+C.border,background:"transparent",color:C.muted,fontSize:14,fontWeight:700,cursor:"pointer"}}>Annuler</button>
+                        <button onClick={saveEditResp} style={{...S.btn(C.cyan),padding:"9px",flex:1}}>💾 Enregistrer</button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               );
             })}
