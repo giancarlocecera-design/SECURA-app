@@ -1542,6 +1542,38 @@ function DashboardScreen({user,inspections,actions,onNav,config,sitesState,appSt
         })()}
       </div>
 
+      {/* Répartition accidents par métier */}
+      <div style={{margin:"14px 14px 0",...S.card()}}>
+        <div style={{fontSize:18,fontWeight:800,marginBottom:4}}>🩹 Répartition accidents par métier</div>
+        <div style={{fontSize:15,color:C.muted,marginBottom:14}}>{siteFilter==="Tous"?"Tous accidents confondus":"Accidents — "+siteFilter}</div>
+        {(function(){
+          var allAccidents=(appState&&appState.accidents)||[];
+          var fAcc=siteFilter==="Tous"?allAccidents:allAccidents.filter(function(a){return a.site===siteFilter;});
+          if(fAcc.length===0) return <div style={{textAlign:"center",padding:"20px 0",color:C.muted,fontSize:16}}>Aucun accident enregistré</div>;
+          var byMetier={};
+          fAcc.forEach(function(a){var m=a.statut||"Autre";if(!byMetier[m])byMetier[m]=0;byMetier[m]++;});
+          var metierColors={"Enseignement":C.cyan,"Ouvriers":C.amber,"Employés":C.purple,"Techniciennes de surface":C.teal,"Puéricultrices":C.orange,"Aides-familiales":C.green,"Autre":C.muted};
+          var sorted=Object.entries(byMetier).sort(function(a,b){return b[1]-a[1];});
+          var total=fAcc.length;
+          return (<div style={{display:"flex",flexDirection:"column",gap:10}}>
+            {sorted.map(function(entry,i){
+              var m=entry[0],n=entry[1],pct=Math.round(n/total*100),col=metierColors[m]||C.muted;
+              return (<div key={i}>
+                <div style={{display:"flex",justifyContent:"space-between",marginBottom:4}}>
+                  <span style={{fontSize:15,fontWeight:700,color:col}}>● {m}</span>
+                  <span style={{fontSize:15,fontWeight:900,color:col}}>{n} <span style={{fontSize:13,color:C.muted,fontWeight:400}}>({pct}%)</span></span>
+                </div>
+                <div style={{background:C.dim,borderRadius:99,height:5,overflow:"hidden"}}><div style={{width:pct+"%",height:"100%",background:col,borderRadius:99,transition:"width .6s"}}/></div>
+              </div>);
+            })}
+            <div style={{marginTop:8,paddingTop:10,borderTop:"1px solid "+C.dim,display:"flex",justifyContent:"space-between"}}>
+              <span style={{fontSize:14,color:C.muted}}>Total</span>
+              <span style={{fontSize:16,fontWeight:900,color:C.text}}>{total} accident{total>1?"s":""}</span>
+            </div>
+          </div>);
+        })()}
+      </div>
+
       {/* Sites — dernière inspection */}
       <div style={{margin:"14px 14px 0",...S.card()}}>
         <div style={{fontSize:18,fontWeight:800,marginBottom:4}}>📍 Suivi des sites</div>
@@ -3094,7 +3126,7 @@ function QRCodeDisplay({text, size}){
   );
 }
 
-function RapportsScreen({inspections,onDelete,onArchive,config}){
+function RapportsScreen({inspections,onDelete,onArchive,config,appState}){
   const [sel,setSel]=useState(null);
   const [printing,setPrinting]=useState(false);
   const [reportHTML,setReportHTML]=useState(null);
@@ -3571,6 +3603,38 @@ function RapportsScreen({inspections,onDelete,onArchive,config}){
                 +"</style></head><body>"
                 +"<div class='header'><div><h1>"+appName+"</h1><div class='sub'>RAPPORT GLOBAL - TOUS LES AUDITS</div></div><div class='date'>"+new Date().toLocaleDateString("fr-BE",{day:"2-digit",month:"long",year:"numeric"})+"</div></div>"
                 +"<div class='stats'><div class='stat-box'><div class='stat-val' style='color:"+scoreColor(avg)+"'>"+avg+"/100</div><div class='stat-label'>Score moyen</div></div><div class='stat-box'><div class='stat-val' style='color:#FF1744'>"+totalNC+"</div><div class='stat-label'>Total NC</div></div><div class='stat-box'><div class='stat-val' style='color:#00C853'>"+validated.length+"</div><div class='stat-label'>Audits valides</div></div><div class='stat-box'><div class='stat-val'>"+sites.length+"</div><div class='stat-label'>Sites</div></div></div>"
+                +(function(){
+                  var critN=0,elevN=0,minN=0;
+                  validated.forEach(function(ins){(ins.items||[]).forEach(function(it){if(it&&!it.ok){var p=it.poids||it.p||"mineur";if(p==="critique")critN++;else if(p==="eleve")elevN++;else minN++;}});});
+                  var totN=critN+elevN+minN;
+                  if(totN===0) return "";
+                  var pctC=Math.round(critN/totN*100),pctE=Math.round(elevN/totN*100),pctM=Math.round(minN/totN*100);
+                  return "<h3 style='font-size:12px;color:#07090F;margin:18px 0 6px 0;letter-spacing:2px;text-transform:uppercase;border-left:3px solid #00E5FF;padding-left:8px'>Repartition NC par criticite</h3>"
+                    +"<table style='width:100%;border-collapse:collapse;margin-bottom:14px;font-size:11px'>"
+                    +"<tr><th style='background:#0D1825;color:#00E5FF;padding:8px;text-align:left;letter-spacing:1px;text-transform:uppercase;font-size:10px'>Criticite</th><th style='background:#0D1825;color:#00E5FF;padding:8px;text-align:right;letter-spacing:1px;text-transform:uppercase;font-size:10px'>Nombre</th><th style='background:#0D1825;color:#00E5FF;padding:8px;text-align:right;letter-spacing:1px;text-transform:uppercase;font-size:10px'>Pourcentage</th></tr>"
+                    +"<tr><td style='padding:7px 8px;border-bottom:1px solid #eee;font-weight:700;color:#FF1744'>● Critique</td><td style='padding:7px 8px;border-bottom:1px solid #eee;text-align:right;font-weight:800'>"+critN+"</td><td style='padding:7px 8px;border-bottom:1px solid #eee;text-align:right;color:#666'>"+pctC+"%</td></tr>"
+                    +"<tr><td style='padding:7px 8px;border-bottom:1px solid #eee;font-weight:700;color:#FF6D00'>● Eleve</td><td style='padding:7px 8px;border-bottom:1px solid #eee;text-align:right;font-weight:800'>"+elevN+"</td><td style='padding:7px 8px;border-bottom:1px solid #eee;text-align:right;color:#666'>"+pctE+"%</td></tr>"
+                    +"<tr><td style='padding:7px 8px;border-bottom:1px solid #eee;font-weight:700;color:#FFB300'>● Mineur</td><td style='padding:7px 8px;border-bottom:1px solid #eee;text-align:right;font-weight:800'>"+minN+"</td><td style='padding:7px 8px;border-bottom:1px solid #eee;text-align:right;color:#666'>"+pctM+"%</td></tr>"
+                    +"<tr><td style='padding:8px;background:#f5f8fc;font-weight:900'>Total NC</td><td style='padding:8px;background:#f5f8fc;text-align:right;font-weight:900'>"+totN+"</td><td style='padding:8px;background:#f5f8fc;text-align:right;font-weight:900'>100%</td></tr>"
+                    +"</table>";
+                })()
+                +(function(){
+                  var accidents=(appState&&appState.accidents)||[];
+                  if(accidents.length===0) return "";
+                  var byMet={};
+                  accidents.forEach(function(a){var m=a.statut||"Autre";if(!byMet[m])byMet[m]=0;byMet[m]++;});
+                  var metColors={"Enseignement":"#00E5FF","Ouvriers":"#FFB300","Employés":"#D500F9","Techniciennes de surface":"#1DE9B6","Puéricultrices":"#FF6D00","Aides-familiales":"#00C853","Autre":"#888"};
+                  var sorted=Object.entries(byMet).sort(function(a,b){return b[1]-a[1];});
+                  var tot=accidents.length;
+                  var rows=sorted.map(function(e){var m=e[0],n=e[1],pct=Math.round(n/tot*100),col=metColors[m]||"#888";return "<tr><td style='padding:7px 8px;border-bottom:1px solid #eee;font-weight:700;color:"+col+"'>● "+m+"</td><td style='padding:7px 8px;border-bottom:1px solid #eee;text-align:right;font-weight:800'>"+n+"</td><td style='padding:7px 8px;border-bottom:1px solid #eee;text-align:right;color:#666'>"+pct+"%</td></tr>";}).join("");
+                  return "<h3 style='font-size:12px;color:#07090F;margin:18px 0 6px 0;letter-spacing:2px;text-transform:uppercase;border-left:3px solid #FF1744;padding-left:8px'>Repartition accidents par metier</h3>"
+                    +"<table style='width:100%;border-collapse:collapse;margin-bottom:14px;font-size:11px'>"
+                    +"<tr><th style='background:#0D1825;color:#00E5FF;padding:8px;text-align:left;letter-spacing:1px;text-transform:uppercase;font-size:10px'>Metier</th><th style='background:#0D1825;color:#00E5FF;padding:8px;text-align:right;letter-spacing:1px;text-transform:uppercase;font-size:10px'>Nombre</th><th style='background:#0D1825;color:#00E5FF;padding:8px;text-align:right;letter-spacing:1px;text-transform:uppercase;font-size:10px'>Pourcentage</th></tr>"
+                    +rows
+                    +"<tr><td style='padding:8px;background:#f5f8fc;font-weight:900'>Total accidents</td><td style='padding:8px;background:#f5f8fc;text-align:right;font-weight:900'>"+tot+"</td><td style='padding:8px;background:#f5f8fc;text-align:right;font-weight:900'>100%</td></tr>"
+                    +"</table>";
+                })()
+                +"<h3 style='font-size:12px;color:#07090F;margin:18px 0 6px 0;letter-spacing:2px;text-transform:uppercase;border-left:3px solid #00C853;padding-left:8px'>Detail des audits</h3>"
                 +"<table><tr><th>#</th><th>Titre</th><th>Site</th><th>Categ.</th><th>Inspecteur</th><th>Date</th><th>Score</th><th>Penalite</th><th>NC C.</th><th>NC E.</th><th>NC M.</th><th>Statut</th></tr>"+tableRows+"</table>"
                 +"<div class='footer'><div><strong>"+appName+"</strong> · Rapport genere le "+new Date().toLocaleDateString("fr-BE",{day:"2-digit",month:"long",year:"numeric"})+"</div><div>Document confidentiel</div></div>"
                 +"</body></html>";
@@ -5015,7 +5079,7 @@ function App(){
         {screen==="inspections" &&<InspectionsScreen inspections={inspections} onOpen={openDetail} onNav={nav} onDelete={deleteIns} user={user} config={config}/>}
         {screen==="actions"     &&<ActionsScreen actions={actions} onUpdate={updateAct} resps={respsState} config={config} onConfigUpdate={saveConfig} user={user}/>}
         {screen==="accidents"   &&<AccidentScreen appState={appState} onAppStateUpdate={handleAppStateUpdate} sitesState={sitesState} config={config}/>}
-        {screen==="rapports"    &&<RapportsScreen inspections={inspections} onDelete={deleteIns} onArchive={archiveIns} config={config}/>}
+        {screen==="rapports"    &&<RapportsScreen inspections={inspections} onDelete={deleteIns} onArchive={archiveIns} config={config} appState={appState}/>}
         {screen==="settings"    &&<SettingsScreen user={user} onLogout={()=>{setUser(null);setScreen("dashboard");}} config={config} onConfigUpdate={saveConfig} appState={appState} respsState={respsState} sitesState={sitesState} onAppStateUpdate={handleAppStateUpdate}/>}
       </div>
       <BottomNav active={screen} onChange={setScreen} badge={pending} user={user} config={config}/>
