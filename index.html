@@ -2118,10 +2118,10 @@ function InspectionDetailScreen({inspection,onBack,onUpdate,resps,sitesState}){
   const addPhoto=(id,src)=>setItems(p=>p.map(i=>i.id===id?{...i,photos:[...(i.photos||[]),src]}:i));
   const removePhoto=(id,idx)=>setItems(p=>p.map(i=>i.id===id?{...i,photos:(i.photos||[]).filter((_,j)=>j!==idx)}:i));
   const [showSig,setShowSig]=useState(false);
-  const [sigInsp,setSigInsp]=useState(null);
-  const [sigResp,setSigResp]=useState(null);
-  const save=()=>{onUpdate({...inspection,...metaForm,items,notes,avisSIPPT,zonesAmiante,score:scoreFinal,nc:totalNC});setSaved(true);setTimeout(()=>setSaved(false),2000);};
-  const saveMeta=()=>{onUpdate({...inspection,...metaForm,items,notes,avisSIPPT,zonesAmiante,score:scoreFinal,nc:totalNC});setEditMeta(false);setSaved(true);setTimeout(()=>setSaved(false),2000);};
+  const [sigInsp,setSigInsp]=useState(inspection.sigInspecteur||null);
+  const [sigResp,setSigResp]=useState(inspection.sigResponsable||null);
+  const save=()=>{onUpdate({...inspection,...metaForm,items,notes,avisSIPPT,zonesAmiante,score:scoreFinal,nc:totalNC,sigInspecteur:sigInsp||inspection.sigInspecteur||null,sigResponsable:sigResp||inspection.sigResponsable||null});setSaved(true);setTimeout(()=>setSaved(false),2000);};
+  const saveMeta=()=>{onUpdate({...inspection,...metaForm,items,notes,avisSIPPT,zonesAmiante,score:scoreFinal,nc:totalNC,sigInspecteur:sigInsp||inspection.sigInspecteur||null,sigResponsable:sigResp||inspection.sigResponsable||null});setEditMeta(false);setSaved(true);setTimeout(()=>setSaved(false),2000);};
 
   const totalPhotos=items.reduce((s,i)=>s+((i.photos&&i.photos.length)||0),0);
 
@@ -2376,11 +2376,18 @@ function InspectionDetailScreen({inspection,onBack,onUpdate,resps,sitesState}){
       <div style={{padding:"12px 14px 0",display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
         <button onClick={save} style={{...S.btn(saved?C.green:C.cyan)}}>{saved?"✓ Sauvegardé":"Sauvegarder"}</button>
         <button onClick={()=>{
-          setShowSig(true);
-          if(sigInsp&&sigResp){
-            onUpdate({...inspection,items,notes,avisSIPPT,zonesAmiante,score:scoreFinal,nc:totalNC,statut:"Validée",sigInspecteur:sigInsp,sigResponsable:sigResp});
+          if(!showSig){
+            // 1er clic : ouvre la zone signature
+            setShowSig(true);
+            return;
           }
-        }} style={{...S.btn(C.green)}}>{sigInsp&&sigResp?"✓ Valider":"Signer & valider"}</button>
+          // 2ème clic : garde-fou avant validation
+          if(!sigInsp||!sigResp){
+            alert("⚠️ Veuillez signer les 2 signatures avant de valider l'audit.");
+            return;
+          }
+          onUpdate({...inspection,items,notes,avisSIPPT,zonesAmiante,score:scoreFinal,nc:totalNC,statut:"Validée",sigInspecteur:sigInsp,sigResponsable:sigResp});
+        }} disabled={showSig&&(!sigInsp||!sigResp)} style={{...S.btn(C.green),opacity:(showSig&&(!sigInsp||!sigResp))?0.4:1}}>{sigInsp&&sigResp?"✓ Valider":"Signer & valider"}</button>
       </div>
     </div>
   );
