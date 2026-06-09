@@ -4249,7 +4249,7 @@ function AccidentScreen({appState,onAppStateUpdate,sitesState,config}){
   var siteList=(sitesState&&sitesState.length>0)?sitesState:SITES;
   const [showForm,setShowForm]=useState(false);
   const [editId,setEditId]=useState(null);
-  const [form,setForm]=useState({date:new Date().toISOString().split("T")[0],dateReception:"",site:siteList[0]||"",type:ACC_TYPES[0],cause:ACC_CAUSES[0],statut:ACC_STATUTS[0],partieCorps:ACC_PARTIES[0],victime:"",joursArret:0,description:"",actionsPrises:"",gravite:"mineur"});
+  const [form,setForm]=useState({date:new Date().toISOString().split("T")[0],dateReception:"",site:siteList[0]||"",type:ACC_TYPES[0],cause:ACC_CAUSES[0],origineCause:"",statut:ACC_STATUTS[0],partieCorps:ACC_PARTIES[0],victime:"",joursArret:0,description:"",actionsPrises:"",gravite:"mineur"});
   const [tab,setTab]=useState("kpi");
   const [siteFilter,setSiteFilter]=useState("Tous");
   const [reportHTML,setReportHTML]=useState(null);
@@ -4293,6 +4293,7 @@ function AccidentScreen({appState,onAppStateUpdate,sitesState,config}){
       +"<div class='item'><div class='label'>Fonction / Statut</div><div class='value'>"+(a.statut||"—")+"</div></div>"
       +"<div class='item'><div class='label'>Type d'accident</div><div class='value'>"+a.type+"</div></div>"
       +"<div class='item'><div class='label'>Cause</div><div class='value'>"+a.cause+"</div></div>"
+      +"<div class='item'><div class='label'>Origine de la cause</div><div class='value'>"+(a.origineCause?(a.origineCause==="primaire"?"Primaire (erreur du travailleur)":a.origineCause==="secondaire"?"Secondaire (erreur organisationnelle)":"Tertiaire (defaut materiel/technique)"):"—")+"</div></div>"
       +"<div class='item'><div class='label'>Partie du corps touchee</div><div class='value'>"+(a.partieCorps||"—")+"</div></div>"
       +"<div class='item'><div class='label'>Jours d'arret</div><div class='value' style='color:#FF1744;font-size:16px'>"+(a.joursArret||0)+" jour(s)</div></div>"
       +"<div class='item'><div class='label'>Gravite</div><div class='value' style='color:"+col+";font-size:16px'>"+gravLabel+"</div></div>"
@@ -4305,7 +4306,7 @@ function AccidentScreen({appState,onAppStateUpdate,sitesState,config}){
     setReportHTML(html);
   }
 
-  function resetForm(){setForm({date:new Date().toISOString().split("T")[0],dateReception:"",site:siteList[0]||"",type:ACC_TYPES[0],cause:ACC_CAUSES[0],statut:ACC_STATUTS[0],partieCorps:ACC_PARTIES[0],victime:"",joursArret:0,description:"",actionsPrises:"",gravite:"mineur"});setEditId(null);}
+  function resetForm(){setForm({date:new Date().toISOString().split("T")[0],dateReception:"",site:siteList[0]||"",type:ACC_TYPES[0],cause:ACC_CAUSES[0],origineCause:"",statut:ACC_STATUTS[0],partieCorps:ACC_PARTIES[0],victime:"",joursArret:0,description:"",actionsPrises:"",gravite:"mineur"});setEditId(null);}
 
   function saveAcc(){
     var acc={...form,id:editId||Date.now(),joursArret:parseInt(form.joursArret)||0};
@@ -4414,6 +4415,15 @@ function AccidentScreen({appState,onAppStateUpdate,sitesState,config}){
           <select value={form.statut} onChange={function(e){setForm({...form,statut:e.target.value});}} style={{...S.input,marginBottom:10}}>{ACC_STATUTS.map(function(s){return <option key={s} value={s}>{s}</option>;})}</select>
           <label style={S.label}>Cause</label>
           <select value={form.cause} onChange={function(e){setForm({...form,cause:e.target.value});}} style={{...S.input,marginBottom:10}}>{ACC_CAUSES.map(function(c){return <option key={c} value={c}>{c}</option>;})}</select>
+          <label style={S.label}>Origine de la cause</label>
+          <div style={{display:"flex",gap:6,marginBottom:8}}>
+            {[["primaire","👤 Primaire",C.cyan],["secondaire","🏢 Secondaire",C.purple],["tertiaire","🔧 Tertiaire",C.amber]].map(function(o){var active=form.origineCause===o[0];return <button key={o[0]} onClick={function(){setForm({...form,origineCause:o[0]});}} style={{flex:1,padding:"8px 4px",borderRadius:8,border:"1px solid "+(active?o[2]:C.border),background:active?o[2]+"18":"transparent",color:active?o[2]:C.muted,fontSize:13,fontWeight:active?800:500,cursor:"pointer"}}>{o[1]}</button>;})}
+          </div>
+          {form.origineCause&&<div style={{padding:"8px 10px",background:C.surface,borderLeft:"3px solid "+(form.origineCause==="primaire"?C.cyan:form.origineCause==="secondaire"?C.purple:C.amber),borderRadius:"0 8px 8px 0",fontSize:13,color:C.muted,marginBottom:10,fontStyle:"italic"}}>
+            {form.origineCause==="primaire"&&"Erreur du travailleur (non-port d'EPI, comportement à risque, mauvaise gestuelle, négligence)."}
+            {form.origineCause==="secondaire"&&"Erreur organisationnelle (procédure manquante, formation insuffisante, planning, encadrement défaillant)."}
+            {form.origineCause==="tertiaire"&&"Défaut matériel ou technique (équipement défectueux, infrastructure défaillante, EPI non conforme)."}
+          </div>}
           <label style={S.label}>Partie du corps touchée</label>
           <select value={form.partieCorps} onChange={function(e){setForm({...form,partieCorps:e.target.value});}} style={{...S.input,marginBottom:10}}>{ACC_PARTIES.map(function(p){return <option key={p} value={p}>{p}</option>;})}</select>
           <label style={S.label}>Gravité</label>
