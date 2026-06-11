@@ -3136,7 +3136,7 @@ function QRCodeDisplay({text, size}){
   );
 }
 
-function RapportsScreen({inspections,onDelete,onArchive,config,appState}){
+function RapportsScreen({inspections,onDelete,onArchive,onUnvalidate,config,appState}){
   const [sel,setSel]=useState(null);
   const [printing,setPrinting]=useState(false);
   const [reportHTML,setReportHTML]=useState(null);
@@ -3553,6 +3553,13 @@ function RapportsScreen({inspections,onDelete,onArchive,config,appState}){
                     </div>
                   ):(
                     <div style={{display:"flex",gap:8,marginTop:4}}>
+                      <button onClick={function(e){
+                        e.stopPropagation();
+                        if(window.confirm("Cet audit est validé. Le repasser en 'En cours' effacera les signatures et il devra être re-signé pour être à nouveau validé. Continuer ?")){
+                          onUnvalidate&&onUnvalidate(ins.id);
+                          setSel(null);
+                        }
+                      }} style={{flex:1,background:"transparent",border:"1px solid "+C.cyan+"44",borderRadius:8,padding:"7px 12px",color:C.cyan,fontSize:14,fontWeight:700,cursor:"pointer"}}>✏️ Modifier</button>
                       <button onClick={function(e){e.stopPropagation();onArchive&&onArchive(ins.id,true);setSel(null);}} style={{flex:1,background:"transparent",border:"1px solid "+C.amber+"44",borderRadius:8,padding:"7px 12px",color:C.amber,fontSize:14,fontWeight:700,cursor:"pointer"}}>📦 Archiver</button>
                       <InlineDelete onConfirm={()=>{onDelete&&onDelete(ins.id);setSel(null);}}/>
                     </div>
@@ -5065,6 +5072,19 @@ function App(){
       else console.log("Archive OK:",id,archived);
     }catch(e){console.error("Archive exception:",e);}
   };
+  async function unvalidateIns(id){
+    // Repasse l'audit en "En cours" et efface les signatures (re-signature obligatoire à la prochaine validation)
+    setInspections(p=>p.map(function(i){return i.id===id?{...i,statut:"En cours",sigInspecteur:null,sigResponsable:null}:i;}));
+    try{
+      const r=await fetch(SUPA_URL+"/rest/v1/inspections?id=eq."+id,{
+        method:"PATCH",
+        headers:{"apikey":SUPA_KEY,"Authorization":"Bearer "+SUPA_KEY,"Content-Type":"application/json","Prefer":"return=minimal"},
+        body:JSON.stringify({statut:"En cours",sig_inspecteur:null,sig_responsable:null})
+      });
+      if(!r.ok) console.error("Unvalidate error:",r.status,await r.text());
+      else console.log("Unvalidate OK:",id);
+    }catch(e){console.error("Unvalidate exception:",e);}
+  };
   const pending=actions.filter(a=>a.statut!=="Clôturée").length;
 
   // ── Notifications - check due actions ───────────────────────
@@ -5155,7 +5175,7 @@ function App(){
         {screen==="inspections" &&<InspectionsScreen inspections={inspections} onOpen={openDetail} onNav={nav} onDelete={deleteIns} user={user} config={config}/>}
         {screen==="actions"     &&<ActionsScreen actions={actions} onUpdate={updateAct} resps={respsState} config={config} onConfigUpdate={saveConfig} user={user}/>}
         {screen==="accidents"   &&<AccidentScreen appState={appState} onAppStateUpdate={handleAppStateUpdate} sitesState={sitesState} config={config}/>}
-        {screen==="rapports"    &&<RapportsScreen inspections={inspections} onDelete={deleteIns} onArchive={archiveIns} config={config} appState={appState}/>}
+        {screen==="rapports"    &&<RapportsScreen inspections={inspections} onDelete={deleteIns} onArchive={archiveIns} onUnvalidate={unvalidateIns} config={config} appState={appState}/>}
         {screen==="settings"    &&<SettingsScreen user={user} onLogout={()=>{setUser(null);setScreen("dashboard");}} config={config} onConfigUpdate={saveConfig} appState={appState} respsState={respsState} sitesState={sitesState} onAppStateUpdate={handleAppStateUpdate}/>}
       </div>
       <BottomNav active={screen} onChange={setScreen} badge={pending} user={user} config={config}/>
