@@ -4865,6 +4865,7 @@ function DashboardScreen({
       "Techniciennes de surface": C.teal,
       "Puéricultrices": C.orange,
       "Aides-familiales": C.green,
+      "Article 60": C.blue,
       "Autre": C.muted
     };
     var its = Object.entries(byMetier).sort(function (a, b) {
@@ -10943,6 +10944,7 @@ function RapportsScreen({
             "Techniciennes de surface": "#1DE9B6",
             "Puéricultrices": "#FF6D00",
             "Aides-familiales": "#00C853",
+            "Article 60": "#2979FF",
             "Autre": "#888"
           };
           var sorted = Object.entries(byMet).sort(function (a, b) {
@@ -12688,7 +12690,7 @@ function NavIcon({
 // ═══════════════════════════════════════════════════════════════════════
 var ACC_TYPES = ["AT avec arrêt", "AT sans arrêt", "Presqu'accident", "Incident", "Accident de trajet"];
 var ACC_CAUSES = ["Chute de hauteur", "Chute de plain-pied", "Manutention manuelle", "Machine/Outil", "Contact chimique", "Projection", "Choc/Coincement", "Électrique", "Brûlure", "Circulation", "Agression", "Autre"];
-var ACC_STATUTS = ["Enseignement", "Ouvriers", "Employés", "Techniciennes de surface", "Puéricultrices", "Aides-familiales", "Autre"];
+var ACC_STATUTS = ["Enseignement", "Ouvriers", "Employés", "Techniciennes de surface", "Puéricultrices", "Aides-familiales", "Article 60", "Autre"];
 var ACC_PARTIES = ["Tête", "Yeux", "Oreilles", "Visage", "Cou", "Épaule gauche", "Épaule droite", "Bras gauche", "Bras droit", "Coude gauche", "Coude droit", "Avant-bras gauche", "Avant-bras droit", "Poignet gauche", "Poignet droit", "Main gauche", "Main droite", "Doigt(s) main gauche", "Doigt(s) main droite", "Thorax", "Abdomen", "Dos (lombaires)", "Dos (dorsales)", "Dos (cervicales)", "Bassin", "Hanche gauche", "Hanche droite", "Cuisse gauche", "Cuisse droite", "Genou gauche", "Genou droit", "Jambe gauche", "Jambe droite", "Cheville gauche", "Cheville droite", "Pied gauche", "Pied droit", "Orteil(s)", "Organes internes", "Lésions multiples", "Corps entier", "Autre"];
 function AccidentScreen({
   appState,
