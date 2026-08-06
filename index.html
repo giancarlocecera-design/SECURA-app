@@ -3100,7 +3100,7 @@ function LoginScreen({
   const [err, setErr] = useState("");
   const [load, setLoad] = useState(false);
   // Merge static USERS with dynamic respsState users
-  const allUsers = (users && users.length && typeof users[0] === "object" && users[0].email ? users : USERS).filter(function (u) {
+  const allUsers = [].concat(users && users.length && typeof users[0] === "object" && users[0].email ? users : [], USERS).filter(function (u) {
     return u && u.nom;
   });
   const handle = () => {
@@ -3110,7 +3110,8 @@ function LoginScreen({
       var em = email.trim().toLowerCase();
       var pw = pass.trim();
       const u = allUsers.find(function (u) {
-        return u.email && u.email.trim().toLowerCase() === em && u.pass && u.pass.trim() === pw;
+        var upw = (u.pass || u.password || u.mdp || "").trim();
+        return u.email && u.email.trim().toLowerCase() === em && upw && upw === pw;
       });
       if (u) onLogin(u);else {
         setErr("Identifiants incorrects.");
