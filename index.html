@@ -14119,39 +14119,54 @@ function App() {
   const [syncMsg, setSyncMsg] = useState(null);
   const [isOnline, setIsOnline] = useState(typeof navigator !== "undefined" ? navigator.onLine : true);
 
+  // ── Garde-fou synchronisation (anti-perte de données) ─────────
+  async function flushPending() {
+    var pending = LS.getPending();
+    if (!pending || !pending.length) return true;
+    setSyncMsg("🔄 Synchronisation de " + pending.length + " élément(s)...");
+    var stillPending = [];
+    for (var i = 0; i < pending.length; i++) {
+      var p = pending[i];
+      var ok = false;
+      try {
+        if (p.type === "upsert_inspection") ok = await supa.upsert("inspections", mapInspection(p.data));
+        else if (p.type === "upsert_action") ok = await supa.upsert("actions", p.data);
+        else if (p.type === "del_action") ok = await supa.del("actions", p.data.id);
+        else ok = true;
+      } catch (e) {
+        ok = false;
+      }
+      if (!ok) stillPending.push(p);
+    }
+    LS.save("pending", stillPending);
+    if (stillPending.length === 0) {
+      setSyncMsg("✅ Tout est synchronisé");
+      setTimeout(function () { setSyncMsg(null); }, 3000);
+      return true;
+    }
+    setSyncMsg("⚠️ " + stillPending.length + " contrôle(s) NON synchronisé(s) — restez connecté à internet, ne videz pas le cache");
+    return false;
+  }
   // ── Online/Offline detection ─────────────────────────────────
   React.useEffect(function () {
     function goOnline() {
       setIsOnline(true);
-      setSyncMsg("🔄 Synchronisation...");
-      // Sync pending items
-      var pending = LS.getPending();
-      if (pending.length > 0) {
-        Promise.all(pending.map(function (p) {
-          if (p.type === "upsert_inspection") return supa.upsert("inspections", p.data).catch(function () {});
-          if (p.type === "upsert_action") return supa.upsert("actions", p.data).catch(function () {});
-          if (p.type === "del_action") return supa.del("actions", p.data.id).catch(function () {});
-          return Promise.resolve();
-        })).then(function () {
-          LS.clearPending();
-          setSyncMsg("✅ Synchronisé !");
-          setTimeout(function () {
-            setSyncMsg(null);
-          }, 3000);
-        });
-      } else {
-        setSyncMsg(null);
-      }
+      flushPending();
     }
     function goOffline() {
       setIsOnline(false);
-      setSyncMsg("📵 Hors-ligne — données sauvegardées localement");
+      var n = (LS.getPending() || []).length;
+      setSyncMsg(n > 0 ? "📵 Hors-ligne — " + n + " élément(s) en attente" : "📵 Hors-ligne — données sauvegardées localement");
     }
     window.addEventListener("online", goOnline);
     window.addEventListener("offline", goOffline);
+    var iv = setInterval(function () {
+      if ((LS.getPending() || []).length > 0) flushPending();
+    }, 30000);
     return function () {
       window.removeEventListener("online", goOnline);
       window.removeEventListener("offline", goOffline);
+      clearInterval(iv);
     };
   }, []);
 
@@ -14180,15 +14195,22 @@ function App() {
         });
         // Inspections: Supabase ou localStorage
         if (ins && ins.length) {
-          setInspections(ins.map(function (i) {
+          var cloudList = ins.map(function (i) {
             return {
               ...i,
               items: i.items || [],
               sigInspecteur: i.sigInspecteur || i["sig_inspecteur"] || null,
               sigResponsable: i.sigResponsable || i["sig_responsable"] || null
             };
-          }));
-          LS.save("inspections", ins);
+          });
+          var cloudIds = {};
+          cloudList.forEach(function (i) { cloudIds[String(i.id)] = 1; });
+          var pendIns = (LS.getPending() || []).filter(function (p) {
+            return p.type === "upsert_inspection" && p.data && !cloudIds[String(p.data.id)];
+          }).map(function (p) { return { ...p.data, items: p.data.items || [] }; });
+          var merged = pendIns.concat(cloudList);
+          setInspections(merged);
+          LS.save("inspections", merged);
         } else {
           var localInsFb = LS.load("inspections");
           if (localInsFb && localInsFb.length) setInspections(localInsFb.map(function (i) {
@@ -14306,7 +14328,7 @@ function App() {
         setSyncMsg("📵 Chargement local — reconnectez-vous pour synchroniser");
       }
     }
-    loadFromDB();
+    loadFromDB().then(function () { flushPending(); });
   }, []);
   const [config, setConfig] = useState({
     appName: "SECURA",
@@ -14456,11 +14478,16 @@ function App() {
     setScreen("inspections");
     setSub(null);
     if (isOnline) {
+      var okNew = false;
       try {
-        await supa.upsert("inspections", mapInspection(ins));
+        okNew = await supa.upsert("inspections", mapInspection(ins));
       } catch (e) {
         console.error(e);
+        okNew = false;
+      }
+      if (!okNew) {
         LS.addPending("upsert_inspection", ins);
+        setSyncMsg("⚠️ Contrôle enregistré en LOCAL mais PAS synchronisé — restez connecté, ne videz pas le cache");
       }
     } else {
       LS.addPending("upsert_inspection", ins);
@@ -14595,12 +14622,15 @@ function App() {
         if (!r.ok) {
           var errText = await r.text();
           console.error("PATCH failed:", r.status, errText);
+          LS.addPending("upsert_inspection", ins);
+          setSyncMsg("⚠️ Modification enregistrée en LOCAL mais PAS synchronisée — restez connecté, ne videz pas le cache");
         } else {
           console.log("PATCH ok:", ins.id, "statut:", ins.statut);
         }
       } catch (e) {
         console.error("updateIns error:", e);
         LS.addPending("upsert_inspection", ins);
+        setSyncMsg("⚠️ Modification enregistrée en LOCAL mais PAS synchronisée — restez connecté, ne videz pas le cache");
       }
     } else {
       LS.addPending("upsert_inspection", ins);
