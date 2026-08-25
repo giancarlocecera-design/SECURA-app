@@ -15368,11 +15368,32 @@ function App() {
     }
     if (isOnline) {
       try {
+        // ── Garde-fou multi-audits : détecter une modification concurrente ──
+        if (ins.updated_at) {
+          try {
+            var chk = await fetch(SUPA_URL + "/rest/v1/inspections?id=eq." + String(ins.id) + "&select=updated_at", {
+              headers: { "apikey": SUPA_KEY, "Authorization": "Bearer " + SUPA_KEY }
+            });
+            if (chk.ok) {
+              var chkArr = await chk.json();
+              var cloudStamp = chkArr && chkArr[0] && chkArr[0].updated_at;
+              if (cloudStamp && cloudStamp !== ins.updated_at) {
+                var force = window.confirm("\u26A0\uFE0F CONFLIT DE MODIFICATION\n\nCet audit (" + (ins.site || "") + " \u2014 " + (ins.categorie || "") + ") a \u00E9t\u00E9 modifi\u00E9 par un autre utilisateur depuis que vous l'avez ouvert.\n\n\u2022 OK = FORCER votre version (la sienne sera \u00E9cras\u00E9e)\n\u2022 Annuler = ne rien enregistrer, pour recharger la version \u00E0 jour");
+                if (!force) {
+                  setSyncMsg("\u21A9\uFE0F Enregistrement annul\u00E9 (conflit) \u2014 rechargez l'app pour r\u00E9cup\u00E9rer la version \u00E0 jour de cet audit");
+                  return;
+                }
+              }
+            }
+          } catch (ce) {}
+        }
+        var myStamp = new Date().toISOString();
         var patchBody = {
           "statut": ins.statut,
           "score": ins.score,
           "nc": ins.nc,
-          "notes": ins.notes || ""
+          "notes": ins.notes || "",
+          "updated_at": myStamp
         };
         if (ins.sigInspecteur) patchBody["sig_inspecteur"] = ins.sigInspecteur;
         if (ins.sigResponsable) patchBody["sig_responsable"] = ins.sigResponsable;
@@ -15394,6 +15415,7 @@ function App() {
           setSyncMsg("⚠️ Modification enregistrée en LOCAL mais PAS synchronisée — restez connecté, ne videz pas le cache");
         } else {
           console.log("PATCH ok:", ins.id, "statut:", ins.statut);
+          ins.updated_at = myStamp;
         }
       } catch (e) {
         console.error("updateIns error:", e);
