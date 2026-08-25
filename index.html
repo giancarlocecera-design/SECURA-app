@@ -1784,280 +1784,1048 @@ const CHECKLISTS = {
     p: "eleve"
   }],
   // ──────────────────────────────────────────────────────────────
-  "Évacuation": [
-  // Informations générales
+  "Salles de sports": [
+  // Installations électriques
+  {
+    id: "ELE01",
+    s: "Installations électriques",
+    l: "Toutes les armoires contenant des panneaux électriques sont-elles verrouillées, l'accès étant réservé aux personnes averties ou qualifiées ?",
+    p: "critique"
+  },
+  {
+    id: "ELE02",
+    s: "Installations électriques",
+    l: "Toutes les armoires contenant des fusibles sont-elles verrouillées ?",
+    p: "critique"
+  },
+  {
+    id: "ELE03",
+    s: "Installations électriques",
+    l: "L'absence de pontage de fusibles est-elle vérifiée, et les fusibles non automatiques ont-ils été remplacés par des fusibles automatiques de calibre adéquat ?",
+    p: "critique"
+  },
+  {
+    id: "ELE04",
+    s: "Installations électriques",
+    l: "Les parties d'installation électrique hors service ont-elles été démontées (aucun conducteur abandonné susceptible d'être remis sous tension) ?",
+    p: "critique"
+  },
+  {
+    id: "ELE05",
+    s: "Installations électriques",
+    l: "Les réparations et transformations sont-elles confiées à une personne compétente et exécutées conformément au RGIE ?",
+    p: "critique"
+  },
+  {
+    id: "ELE06",
+    s: "Installations électriques",
+    l: "Les réparations ramènent-elles l'installation à un niveau équivalent au neuf (aucune réparation de fortune, ni bande adhésive) ?",
+    p: "critique"
+  },
+  {
+    id: "ELE07",
+    s: "Installations électriques",
+    l: "Les dominos, fiches, socles et rallonges sont-ils en parfait état, sans défaut apparent ?",
+    p: "eleve"
+  },
+  {
+    id: "ELE08",
+    s: "Installations électriques",
+    l: "Le matériel utilisé est-il réglementaire (mise à la terre via la prise ou double isolation) ?",
+    p: "critique"
+  },
+  {
+    id: "ELE09",
+    s: "Installations électriques",
+    l: "L'installation supporte-t-elle partout la charge demandée (pas de multiprises en cascade sur de gros consommateurs) ?",
+    p: "eleve"
+  },
+  {
+    id: "ELE10",
+    s: "Installations électriques",
+    l: "L'installation électrique fait-elle l'objet du contrôle périodique par un SECT et le dernier rapport est-il disponible, remarques levées ?",
+    p: "eleve"
+  },
+  {
+    id: "ELE11",
+    s: "Installations électriques",
+    l: "Les armoires électriques volantes utilisées lors de manifestations disposent-elles d'une attestation de contrôle SECT à chaque mise en service ?",
+    p: "critique"
+  },
+  // Chaufferie et installations gaz
+  {
+    id: "CHA01",
+    s: "Chaufferie et installations gaz",
+    l: "La porte d'accès à la chaufferie est-elle verrouillée et l'accès limité aux personnes autorisées ?",
+    p: "critique"
+  },
+  {
+    id: "CHA02",
+    s: "Chaufferie et installations gaz",
+    l: "La chaufferie est-elle exempte de tout stockage (elle ne sert ni d'atelier, ni de dépôt) ?",
+    p: "eleve"
+  },
+  {
+    id: "CHA03",
+    s: "Chaufferie et installations gaz",
+    l: "La chaufferie dispose-t-elle d'une aération haute débouchant vers l'extérieur ?",
+    p: "eleve"
+  },
+  {
+    id: "CHA04",
+    s: "Chaufferie et installations gaz",
+    l: "La chaufferie dispose-t-elle d'une aération basse débouchant vers l'extérieur ?",
+    p: "eleve"
+  },
+  {
+    id: "CHA05",
+    s: "Chaufferie et installations gaz",
+    l: "Les parois, le plafond et le sol présentent-ils la résistance au feu requise (EI 60 minimum, EI 120 en construction neuve) ?",
+    p: "critique"
+  },
+  {
+    id: "CHA06",
+    s: "Chaufferie et installations gaz",
+    l: "Les portes présentent-elles une résistance au feu EI 30 minimum (EI 60 en neuf) et se ferment-elles automatiquement ?",
+    p: "critique"
+  },
+  {
+    id: "CHA07",
+    s: "Chaufferie et installations gaz",
+    l: "Les passages autres que les portes (gaines, ouïes) sont-ils équipés de dispositifs à fermeture automatique ?",
+    p: "eleve"
+  },
+  {
+    id: "CHA08",
+    s: "Chaufferie et installations gaz",
+    l: "Chauffage au mazout : une installation automatique d'extinction à poudre est-elle prévue ?",
+    p: "critique"
+  },
+  {
+    id: "CHA09",
+    s: "Chaufferie et installations gaz",
+    l: "Un détecteur de fumée ou d'incendie est-il installé dans la chaufferie ?",
+    p: "critique"
+  },
+  {
+    id: "CHA10",
+    s: "Chaufferie et installations gaz",
+    l: "La détection est-elle contrôlée périodiquement et le rapport est-il disponible ?",
+    p: "eleve"
+  },
+  {
+    id: "CHA11",
+    s: "Chaufferie et installations gaz",
+    l: "Chauffage au gaz : un détecteur de fuite de gaz est-il placé ?",
+    p: "critique"
+  },
+  {
+    id: "CHA12",
+    s: "Chaufferie et installations gaz",
+    l: "Le détecteur de gaz est-il contrôlé périodiquement par une personne compétente ?",
+    p: "critique"
+  },
+  {
+    id: "CHA13",
+    s: "Chaufferie et installations gaz",
+    l: "L'installation intérieure au gaz est-elle contrôlée périodiquement par un organisme compétent ?",
+    p: "critique"
+  },
+  {
+    id: "CHA14",
+    s: "Chaufferie et installations gaz",
+    l: "La vanne gaz est-elle asservie à la détection (fermeture automatique en cas d'incendie) ?",
+    p: "critique"
+  },
+  {
+    id: "CHA15",
+    s: "Chaufferie et installations gaz",
+    l: "La vanne de coupure gaz est-elle facilement accessible et située de préférence à l'extérieur du bâtiment ?",
+    p: "critique"
+  },
+  {
+    id: "CHA16",
+    s: "Chaufferie et installations gaz",
+    l: "L'emplacement de la coupure gaz est-il signalé par un pictogramme conforme ?",
+    p: "critique"
+  },
+  {
+    id: "CHA17",
+    s: "Chaufferie et installations gaz",
+    l: "Les conduites d'air de ventilation sont-elles équipées de clapets coupe-feu assurant le compartimentage ?",
+    p: "critique"
+  },
+  {
+    id: "CHA18",
+    s: "Chaufferie et installations gaz",
+    l: "Les conduites de l'installation de chauffage sont-elles équipées de clapets coupe-feu ?",
+    p: "critique"
+  },
+  {
+    id: "CHA19",
+    s: "Chaufferie et installations gaz",
+    l: "L'entretien périodique de la chaudière a-t-il été réalisé et l'attestation est-elle disponible ?",
+    p: "eleve"
+  },
+  // Prévention incendie
+  {
+    id: "PRI01",
+    s: "Prévention incendie",
+    l: "Le compartimentage des locaux est-il respecté et effectif (aucune porte coupe-feu calée, bloquée ou débranchée) ?",
+    p: "critique"
+  },
+  {
+    id: "PRI02",
+    s: "Prévention incendie",
+    l: "Les électro-aimants qui maintiennent les portes coupe-feu ouvertes sont-ils testés régulièrement ?",
+    p: "critique"
+  },
+  {
+    id: "PRI03",
+    s: "Prévention incendie",
+    l: "Chaque local est-il utilisé exclusivement pour l'activité pour laquelle il a été conçu ?",
+    p: "eleve"
+  },
+  {
+    id: "PRI04",
+    s: "Prévention incendie",
+    l: "Les produits d'entretien et produits inflammables sont-ils stockés dans un local ventilé et aménagé pour ce risque ?",
+    p: "critique"
+  },
+  {
+    id: "PRI05",
+    s: "Prévention incendie",
+    l: "Le stockage de plus de 50 litres de liquides inflammables est-il centralisé dans un local conforme ?",
+    p: "critique"
+  },
+  {
+    id: "PRI06",
+    s: "Prévention incendie",
+    l: "Les activités à risque d'incendie (flamme nue, pyrotechnie, machine à fumée) sont-elles interdites ou encadrées, attestation de nocivité exigée ?",
+    p: "critique"
+  },
+  {
+    id: "PRI07",
+    s: "Prévention incendie",
+    l: "Une couverture anti-feu ou un extincteur est-il disponible à proximité immédiate des activités à risque d'incendie ?",
+    p: "critique"
+  },
+  {
+    id: "PRI08",
+    s: "Prévention incendie",
+    l: "Les décors, tentures, tréteaux et matériel de décoration sont-ils en matériaux ignifuges (classe A1 / M1), certificat à l'appui ?",
+    p: "eleve"
+  },
+  {
+    id: "PRI09",
+    s: "Prévention incendie",
+    l: "Les nappes et linges en papier sont-ils proscrits lors des manifestations ?",
+    p: "eleve"
+  },
+  {
+    id: "PRI10",
+    s: "Prévention incendie",
+    l: "L'analyse du risque incendie du bâtiment est-elle formalisée et le dossier incendie tenu à jour ?",
+    p: "mineur"
+  },
+  // Moyens de lutte contre l'incendie
+  {
+    id: "LUT01",
+    s: "Moyens de lutte contre l'incendie",
+    l: "Le système de détection d'incendie est-il testé régulièrement afin de s'assurer de son bon fonctionnement ?",
+    p: "critique"
+  },
+  {
+    id: "LUT02",
+    s: "Moyens de lutte contre l'incendie",
+    l: "La centrale de détection fonctionne-t-elle sans dérangement ni défaut signalé ?",
+    p: "critique"
+  },
+  {
+    id: "LUT03",
+    s: "Moyens de lutte contre l'incendie",
+    l: "Le responsable de la salle connaît-il le fonctionnement de la centrale et de l'installation ?",
+    p: "eleve"
+  },
+  {
+    id: "LUT04",
+    s: "Moyens de lutte contre l'incendie",
+    l: "Un manuel ou des consignes écrites du système de détection sont-ils disponibles sur place ?",
+    p: "critique"
+  },
+  {
+    id: "LUT05",
+    s: "Moyens de lutte contre l'incendie",
+    l: "Les réparations et réglages du système de détection sont-ils confiés à un organisme compétent ?",
+    p: "critique"
+  },
+  {
+    id: "LUT06",
+    s: "Moyens de lutte contre l'incendie",
+    l: "Un report d'alarme automatique est-il prévu vers les pompiers, le dispatching ou le concierge ?",
+    p: "critique"
+  },
+  {
+    id: "LUT07",
+    s: "Moyens de lutte contre l'incendie",
+    l: "Les boutons-poussoirs d'alarme incendie sont-ils en parfait état (vitres intactes, non masqués) ?",
+    p: "critique"
+  },
+  {
+    id: "LUT08",
+    s: "Moyens de lutte contre l'incendie",
+    l: "Les boutons d'alarme, détecteurs et dispositifs d'alarme sont-ils soumis à un contrôle périodique documenté ?",
+    p: "eleve"
+  },
+  {
+    id: "LUT09",
+    s: "Moyens de lutte contre l'incendie",
+    l: "Un inventaire complet et à jour des moyens d'extinction est-il tenu (emplacement, type, état) ?",
+    p: "mineur"
+  },
+  {
+    id: "LUT10",
+    s: "Moyens de lutte contre l'incendie",
+    l: "Les extincteurs sont-ils vérifiés annuellement et porteurs d'une étiquette de contrôle valide ?",
+    p: "critique"
+  },
+  {
+    id: "LUT11",
+    s: "Moyens de lutte contre l'incendie",
+    l: "Tous les moyens d'extinction sont-ils suspendus et visibles ?",
+    p: "eleve"
+  },
+  {
+    id: "LUT12",
+    s: "Moyens de lutte contre l'incendie",
+    l: "Tous les moyens d'extinction sont-ils facilement accessibles (rien entreposé devant) ?",
+    p: "eleve"
+  },
+  {
+    id: "LUT13",
+    s: "Moyens de lutte contre l'incendie",
+    l: "Les moyens d'extinction sont-ils signalés par des pictogrammes conformes et correctement placés ?",
+    p: "eleve"
+  },
+  {
+    id: "LUT14",
+    s: "Moyens de lutte contre l'incendie",
+    l: "Les extincteurs vides ou victimes de vandalisme sont-ils remis en ordre sans délai ?",
+    p: "critique"
+  },
+  {
+    id: "LUT15",
+    s: "Moyens de lutte contre l'incendie",
+    l: "Les dévidoirs muraux sont-ils en parfait état (oxydation, tuyaux, robinets) et contrôlés périodiquement ?",
+    p: "critique"
+  },
+  {
+    id: "LUT16",
+    s: "Moyens de lutte contre l'incendie",
+    l: "Les lances et embouts des dévidoirs sont-ils en place, à hauteur du robinet principal ?",
+    p: "critique"
+  },
+  {
+    id: "LUT17",
+    s: "Moyens de lutte contre l'incendie",
+    l: "Les moyens d'extinction défectueux et inutilisables ont-ils été retirés du service ?",
+    p: "eleve"
+  },
+  {
+    id: "LUT18",
+    s: "Moyens de lutte contre l'incendie",
+    l: "Le nombre et le type d'extincteurs sont-ils adaptés aux risques et aux surfaces (référence usuelle : 1 unité par 150 m²) ?",
+    p: "critique"
+  },
+  // Évacuation et signalisation
   {
     id: "EVA01",
-    s: "Informations générales",
-    l: "Date, heure de début et heure de fin de l'exercice enregistrées",
+    s: "Évacuation et signalisation",
+    l: "Le signal d'alarme d'évacuation est-il testé régulièrement et audible dans l'ensemble du bâtiment ?",
     p: "critique"
-  }, {
+  },
+  {
     id: "EVA02",
-    s: "Informations générales",
-    l: "Lieu (adresse complète) et type d'établissement identifiés (école, crèche, maison, bureau, autres)",
-    p: "critique"
-  }, {
+    s: "Évacuation et signalisation",
+    l: "Le nombre maximum de personnes admises par salle est-il déterminé, affiché et respecté ?",
+    p: "mineur"
+  },
+  {
     id: "EVA03",
-    s: "Informations générales",
-    l: "Numéro de l'exercice et historique des exercices précédents documentés",
-    p: "eleve"
-  }, {
+    s: "Évacuation et signalisation",
+    l: "Les portes situées sur les chemins d'évacuation s'ouvrent-elles dans le sens de la fuite ?",
+    p: "critique"
+  },
+  {
     id: "EVA04",
-    s: "Informations générales",
-    l: "Exercice annoncé ou inopiné — choix justifié selon l'objectif pédagogique",
-    p: "eleve"
-  }, {
+    s: "Évacuation et signalisation",
+    l: "Le bâtiment est-il pourvu des pictogrammes réglementaires indiquant chemins d'évacuation, sorties et sorties de secours ?",
+    p: "critique"
+  },
+  {
     id: "EVA05",
-    s: "Informations générales",
-    l: "Objectifs de l'exercice définis avant déclenchement (test alarme, test évacuation, scénario spécifique)",
+    s: "Évacuation et signalisation",
+    l: "Les pictogrammes placés correspondent-ils tous à des situations réelles (pas de flèche vers une sortie inexistante) ?",
     p: "eleve"
   },
-  // Préparation & scénario
   {
     id: "EVA06",
-    s: "Préparation & scénario",
-    l: "Scénario d'exercice préparé (lieu fictif du sinistre, type de risque, contraintes)",
+    s: "Évacuation et signalisation",
+    l: "Un éclairage de secours équipe-t-il les voies d'évacuation et le dessus des sorties et sorties de secours ?",
     p: "critique"
-  }, {
-    id: "EVA07",
-    s: "Préparation & scénario",
-    l: "Conseiller en prévention présent ou consulté en amont",
-    p: "eleve"
-  }, {
-    id: "EVA08",
-    s: "Préparation & scénario",
-    l: "Observateurs désignés et briefés sur leurs zones de surveillance",
-    p: "eleve"
-  }, {
-    id: "EVA09",
-    s: "Préparation & scénario",
-    l: "Direction et personnel encadrant informés des modalités (sans révéler les détails si inopiné)",
-    p: "eleve"
-  }, {
-    id: "EVA10",
-    s: "Préparation & scénario",
-    l: "Services de secours externes (pompiers, police) prévenus en amont si nécessaire",
-    p: "mineur"
   },
-  // Déclenchement & alarme
+  {
+    id: "EVA07",
+    s: "Évacuation et signalisation",
+    l: "Les appareils d'éclairage de secours sont-ils testés périodiquement et les résultats consignés ?",
+    p: "critique"
+  },
+  {
+    id: "EVA08",
+    s: "Évacuation et signalisation",
+    l: "L'éclairage de secours est-il alimenté par un circuit distinct de l'éclairage général ?",
+    p: "critique"
+  },
+  {
+    id: "EVA09",
+    s: "Évacuation et signalisation",
+    l: "Les luminaires de secours sont-ils exempts d'autocollants ou pictogrammes collés qui réduiraient leur intensité ?",
+    p: "eleve"
+  },
+  {
+    id: "EVA10",
+    s: "Évacuation et signalisation",
+    l: "Le nombre et la largeur des sorties de secours sont-ils suffisants au regard de l'occupation autorisée ?",
+    p: "critique"
+  },
   {
     id: "EVA11",
-    s: "Déclenchement & alarme",
-    l: "Déclenchement de l'alarme (manuel ou automatique) effectué selon le scénario",
-    p: "critique"
-  }, {
-    id: "EVA12",
-    s: "Déclenchement & alarme",
-    l: "Signal sonore audible dans l'ensemble des locaux (caves, sanitaires, étages compris)",
-    p: "critique"
-  }, {
-    id: "EVA13",
-    s: "Déclenchement & alarme",
-    l: "Asservissements (portes coupe-feu, désenfumage, ascenseurs) déclenchés correctement",
-    p: "critique"
-  }, {
-    id: "EVA14",
-    s: "Déclenchement & alarme",
-    l: "Délai entre déclenchement et début d'évacuation effective ≤ 30 secondes",
-    p: "eleve"
-  }, {
-    id: "EVA15",
-    s: "Déclenchement & alarme",
-    l: "Signal de fin d'exercice clairement communiqué à l'ensemble du personnel",
+    s: "Évacuation et signalisation",
+    l: "Les sorties de secours débouchent-elles directement vers l'extérieur, sans transiter par la cafétéria ou un autre local ?",
     p: "eleve"
   },
-  // Déroulement de l'évacuation
+  {
+    id: "EVA12",
+    s: "Évacuation et signalisation",
+    l: "Les sorties de secours sont-elles non verrouillées de l'intérieur (barre anti-panique ou boîtier à clé accessible) ?",
+    p: "critique"
+  },
+  {
+    id: "EVA13",
+    s: "Évacuation et signalisation",
+    l: "Toutes les sorties de secours sont-elles facilement accessibles et libres de tout obstacle sur toute leur largeur ?",
+    p: "eleve"
+  },
+  {
+    id: "EVA14",
+    s: "Évacuation et signalisation",
+    l: "Les passages qui mènent vers les sorties de secours sont-ils totalement dégagés ?",
+    p: "critique"
+  },
+  {
+    id: "EVA15",
+    s: "Évacuation et signalisation",
+    l: "Lors de manifestations, les portes de secours restent-elles déverrouillées et dégagées (obligation prévue au contrat de location) ?",
+    p: "critique"
+  },
   {
     id: "EVA16",
-    s: "Déroulement de l'évacuation",
-    l: "Évacuation effectuée dans le calme — pas de panique, pas de bousculade",
-    p: "critique"
-  }, {
+    s: "Évacuation et signalisation",
+    l: "L'extérieur des portes de secours est-il libre de tout obstacle (véhicules, buissons, vélos) ?",
+    p: "eleve"
+  },
+  {
     id: "EVA17",
-    s: "Déroulement de l'évacuation",
-    l: "Consignes respectées : pas de retour en arrière, pas d'objets personnels superflus",
+    s: "Évacuation et signalisation",
+    l: "Un passage libre de 80 cm minimum est-il maintenu entre tables et chaises lors des mises en place ?",
     p: "critique"
-  }, {
+  },
+  {
     id: "EVA18",
-    s: "Déroulement de l'évacuation",
-    l: "Itinéraires d'évacuation principaux empruntés et fonctionnels",
-    p: "critique"
-  }, {
+    s: "Évacuation et signalisation",
+    l: "Des plans d'évacuation sont-ils affichés aux points stratégiques (entrées, cages d'escaliers, chaque niveau) ?",
+    p: "mineur"
+  },
+  {
     id: "EVA19",
-    s: "Déroulement de l'évacuation",
-    l: "Itinéraires de secours testés (issues secondaires utilisées au moins partiellement)",
-    p: "eleve"
-  }, {
+    s: "Évacuation et signalisation",
+    l: "Une copie du plan a-t-elle été transmise au service d'incendie compétent ?",
+    p: "critique"
+  },
+  {
     id: "EVA20",
-    s: "Déroulement de l'évacuation",
-    l: "Voies d'évacuation dégagées en permanence durant l'exercice",
+    s: "Évacuation et signalisation",
+    l: "Un exercice d'évacuation est-il organisé au moins une fois par an et évalué par écrit ?",
     p: "critique"
-  }, {
-    id: "EVA21",
-    s: "Déroulement de l'évacuation",
-    l: "Portes coupe-feu refermées au passage à chaque étage",
-    p: "critique"
-  }, {
-    id: "EVA22",
-    s: "Déroulement de l'évacuation",
-    l: "Énergies (gaz, électricité non-essentielle) coupées si procédure le prévoit",
+  },
+  // Premiers secours et urgences
+  {
+    id: "SEC01",
+    s: "Premiers secours et urgences",
+    l: "En cas d'incident, le responsable est-il toujours joignable rapidement (GSM interne, ligne directe) ?",
     p: "eleve"
-  }, {
-    id: "EVA23",
-    s: "Déroulement de l'évacuation",
-    l: "Lumières des locaux évacués éteintes ou signalées",
+  },
+  {
+    id: "SEC02",
+    s: "Premiers secours et urgences",
+    l: "Un téléphone avec ligne extérieure est-il accessible aux visiteurs, les appels vers les secours étant gratuits ?",
+    p: "eleve"
+  },
+  {
+    id: "SEC03",
+    s: "Premiers secours et urgences",
+    l: "La boîte de secours est-elle complète et complétée par les moyens propres à la médecine sportive ?",
+    p: "eleve"
+  },
+  {
+    id: "SEC04",
+    s: "Premiers secours et urgences",
+    l: "Le contenu de la boîte de secours est-il contrôlé régulièrement (état et dates de péremption) ?",
+    p: "eleve"
+  },
+  {
+    id: "SEC05",
+    s: "Premiers secours et urgences",
+    l: "Au moins un secouriste breveté est-il disponible, sa formation étant recyclée annuellement ?",
+    p: "eleve"
+  },
+  {
+    id: "SEC06",
+    s: "Premiers secours et urgences",
+    l: "Les voies d'accès des services de secours vers le bâtiment sont-elles libres en permanence, y compris lors de manifestations ?",
+    p: "eleve"
+  },
+  {
+    id: "SEC07",
+    s: "Premiers secours et urgences",
+    l: "Lors de grandes manifestations, une permanence de secours extérieure est-elle prévue dans le contrat avec l'organisateur ?",
+    p: "eleve"
+  },
+  {
+    id: "SEC08",
+    s: "Premiers secours et urgences",
+    l: "Le registre des premiers soins est-il tenu et les accidents du travail sont-ils déclarés ?",
     p: "mineur"
-  }, {
-    id: "EVA24",
-    s: "Déroulement de l'évacuation",
-    l: "Temps total d'évacuation conforme à l'objectif (≤ 5 minutes en général)",
-    p: "critique"
   },
-  // Équipiers d'intervention (EPI / SLCI)
   {
-    id: "EVA25",
-    s: "Équipiers d'intervention (EPI/SLCI)",
-    l: "Équipiers de première intervention présents en nombre suffisant et identifiés (gilet orange/rouge)",
-    p: "critique"
-  }, {
-    id: "EVA26",
-    s: "Équipiers d'intervention (EPI/SLCI)",
-    l: "Localisation rapide du sinistre simulé par les EPI",
-    p: "critique"
-  }, {
-    id: "EVA27",
-    s: "Équipiers d'intervention (EPI/SLCI)",
-    l: "Utilisation correcte des extincteurs (manipulation ou test technique simulé)",
-    p: "eleve"
-  }, {
-    id: "EVA28",
-    s: "Équipiers d'intervention (EPI/SLCI)",
-    l: "Coupure de l'alarme par personnel habilité après confirmation",
-    p: "eleve"
-  }, {
-    id: "EVA29",
-    s: "Équipiers d'intervention (EPI/SLCI)",
-    l: "Guides-file désignés et identifiés (gilet jaune) pour chaque zone",
-    p: "eleve"
-  }, {
-    id: "EVA30",
-    s: "Équipiers d'intervention (EPI/SLCI)",
-    l: "Serre-file en fin de groupe pour vérifier que personne n'est resté",
-    p: "critique"
-  }, {
-    id: "EVA31",
-    s: "Équipiers d'intervention (EPI/SLCI)",
-    l: "Tous les locaux (classes, bureaux, sanitaires, vestiaires) vérifiés avant abandon de zone",
-    p: "critique"
-  },
-  // Comptage & point de rassemblement
-  {
-    id: "EVA32",
-    s: "Comptage & point de rassemblement",
-    l: "Point de rassemblement clairement identifié, signalé et atteint par tous les évacués",
-    p: "critique"
-  }, {
-    id: "EVA33",
-    s: "Comptage & point de rassemblement",
-    l: "Comptage effectué au point de rassemblement par groupe/classe/service",
-    p: "critique"
-  }, {
-    id: "EVA34",
-    s: "Comptage & point de rassemblement",
-    l: "Registres de présence (listes) emportés et utilisés pour le comptage",
-    p: "critique"
-  }, {
-    id: "EVA35",
-    s: "Comptage & point de rassemblement",
-    l: "Personnes manquantes ou non-évacuées rapidement identifiées et signalées",
-    p: "critique"
-  }, {
-    id: "EVA36",
-    s: "Comptage & point de rassemblement",
-    l: "Procédure spécifique PMR appliquée — personne à mobilité réduite prise en charge",
-    p: "critique"
-  }, {
-    id: "EVA37",
-    s: "Comptage & point de rassemblement",
-    l: "Visiteurs, intervenants externes ou nouveaux collaborateurs intégrés au comptage",
-    p: "eleve"
-  }, {
-    id: "EVA38",
-    s: "Comptage & point de rassemblement",
-    l: "Point de rassemblement à distance suffisante du bâtiment et hors zone d'accès pompiers",
-    p: "eleve"
-  },
-  // Communication & intervention secours
-  {
-    id: "EVA39",
-    s: "Communication & intervention secours",
-    l: "Appel fictif aux secours (112) effectué selon le scénario",
-    p: "eleve"
-  }, {
-    id: "EVA40",
-    s: "Communication & intervention secours",
-    l: "Personne désignée pour accueillir les services de secours à l'entrée du site",
-    p: "eleve"
-  }, {
-    id: "EVA41",
-    s: "Communication & intervention secours",
-    l: "Dossier d'intervention pompier accessible et présenté lors de l'exercice",
-    p: "critique"
-  }, {
-    id: "EVA42",
-    s: "Communication & intervention secours",
-    l: "Communication interne efficace pendant l'évacuation (radios, mégaphones, signaux)",
+    id: "SEC09",
+    s: "Premiers secours et urgences",
+    l: "Les numéros d'urgence et la procédure d'alerte sont-ils affichés de manière visible (112, coordonnées internes) ?",
     p: "mineur"
-  }, {
-    id: "EVA43",
-    s: "Communication & intervention secours",
-    l: "Reprise normale annoncée et autorisée après vérification complète",
+  },
+  // Sécurité de la pratique sportive
+  {
+    id: "SPO01",
+    s: "Sécurité de la pratique sportive",
+    l: "Les abords des terrains sont-ils exempts d'obstacles heurtables, en particulier dans le prolongement de l'axe de jeu ?",
     p: "eleve"
   },
-  // Bilan & actions correctives
   {
-    id: "EVA44",
-    s: "Bilan & actions correctives",
-    l: "Débriefing organisé immédiatement après l'exercice avec les participants clés",
-    p: "critique"
-  }, {
-    id: "EVA45",
-    s: "Bilan & actions correctives",
-    l: "Points positifs identifiés et formalisés dans le rapport",
+    id: "SPO02",
+    s: "Sécurité de la pratique sportive",
+    l: "Seul le matériel sportif nécessaire à l'activité en cours se trouve-t-il sur le terrain et à ses abords ?",
     p: "eleve"
-  }, {
-    id: "EVA46",
-    s: "Bilan & actions correctives",
-    l: "Points à améliorer et difficultés rencontrées listés précisément",
-    p: "critique"
-  }, {
-    id: "EVA47",
-    s: "Bilan & actions correctives",
-    l: "Actions correctives immédiates définies avec responsables et délais",
-    p: "critique"
-  }, {
-    id: "EVA48",
-    s: "Bilan & actions correctives",
-    l: "Suggestions d'amélioration du processus consignées",
+  },
+  {
+    id: "SPO03",
+    s: "Sécurité de la pratique sportive",
+    l: "Le matériel est-il utilisé exclusivement pour les activités pour lesquelles il a été conçu ?",
     p: "eleve"
-  }, {
-    id: "EVA49",
-    s: "Bilan & actions correctives",
-    l: "Rapport d'exercice signé par le responsable de la validation et archivé",
+  },
+  {
+    id: "SPO04",
+    s: "Sécurité de la pratique sportive",
+    l: "Les murs situés très près des terrains sont-ils protégés contre les contacts involontaires ?",
+    p: "eleve"
+  },
+  {
+    id: "SPO05",
+    s: "Sécurité de la pratique sportive",
+    l: "Le matériel entreposé derrière les filets ou rideaux masquant les rangements est-il suffisamment éloigné ?",
     p: "critique"
-  }, {
-    id: "EVA50",
-    s: "Bilan & actions correctives",
-    l: "Date du prochain exercice planifiée (cohérent avec exigence ≥ 1x/an)",
+  },
+  {
+    id: "SPO06",
+    s: "Sécurité de la pratique sportive",
+    l: "Les fenêtres sont-elles protégées contre le bris de glace par des filets tendus ?",
+    p: "eleve"
+  },
+  {
+    id: "SPO07",
+    s: "Sécurité de la pratique sportive",
+    l: "Les tribunes télescopiques ne sont-elles dépliées que lorsque c'est nécessaire, avec une distance suffisante par rapport à l'activité ?",
+    p: "eleve"
+  },
+  {
+    id: "SPO08",
+    s: "Sécurité de la pratique sportive",
+    l: "Les côtés des tribunes sont-ils obturés pour empêcher l'accès sous la structure ?",
+    p: "eleve"
+  },
+  {
+    id: "SPO09",
+    s: "Sécurité de la pratique sportive",
+    l: "L'absence de personne sous la tribune est-elle systématiquement vérifiée avant toute manœuvre d'ouverture ou de fermeture ?",
+    p: "eleve"
+  },
+  {
+    id: "SPO10",
+    s: "Sécurité de la pratique sportive",
+    l: "Les activités sportives se déroulent-elles toujours sous la surveillance d'une personne compétente ?",
+    p: "eleve"
+  },
+  {
+    id: "SPO11",
+    s: "Sécurité de la pratique sportive",
+    l: "Les accompagnateurs de groupes s'engagent-ils à ne jamais laisser leur groupe sans surveillance (clause au ROI ou au contrat) ?",
+    p: "eleve"
+  },
+  {
+    id: "SPO12",
+    s: "Sécurité de la pratique sportive",
+    l: "Les activités sont-elles programmées de manière compatible entre elles et dans des conditions normales de pratique ?",
+    p: "eleve"
+  },
+  {
+    id: "SPO13",
+    s: "Sécurité de la pratique sportive",
+    l: "Un règlement d'ordre intérieur est-il remis et accepté par tous les locataires et utilisateurs, individuels comme groupes ?",
+    p: "eleve"
+  },
+  {
+    id: "SPO14",
+    s: "Sécurité de la pratique sportive",
+    l: "Les activités mixtes à risque (par exemple football pratiqué en rollers) sont-elles interdites ?",
+    p: "eleve"
+  },
+  {
+    id: "SPO15",
+    s: "Sécurité de la pratique sportive",
+    l: "Les buts et équipements sportifs mobiles sont-ils ancrés ou lestés pour éviter tout basculement ?",
     p: "critique"
-  }, {
-    id: "EVA51",
-    s: "Bilan & actions correctives",
-    l: "Temps total d'évacuation chronométré et consigné dans le rapport (minutes/secondes) — détail par bloc/zone à préciser en commentaire",
+  },
+  // Aires de jeux et parcours santé
+  {
+    id: "JEU01",
+    s: "Aires de jeux et parcours santé",
+    l: "L'aire de jeux ou le parcours santé répond-il aux prescriptions relatives à l'exploitation des aires de jeux ?",
+    p: "eleve"
+  },
+  {
+    id: "JEU02",
+    s: "Aires de jeux et parcours santé",
+    l: "Les attractions sont-elles inaccessibles sans accompagnement (domaine fermé ou clôturé) ?",
+    p: "eleve"
+  },
+  {
+    id: "JEU03",
+    s: "Aires de jeux et parcours santé",
+    l: "Les participants sont-ils informés qu'il est interdit d'accéder aux attractions sans assistance (formulaire, règlement, briefing) ?",
+    p: "eleve"
+  },
+  {
+    id: "JEU04",
+    s: "Aires de jeux et parcours santé",
+    l: "Les attractions ont-elles été conçues dans les règles de l'art par une personne qualifiée ?",
+    p: "eleve"
+  },
+  {
+    id: "JEU05",
+    s: "Aires de jeux et parcours santé",
+    l: "Les équipements sont-ils conformes aux prescriptions relatives à la sécurité des équipements d'aires de jeux ?",
+    p: "eleve"
+  },
+  {
+    id: "JEU06",
+    s: "Aires de jeux et parcours santé",
+    l: "Un contrôle par un SECT a-t-il été réalisé avant la mise en service des engins ?",
+    p: "eleve"
+  },
+  {
+    id: "JEU07",
+    s: "Aires de jeux et parcours santé",
+    l: "Les équipements sont-ils inspectés régulièrement, avec mise hors service en attendant réparation ?",
+    p: "eleve"
+  },
+  {
+    id: "JEU08",
+    s: "Aires de jeux et parcours santé",
+    l: "Le port des équipements de protection individuelle est-il imposé là où c'est nécessaire ?",
+    p: "eleve"
+  },
+  {
+    id: "JEU09",
+    s: "Aires de jeux et parcours santé",
+    l: "Les équipements de protection individuelle sont-ils mis à disposition par l'exploitant ?",
+    p: "eleve"
+  },
+  {
+    id: "JEU10",
+    s: "Aires de jeux et parcours santé",
+    l: "Le surveillant donne-t-il les instructions nécessaires relatives à l'utilisation des protections individuelles ?",
+    p: "eleve"
+  },
+  {
+    id: "JEU11",
+    s: "Aires de jeux et parcours santé",
+    l: "Les équipements de protection soumis à contrôle le sont-ils périodiquement par un SECT (antichute annuel, levage trimestriel) ?",
     p: "critique"
+  },
+  {
+    id: "JEU12",
+    s: "Aires de jeux et parcours santé",
+    l: "Une assistance compétente et en nombre suffisant est-elle prévue là où les attractions présentent des risques spécifiques ?",
+    p: "eleve"
+  },
+  {
+    id: "JEU13",
+    s: "Aires de jeux et parcours santé",
+    l: "Un poste de premiers secours complet est-il prévu à proximité des risques ?",
+    p: "eleve"
+  },
+  {
+    id: "JEU14",
+    s: "Aires de jeux et parcours santé",
+    l: "Le contenu de la pharmacie est-il contrôlé régulièrement (dates de péremption) ?",
+    p: "eleve"
+  },
+  {
+    id: "JEU15",
+    s: "Aires de jeux et parcours santé",
+    l: "Les surveillants ont-ils suivi une formation de secouriste ?",
+    p: "eleve"
+  },
+  {
+    id: "JEU16",
+    s: "Aires de jeux et parcours santé",
+    l: "L'analyse de risques de l'aire de jeux est-elle formalisée et le schéma d'entretien écrit disponible ?",
+    p: "eleve"
+  },
+  // Cafétéria et cuisine
+  {
+    id: "CAF01",
+    s: "Cafétéria et cuisine",
+    l: "La cafétéria fait-elle l'objet de contrôles périodiques de sécurité (risques calorifiques et électriques) ?",
+    p: "eleve"
+  },
+  {
+    id: "CAF02",
+    s: "Cafétéria et cuisine",
+    l: "L'installation électrique est-elle dimensionnée pour la charge réellement demandée (friteuses, fours, percolateurs) ?",
+    p: "critique"
+  },
+  {
+    id: "CAF03",
+    s: "Cafétéria et cuisine",
+    l: "Les dominos, prises et rallonges sont-ils tous en parfait état, sans réparation de fortune ?",
+    p: "eleve"
+  },
+  {
+    id: "CAF04",
+    s: "Cafétéria et cuisine",
+    l: "Le matériel électrique utilisé est-il réglementaire (prise de terre ou double isolation) ?",
+    p: "eleve"
+  },
+  {
+    id: "CAF05",
+    s: "Cafétéria et cuisine",
+    l: "Les extincteurs sont-ils en nombre suffisant et une couverture anti-feu est-elle présente en cuisine ?",
+    p: "critique"
+  },
+  {
+    id: "CAF06",
+    s: "Cafétéria et cuisine",
+    l: "Tous les extincteurs sont-ils signalés par un pictogramme apposé au-dessus de l'appareil ?",
+    p: "critique"
+  },
+  {
+    id: "CAF07",
+    s: "Cafétéria et cuisine",
+    l: "Tous les extincteurs sont-ils accessibles (pas au sol, ni derrière un meuble ou une plante) ?",
+    p: "critique"
+  },
+  {
+    id: "CAF08",
+    s: "Cafétéria et cuisine",
+    l: "Les extincteurs sont-ils contrôlés annuellement ?",
+    p: "critique"
+  },
+  {
+    id: "CAF09",
+    s: "Cafétéria et cuisine",
+    l: "Le bec à gaz, les tuyauteries et les flexibles sont-ils en bon état et dans leur date de validité ?",
+    p: "critique"
+  },
+  {
+    id: "CAF10",
+    s: "Cafétéria et cuisine",
+    l: "Le stock de bonbonnes de gaz est-il limité au strict nécessaire et entreposé conformément ?",
+    p: "critique"
+  },
+  {
+    id: "CAF11",
+    s: "Cafétéria et cuisine",
+    l: "L'installation au gaz est-elle contrôlée annuellement par un organisme compétent ?",
+    p: "critique"
+  },
+  {
+    id: "CAF12",
+    s: "Cafétéria et cuisine",
+    l: "L'arrivée de gaz est-elle équipée d'une fermeture asservie à un système de détection ?",
+    p: "critique"
+  },
+  {
+    id: "CAF13",
+    s: "Cafétéria et cuisine",
+    l: "Les systèmes de détection sont-ils en bon état, ni shuntés ni débranchés ?",
+    p: "critique"
+  },
+  {
+    id: "CAF14",
+    s: "Cafétéria et cuisine",
+    l: "Le compartimentage est-il respecté (aucun mur ni porte supprimé lors de transformations) ?",
+    p: "critique"
+  },
+  {
+    id: "CAF15",
+    s: "Cafétéria et cuisine",
+    l: "La cafétéria dispose-t-elle de sorties de secours propres, suffisantes et efficaces, le cumul d'occupation étant pris en compte ?",
+    p: "eleve"
+  },
+  {
+    id: "CAF16",
+    s: "Cafétéria et cuisine",
+    l: "Les sorties, sorties de secours et issues sont-elles pourvues des signaux de sécurité réglementaires ?",
+    p: "critique"
+  },
+  {
+    id: "CAF17",
+    s: "Cafétéria et cuisine",
+    l: "Un éclairage de secours est-il présent au-dessus de chaque sortie, y compris les sorties de secours ?",
+    p: "critique"
+  },
+  {
+    id: "CAF18",
+    s: "Cafétéria et cuisine",
+    l: "Les sorties de secours et chemins d'évacuation sont-ils libres sur toute leur largeur (aucun mobilier, casier ou flipper) ?",
+    p: "critique"
+  },
+  {
+    id: "CAF19",
+    s: "Cafétéria et cuisine",
+    l: "La hotte, les filtres et les conduits d'extraction sont-ils nettoyés et dégraissés périodiquement ?",
+    p: "critique"
+  },
+  // Vestiaires, douches et sanitaires
+  {
+    id: "VES01",
+    s: "Vestiaires, douches et sanitaires",
+    l: "Les vestiaires et douches sont-ils en nombre suffisant, séparés par sexe et maintenus en bon état de propreté ?",
+    p: "eleve"
+  },
+  {
+    id: "VES02",
+    s: "Vestiaires, douches et sanitaires",
+    l: "Les sols des vestiaires, douches et abords sont-ils antidérapants, propres et sans stagnation d'eau ?",
+    p: "eleve"
+  },
+  {
+    id: "VES03",
+    s: "Vestiaires, douches et sanitaires",
+    l: "Un plan de gestion du risque légionelle est-il établi (températures, purges, points morts du réseau) ?",
+    p: "mineur"
+  },
+  {
+    id: "VES04",
+    s: "Vestiaires, douches et sanitaires",
+    l: "La température de l'eau chaude sanitaire est-elle maîtrisée (production suffisamment chaude, mitigeurs anti-brûlure aux points de puisage) ?",
+    p: "eleve"
+  },
+  {
+    id: "VES05",
+    s: "Vestiaires, douches et sanitaires",
+    l: "Des analyses d'eau sont-elles réalisées périodiquement et les résultats consignés ?",
+    p: "eleve"
+  },
+  {
+    id: "VES06",
+    s: "Vestiaires, douches et sanitaires",
+    l: "La ventilation des vestiaires et des douches est-elle suffisante et fonctionnelle ?",
+    p: "eleve"
+  },
+  {
+    id: "VES07",
+    s: "Vestiaires, douches et sanitaires",
+    l: "Les installations électriques des locaux humides sont-elles conformes (indice de protection adapté, différentiel 30 mA) ?",
+    p: "eleve"
+  },
+  {
+    id: "VES08",
+    s: "Vestiaires, douches et sanitaires",
+    l: "Le nettoyage et la désinfection suivent-ils un plan écrit, les produits étant stockés hors d'atteinte du public ?",
+    p: "eleve"
+  },
+  // Bâtiment, abords et accès
+  {
+    id: "BAT01",
+    s: "Bâtiment, abords et accès",
+    l: "L'inventaire amiante est-il établi, tenu à jour, et le programme de gestion disponible ?",
+    p: "mineur"
+  },
+  {
+    id: "BAT02",
+    s: "Bâtiment, abords et accès",
+    l: "Les accès aux toitures et zones en hauteur sont-ils sécurisés (protections antichute, points d'ancrage contrôlés) ?",
+    p: "critique"
+  },
+  {
+    id: "BAT03",
+    s: "Bâtiment, abords et accès",
+    l: "Les vitrages, faux plafonds et éléments suspendus sont-ils en bon état, leurs fixations ayant été vérifiées ?",
+    p: "eleve"
+  },
+  {
+    id: "BAT04",
+    s: "Bâtiment, abords et accès",
+    l: "L'accessibilité des personnes à mobilité réduite est-elle assurée (cheminements, sanitaires, vestiaires) ?",
+    p: "critique"
+  },
+  {
+    id: "BAT05",
+    s: "Bâtiment, abords et accès",
+    l: "L'évacuation des personnes à mobilité réduite est-elle organisée (zone d'attente, procédure, personnel désigné) ?",
+    p: "mineur"
+  },
+  {
+    id: "BAT06",
+    s: "Bâtiment, abords et accès",
+    l: "Les abords, parkings et cheminements piétons sont-ils éclairés et en bon état (revêtement, dénivelés signalés) ?",
+    p: "critique"
+  },
+  {
+    id: "BAT07",
+    s: "Bâtiment, abords et accès",
+    l: "La voirie destinée aux véhicules de secours est-elle dégagée et praticable (portance, gabarit, largeur) ?",
+    p: "eleve"
+  },
+  {
+    id: "BAT08",
+    s: "Bâtiment, abords et accès",
+    l: "La signalétique extérieure et l'adresse du site sont-elles visibles pour les services de secours ?",
+    p: "eleve"
+  },
+  {
+    id: "BAT09",
+    s: "Bâtiment, abords et accès",
+    l: "Les aires extérieures (terrains, buts, clôtures, mains courantes) sont-elles contrôlées périodiquement ?",
+    p: "eleve"
+  },
+  {
+    id: "BAT10",
+    s: "Bâtiment, abords et accès",
+    l: "Les locaux techniques et de stockage sont-ils fermés et inaccessibles au public ?",
+    p: "eleve"
+  },
+  // Risques divers et équipements
+  {
+    id: "DIV01",
+    s: "Risques divers et équipements",
+    l: "Les escaliers sont-ils pourvus de dispositifs antidérapants et de mains courantes conformes ?",
+    p: "eleve"
+  },
+  {
+    id: "DIV02",
+    s: "Risques divers et équipements",
+    l: "Les tribunes, échafaudages et podiums sont-ils conformes (garde-corps, lisse intermédiaire, plinthe) ?",
+    p: "critique"
+  },
+  {
+    id: "DIV03",
+    s: "Risques divers et équipements",
+    l: "Les échelles sont-elles numérotées, reprises dans un registre et contrôlées périodiquement par une personne compétente ?",
+    p: "mineur"
+  },
+  {
+    id: "DIV04",
+    s: "Risques divers et équipements",
+    l: "Le stockage des produits dangereux est-il conforme, les fiches de données de sécurité étant disponibles ?",
+    p: "eleve"
+  },
+  {
+    id: "DIV05",
+    s: "Risques divers et équipements",
+    l: "Le hall est-il exempt d'aménagement en salle de spectacle ou de cinéma sans application des prescriptions complémentaires ?",
+    p: "eleve"
+  },
+  {
+    id: "DIV06",
+    s: "Risques divers et équipements",
+    l: "L'ascenseur ou le monte-charge est-il soumis au contrôle préventif et à l'analyse de risques réglementaire ?",
+    p: "eleve"
+  },
+  {
+    id: "DIV07",
+    s: "Risques divers et équipements",
+    l: "Les installations de levage (paniers de basket motorisés, rideaux, filets suspendus) sont-elles contrôlées périodiquement ?",
+    p: "critique"
+  },
+  {
+    id: "DIV08",
+    s: "Risques divers et équipements",
+    l: "L'éclairage des salles est-il suffisant et protégé contre les chocs (grilles ou verres de protection sur les luminaires) ?",
+    p: "eleve"
+  },
+  // Organisation et documents
+  {
+    id: "ORG01",
+    s: "Organisation et documents",
+    l: "L'analyse des risques du site est-elle formalisée et intégrée au plan global de prévention ?",
+    p: "mineur"
+  },
+  {
+    id: "ORG02",
+    s: "Organisation et documents",
+    l: "Les actions issues du présent contrôle sont-elles reprises dans le plan annuel d'action ?",
+    p: "eleve"
+  },
+  {
+    id: "ORG03",
+    s: "Organisation et documents",
+    l: "Le règlement d'ordre intérieur est-il affiché et annexé aux contrats d'occupation ?",
+    p: "mineur"
+  },
+  {
+    id: "ORG04",
+    s: "Organisation et documents",
+    l: "Les contrats de location prévoient-ils explicitement les obligations de sécurité (surveillance, sorties, secours, matériel) ?",
+    p: "mineur"
+  },
+  {
+    id: "ORG05",
+    s: "Organisation et documents",
+    l: "La coordination avec les entreprises extérieures est-elle organisée et les informations sur les risques transmises par écrit ?",
+    p: "mineur"
+  },
+  {
+    id: "ORG06",
+    s: "Organisation et documents",
+    l: "Le registre de sécurité est-il tenu à jour (rapports SECT, extincteurs, détection, exercices, incidents) ?",
+    p: "eleve"
+  },
+  {
+    id: "ORG07",
+    s: "Organisation et documents",
+    l: "Le personnel du hall est-il formé (incendie, EPI, premiers secours, équipements spécifiques) et les formations tracées ?",
+    p: "mineur"
+  },
+  {
+    id: "ORG08",
+    s: "Organisation et documents",
+    l: "Les consignes en cas d'incendie sont-elles affichées et connues du personnel comme des occupants ?",
+    p: "mineur"
   }],
   // ──────────────────────────────────────────────────────────────
-  "Premiers secours": [
+    "Premiers secours": [
   // Matériel
   {
     id: "PS01",
@@ -2838,8 +3606,8 @@ const CAT_META = {
     icon: "🪑",
     color: C.purple
   },
-  "Évacuation": {
-    icon: "🏃",
+  "Salles de sports": {
+    icon: "🏟️",
     color: C.green
   },
   "Premiers secours": {
@@ -3251,7 +4019,7 @@ function HelpScreen({
     title: "Audits & Inspections",
     sub: "10 catégories d'audit disponibles",
     color: C.green,
-    items: ["🔥 Incendie — 63 questions / 8 thèmes (détection, extinction, évacuation, compartimentage, locaux à risque)", "⚡ Électricité — 40 questions / 7 thèmes (RGIE, tableaux, prises, mise à la terre)", "🛡️ Sécurité générale — 64 questions / 10 thèmes (le plus complet, audit annuel)", "🧼 Hygiène & propreté — 40 questions / 6 thèmes (sanitaires, vestiaires, nettoyage)", "🪑 Ergonomie — 40 questions / 6 thèmes (postes, écrans, manutention, lumière)", "🏃 Évacuation — 51 questions / 8 thèmes (exercice incendie : préparation, déroulement, comptage, débriefing)", "🚑 Premiers secours — 40 questions / 5 thèmes (boîtes, formation, DEA)", "🪜 Échelles & escabeaux — 10 questions / 9 thèmes (audit ciblé rapide)", "🦠 Amiante - Contrôle visuel — 21 questions / 7 thèmes + panel zones MCA", "🚨 AMOK - Intrusion malveillante — 69 questions / 10 thèmes (sécurité bâtiment, alerte)"]
+    items: ["🔥 Incendie — 63 questions / 8 thèmes (détection, extinction, évacuation, compartimentage, locaux à risque)", "⚡ Électricité — 40 questions / 7 thèmes (RGIE, tableaux, prises, mise à la terre)", "🛡️ Sécurité générale — 64 questions / 10 thèmes (le plus complet, audit annuel)", "🧼 Hygiène & propreté — 40 questions / 6 thèmes (sanitaires, vestiaires, nettoyage)", "🪑 Ergonomie — 40 questions / 6 thèmes (postes, écrans, manutention, lumière)", "🏟️ Salles de sports — 171 questions / 13 thèmes (électricité, chaufferie & gaz, prévention & lutte incendie, évacuation, premiers secours, pratique sportive, aires de jeux, cafétéria, vestiaires, bâtiment, organisation)", "🚑 Premiers secours — 40 questions / 5 thèmes (boîtes, formation, DEA)", "🪜 Échelles & escabeaux — 10 questions / 9 thèmes (audit ciblé rapide)", "🦠 Amiante - Contrôle visuel — 21 questions / 7 thèmes + panel zones MCA", "🚨 AMOK - Intrusion malveillante — 69 questions / 10 thèmes (sécurité bâtiment, alerte)"]
   }, {
     icon: "📝",
     title: "Réaliser un audit",
