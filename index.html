@@ -184,6 +184,10 @@ const supa = {
 // ═══════════════════════════════════════════════════════════════
 // LOCAL STORAGE - MODE HORS-LIGNE
 // ═══════════════════════════════════════════════════════════════
+/* Module d'accidentologie retiré le 4 novembre 2026 : les accidents du travail
+   sont tenus dans EKIPRO. On efface la copie locale résiduelle. */
+try { localStorage.removeItem("secura_accidents"); } catch (e) {}
+
 const LS = {
   save: function (key, data) {
     try {
@@ -4070,12 +4074,6 @@ function HelpScreen({
     color: C.purple,
     items: ["Export PDF individuel — rapport pro avec en-tête sombre, logo, score, photo site", "NC détaillées — chaque non-conformité avec photos, remarques et responsable", "Points conformes — section dédiée avec tous les contrôles validés", "Évaluation zones MCA — section dédiée dans le PDF Amiante avec photos et indicateurs", "Avis SIPPT — encart coloré dans le PDF avec niveau d'évaluation et description", "Récap actions correctives — tableau en fin de rapport avec criticité, responsable et remarques", "Téléchargement PDF — partage via le menu natif du téléphone (AirDrop, email, Drive...)", "QR Code imprimable — bouton 📷 pour générer un QR code lié au rapport public du site", "Rapport public — vue intégrée dans l'app avec bouton 📋 Copier lien (fonctionne en mode PWA)", "Archives — bouton 📦 Archives en haut à droite pour basculer entre actifs et archivés", "Bouton 📦 Archiver — range un audit ancien sans le supprimer", "Bouton ↩️ Restaurer — remet une archive en actif", "Le QR code et le lien public restent fonctionnels même après archivage", "Tableau global — toutes les inspections regroupées par site avec scores et détail des NC par criticité"]
   }, {
-    icon: "🩹",
-    title: "Accidentologie",
-    sub: "Suivi des accidents du travail",
-    color: C.red,
-    items: ["Onglet 🩹 dans la barre de navigation — accès direct au module accidents", "Déclaration complète — date, date réception déclaration, victime, site, type, cause, statut, partie corps, gravité, jours d'arrêt", "5 types d'accidents — AT avec arrêt, AT sans arrêt, presqu'accident, incident, accident de trajet", "12 causes — Manutention manuelle, Chute, Circulation, Projection, Choc, Coupure, Brûlure, etc.", "7 catégories de personnel — Enseignement, Ouvriers, Employés, Techniciennes de surface, Puéricultrices, Aides-familiales, Autre", "42 parties du corps — détail anatomique pour analyses fines", "3 onglets pleine largeur — Indicateurs / Liste (X) / Évolution", "KPI Indicateurs — Total AT, Jours arrêt, Presqu'accidents, Tf", "Jours sans accident — compteur automatique par site avec classement", "Évolution — graphique sur 12 mois pour suivre la tendance", "Tf et Tg détaillés — Taux de fréquence et de gravité par site", "Graphique multicolore par catégorie — accidents par fonction avec détail des causes (ex: Puéricultrices 5 → 2× Manutention, 1× Circulation, 2× Projection)", "Graphique par cause — répartition globale avec couleurs distinctes", "Bouton 📄 Fiche — export PDF individuel par accident", "Bouton 📊 Rapport — export global anonymisé pour la direction/CPPT", "Heures prestées — à configurer par catégorie de personnel dans Profil → Système pour les calculs Tf/Tg", "Synchronisation Supabase — accidents partagés entre tous les appareils"]
-  }, {
     icon: "🤖",
     title: "Assistant IA juridique",
     sub: "Législation HSE belge",
@@ -4092,7 +4090,7 @@ function HelpScreen({
     title: "Système & Permissions",
     sub: "Configuration avancée (Admin)",
     color: C.amber,
-    items: ["Pénalités par criticité — Critique (−5pts par défaut), Élevé (−3pts), Mineur (−1pt)", "Délais de résolution — Critique (7j par défaut), Élevé (30j), Mineur (90j)", "Seuils de suivi des sites — couleurs vert/orange/rouge selon nb de jours depuis dernière inspection", "Heures prestées — par catégorie de personnel (Enseignement, Ouvriers, Employés, etc.) pour les calculs Tf/Tg", "Templates personnalisés — modifier les checklists de chaque catégorie (questions, criticité)", "Notifications push — alertes échéances actions sur iPhone J-3, J-1 et le jour J", "Clé API IA — configuration de l'assistant Claude", "Permissions par rôle — l'Admin configure finement les accès Inspecteur/Responsable pour chaque fonctionnalité (dashboard, inspections, actions, rapports, rappels, IA, accidents)", "Version 1.0.0 — affichée en bas du menu Système"]
+    items: ["Pénalités par criticité — Critique (−5pts par défaut), Élevé (−3pts), Mineur (−1pt)", "Délais de résolution — Critique (7j par défaut), Élevé (30j), Mineur (90j)", "Seuils de suivi des sites — couleurs vert/orange/rouge selon nb de jours depuis dernière inspection", "Heures prestées — par catégorie de personnel (Enseignement, Ouvriers, Employés, etc.) pour les calculs Tf/Tg", "Templates personnalisés — modifier les checklists de chaque catégorie (questions, criticité)", "Notifications push — alertes échéances actions sur iPhone J-3, J-1 et le jour J", "Clé API IA — configuration de l'assistant Claude", "Permissions par rôle — l'Admin configure finement les accès Inspecteur/Responsable pour chaque fonctionnalité (dashboard, inspections, actions, rapports, rappels, IA)", "Version 1.0.0 — affichée en bas du menu Système"]
   }, {
     icon: "🎨",
     title: "Apparence & Mode Tec",
@@ -5598,187 +5596,6 @@ function DashboardScreen({
           background: C.dim,
           borderRadius: 99,
           height: 5,
-          overflow: "hidden"
-        }
-      }, /*#__PURE__*/React.createElement("div", {
-        style: {
-          width: pct + "%",
-          height: "100%",
-          background: it.col,
-          borderRadius: 99,
-          transition: "width .6s"
-        }
-      })));
-    })));
-  }()), /*#__PURE__*/React.createElement("div", {
-    style: {
-      margin: "14px 14px 0",
-      ...S.card()
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 18,
-      fontWeight: 800,
-      marginBottom: 4
-    }
-  }, "\uD83E\uDE79 R\xE9partition accidents par m\xE9tier"), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 15,
-      color: C.muted,
-      marginBottom: 14
-    }
-  }, siteFilter === "Tous" ? "Tous accidents confondus" : "Accidents — " + siteFilter), function () {
-    var allAccidents = appState && appState.accidents || [];
-    var fAcc = siteFilter === "Tous" ? allAccidents : allAccidents.filter(function (a) {
-      return a.site === siteFilter;
-    });
-    if (fAcc.length === 0) return /*#__PURE__*/React.createElement("div", {
-      style: {
-        textAlign: "center",
-        padding: "20px 0",
-        color: C.muted,
-        fontSize: 16
-      }
-    }, "Aucun accident enregistr\xE9");
-    var byMetier = {};
-    fAcc.forEach(function (a) {
-      var m = a.statut || "Autre";
-      if (!byMetier[m]) byMetier[m] = 0;
-      byMetier[m]++;
-    });
-    var metierColors = {
-      "Enseignement": C.cyan,
-      "Ouvriers": C.amber,
-      "Employés": C.purple,
-      "Techniciennes de surface": C.teal,
-      "Puéricultrices": C.orange,
-      "Aides-familiales": C.green,
-      "Article 60": C.blue,
-      "Autre": C.muted
-    };
-    var its = Object.entries(byMetier).sort(function (a, b) {
-      return b[1] - a[1];
-    }).map(function (e) {
-      return {
-        label: e[0],
-        count: e[1],
-        col: metierColors[e[0]] || C.muted
-      };
-    });
-    var total = fAcc.length;
-    var r = 54,
-      cx = 70,
-      cy = 70,
-      circ = 2 * Math.PI * r,
-      offset = 0;
-    var segs = its.map(function (it) {
-      var pct = total > 0 ? it.count / total : 0;
-      var dash = pct * circ;
-      var seg = Object.assign({}, it, {
-        dash: dash,
-        offset: offset,
-        pct: Math.round(pct * 100)
-      });
-      offset += dash;
-      return seg;
-    });
-    return /*#__PURE__*/React.createElement("div", {
-      style: {
-        display: "flex",
-        alignItems: "center",
-        gap: 16
-      }
-    }, /*#__PURE__*/React.createElement("svg", {
-      width: 140,
-      height: 140,
-      viewBox: "0 0 140 140",
-      style: {
-        flexShrink: 0
-      }
-    }, /*#__PURE__*/React.createElement("circle", {
-      cx: cx,
-      cy: cy,
-      r: r,
-      fill: "none",
-      stroke: C.dim,
-      strokeWidth: 18
-    }), segs.map(function (seg, i) {
-      if (seg.count === 0) return null;
-      return /*#__PURE__*/React.createElement("circle", {
-        key: i,
-        cx: cx,
-        cy: cy,
-        r: r,
-        fill: "none",
-        stroke: seg.col,
-        strokeWidth: 18,
-        strokeDasharray: seg.dash + " " + circ,
-        strokeDashoffset: -seg.offset + circ / 4,
-        style: {
-          filter: "drop-shadow(0 0 3px " + seg.col + "66)"
-        }
-      });
-    }), /*#__PURE__*/React.createElement("text", {
-      x: cx,
-      y: cy - 6,
-      textAnchor: "middle",
-      fill: C.text,
-      fontSize: 22,
-      fontWeight: 900
-    }, total), /*#__PURE__*/React.createElement("text", {
-      x: cx,
-      y: cy + 12,
-      textAnchor: "middle",
-      fill: C.muted,
-      fontSize: 10
-    }, "accidents")), /*#__PURE__*/React.createElement("div", {
-      style: {
-        flex: 1,
-        display: "flex",
-        flexDirection: "column",
-        gap: 8,
-        minWidth: 0
-      }
-    }, its.map(function (it, i) {
-      var pct = total > 0 ? Math.round(it.count / total * 100) : 0;
-      return /*#__PURE__*/React.createElement("div", {
-        key: i
-      }, /*#__PURE__*/React.createElement("div", {
-        style: {
-          display: "flex",
-          justifyContent: "space-between",
-          marginBottom: 3,
-          gap: 6
-        }
-      }, /*#__PURE__*/React.createElement("span", {
-        style: {
-          fontSize: 13,
-          fontWeight: 700,
-          color: it.col,
-          overflow: "hidden",
-          textOverflow: "ellipsis",
-          whiteSpace: "nowrap",
-          minWidth: 0,
-          flex: 1
-        }
-      }, "\u25CF ", it.label), /*#__PURE__*/React.createElement("span", {
-        style: {
-          fontSize: 14,
-          fontWeight: 900,
-          color: it.col,
-          flexShrink: 0
-        }
-      }, it.count, " ", /*#__PURE__*/React.createElement("span", {
-        style: {
-          fontSize: 12,
-          color: C.muted,
-          fontWeight: 400
-        }
-      }, "(", pct, "%)"))), /*#__PURE__*/React.createElement("div", {
-        style: {
-          background: C.dim,
-          borderRadius: 99,
-          height: 4,
           overflow: "hidden"
         }
       }, /*#__PURE__*/React.createElement("div", {
@@ -10287,10 +10104,6 @@ function PermissionsScreen({
     l: "Assistant IA",
     icon: "🤖"
   }, {
-    k: "accidents",
-    l: "Accidentologie",
-    icon: "🩹"
-  }, {
     k: "settings",
     l: "Profil & Paramètres",
     icon: "👤"
@@ -11708,46 +11521,6 @@ function RapportsScreen({
             periode = minLbl === maxLbl ? minLbl : minLbl + " — " + maxLbl;
           }
           return "<h3 style='font-size:12px;color:#07090F;margin:18px 0 6px 0;letter-spacing:2px;text-transform:uppercase;border-left:3px solid #00E5FF;padding-left:8px'>Repartition NC par criticite" + (periode ? " <span style=\"font-size:10px;color:#888;font-weight:400;letter-spacing:1px;text-transform:none\">— " + periode + "</span>" : "") + "</h3>" + "<table style='width:100%;border-collapse:collapse;margin-bottom:14px;font-size:11px'>" + "<tr><th style='background:#0D1825;color:#00E5FF;padding:8px;text-align:left;letter-spacing:1px;text-transform:uppercase;font-size:10px'>Criticite</th><th style='background:#0D1825;color:#00E5FF;padding:8px;text-align:right;letter-spacing:1px;text-transform:uppercase;font-size:10px'>Nombre</th><th style='background:#0D1825;color:#00E5FF;padding:8px;text-align:right;letter-spacing:1px;text-transform:uppercase;font-size:10px'>Pourcentage</th></tr>" + "<tr><td style='padding:7px 8px;border-bottom:1px solid #eee;font-weight:700;color:#FF1744'>● Critique</td><td style='padding:7px 8px;border-bottom:1px solid #eee;text-align:right;font-weight:800'>" + critN + "</td><td style='padding:7px 8px;border-bottom:1px solid #eee;text-align:right;color:#666'>" + pctC + "%</td></tr>" + "<tr><td style='padding:7px 8px;border-bottom:1px solid #eee;font-weight:700;color:#FF6D00'>● Eleve</td><td style='padding:7px 8px;border-bottom:1px solid #eee;text-align:right;font-weight:800'>" + elevN + "</td><td style='padding:7px 8px;border-bottom:1px solid #eee;text-align:right;color:#666'>" + pctE + "%</td></tr>" + "<tr><td style='padding:7px 8px;border-bottom:1px solid #eee;font-weight:700;color:#FFB300'>● Mineur</td><td style='padding:7px 8px;border-bottom:1px solid #eee;text-align:right;font-weight:800'>" + minN + "</td><td style='padding:7px 8px;border-bottom:1px solid #eee;text-align:right;color:#666'>" + pctM + "%</td></tr>" + "<tr><td style='padding:8px;background:#f5f8fc;font-weight:900'>Total NC</td><td style='padding:8px;background:#f5f8fc;text-align:right;font-weight:900'>" + totN + "</td><td style='padding:8px;background:#f5f8fc;text-align:right;font-weight:900'>100%</td></tr>" + "</table>";
-        }() + function () {
-          var accidents = appState && appState.accidents || [];
-          if (accidents.length === 0) return "";
-          var byMet = {},
-            datesByMet = {};
-          accidents.forEach(function (a) {
-            var m = a.statut || "Autre";
-            if (!byMet[m]) {
-              byMet[m] = 0;
-              datesByMet[m] = [];
-            }
-            byMet[m]++;
-            if (a.date) {
-              var d = a.date.split("-");
-              if (d.length === 3) datesByMet[m].push(d[2] + "/" + d[1] + "/" + d[0].slice(-2));
-            }
-          });
-          var metColors = {
-            "Enseignement": "#00E5FF",
-            "Ouvriers": "#FFB300",
-            "Employés": "#D500F9",
-            "Techniciennes de surface": "#1DE9B6",
-            "Puéricultrices": "#FF6D00",
-            "Aides-familiales": "#00C853",
-            "Article 60": "#2979FF",
-            "Autre": "#888"
-          };
-          var sorted = Object.entries(byMet).sort(function (a, b) {
-            return b[1] - a[1];
-          });
-          var tot = accidents.length;
-          var rows = sorted.map(function (e) {
-            var m = e[0],
-              n = e[1],
-              pct = Math.round(n / tot * 100),
-              col = metColors[m] || "#888";
-            var dates = (datesByMet[m] || []).sort().join(", ") || "—";
-            return "<tr><td style='padding:7px 8px;border-bottom:1px solid #eee;font-weight:700;color:" + col + "'>● " + m + "</td><td style='padding:7px 8px;border-bottom:1px solid #eee;text-align:right;font-weight:800'>" + n + "</td><td style='padding:7px 8px;border-bottom:1px solid #eee;text-align:right;color:#666'>" + pct + "%</td><td style='padding:7px 8px;border-bottom:1px solid #eee;font-size:10px;color:#555;white-space:normal'>" + dates + "</td></tr>";
-          }).join("");
-          return "<h3 style='font-size:12px;color:#07090F;margin:18px 0 6px 0;letter-spacing:2px;text-transform:uppercase;border-left:3px solid #FF1744;padding-left:8px'>Repartition accidents par metier</h3>" + "<table style='width:100%;border-collapse:collapse;margin-bottom:14px;font-size:11px'>" + "<tr><th style='background:#0D1825;color:#00E5FF;padding:8px;text-align:left;letter-spacing:1px;text-transform:uppercase;font-size:10px'>Metier</th><th style='background:#0D1825;color:#00E5FF;padding:8px;text-align:right;letter-spacing:1px;text-transform:uppercase;font-size:10px'>Nombre</th><th style='background:#0D1825;color:#00E5FF;padding:8px;text-align:right;letter-spacing:1px;text-transform:uppercase;font-size:10px'>%</th><th style='background:#0D1825;color:#00E5FF;padding:8px;text-align:left;letter-spacing:1px;text-transform:uppercase;font-size:10px'>Dates des accidents</th></tr>" + rows + "<tr><td style='padding:8px;background:#f5f8fc;font-weight:900'>Total accidents</td><td style='padding:8px;background:#f5f8fc;text-align:right;font-weight:900'>" + tot + "</td><td style='padding:8px;background:#f5f8fc;text-align:right;font-weight:900'>100%</td><td style='padding:8px;background:#f5f8fc'></td></tr>" + "</table>";
         }() + "<h3 style='font-size:12px;color:#07090F;margin:18px 0 6px 0;letter-spacing:2px;text-transform:uppercase;border-left:3px solid #00C853;padding-left:8px'>Detail des audits</h3>" + "<table><tr><th>#</th><th>Titre</th><th>Site</th><th>Categ.</th><th>Inspecteur</th><th>Date</th><th>Score</th><th>Penalite</th><th>NC C.</th><th>NC E.</th><th>NC M.</th><th>Statut</th></tr>" + tableRows + "</table>" + "<div class='footer'><div><strong>" + appName + "</strong> · Rapport genere le " + new Date().toLocaleDateString("fr-BE", {
           day: "2-digit",
           month: "long",
@@ -14793,10 +14566,6 @@ function BottomNav({
     f: "actions",
     badge: badge
   }, {
-    k: "accidents",
-    l: "Accidents",
-    f: "accidents"
-  }, {
     k: "rapports",
     l: "Rapports",
     f: "rapports"
@@ -15046,7 +14815,6 @@ function App() {
               delais: c.delais || prev.delais,
               customTemplates: c["customtemplates"] || c["custom_templates"] || c.customTemplates || LS.load("customTemplates") || prev.customTemplates || {},
               siteAddresses: c["siteaddresses"] || c.siteAddresses || prev.siteAddresses || {},
-              accidents: c.accidents || prev.accidents || [],
               heuresPresteesParCat: c["heuresprestees"] || prev.heuresPresteesParCat || {}
             };
           });
@@ -15059,13 +14827,11 @@ function App() {
             if (localCfgFb.sites && localCfgFb.sites.length) setSitesState(localCfgFb.sites);
             if (localCfgFb.config && Object.keys(localCfgFb.config).length) setConfig(localCfgFb.config);
           }
-          var localAcc = LS.load("accidents");
           var localH = LS.load("heuresPresteesParCat");
-          if (localAcc || localH) {
+          if (localH) {
             setAppState(function (prev) {
               return {
                 ...prev,
-                accidents: localAcc || prev.accidents,
                 heuresPresteesParCat: localH || prev.heuresPresteesParCat
               };
             });
@@ -15097,13 +14863,11 @@ function App() {
           if (c.sites && c.sites.length) setSitesState(c.sites);
           if (c.config && Object.keys(c.config).length) setConfig(c.config);
         }
-        var localAccidents = LS.load("accidents");
         var localHeures = LS.load("heuresPresteesParCat");
-        if (localAccidents || localHeures) {
+        if (localHeures) {
           setAppState(function (prev) {
             return {
               ...prev,
-              accidents: localAccidents || prev.accidents,
               heuresPresteesParCat: localHeures || prev.heuresPresteesParCat
             };
           });
@@ -15195,7 +14959,6 @@ function App() {
     if (merged.customTemplates && Object.keys(merged.customTemplates).length > 0) {
       payload["customtemplates"] = merged.customTemplates;
     }
-    if (merged.accidents) payload["accidents"] = merged.accidents;
     if (merged.heuresPresteesParCat) payload["heuresprestees"] = merged.heuresPresteesParCat;
     try {
       await supa.upsert("app_config", payload);
@@ -15203,7 +14966,6 @@ function App() {
       console.error("appState save error:", e);
     }
     // Also save to localStorage as backup
-    if (merged.accidents) LS.save("accidents", merged.accidents);
     if (merged.heuresPresteesParCat) LS.save("heuresPresteesParCat", merged.heuresPresteesParCat);
     LS.save("appState", merged);
     LS.save("customTemplates", merged.customTemplates || {});
@@ -15784,11 +15546,6 @@ function App() {
     config: config,
     onConfigUpdate: saveConfig,
     user: user
-  }), screen === "accidents" && /*#__PURE__*/React.createElement(AccidentScreen, {
-    appState: appState,
-    onAppStateUpdate: handleAppStateUpdate,
-    sitesState: sitesState,
-    config: config
   }), screen === "rapports" && /*#__PURE__*/React.createElement(RapportsScreen, {
     inspections: inspections,
     onDelete: deleteIns,
