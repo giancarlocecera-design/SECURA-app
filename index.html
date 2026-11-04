@@ -74,18 +74,79 @@ function mapInspection(ins) {
   if (ins.archived !== undefined) m["archived"] = ins.archived;
   return m;
 }
+/* Authentification Supabase.
+   Le contrôle du mot de passe se faisait dans le navigateur, et la clé
+   publique servait d'autorisation : n'importe qui pouvait interroger la base
+   sans passer par l'écran de connexion. Les appels portent désormais le jeton
+   de session de l'utilisateur connecté ; la clé publique ne sert plus qu'à
+   identifier le projet. */
+let SUPA_TOKEN = null;
+let SUPA_REFRESH = null;
+
+async function securaConnexion(email, motDePasse) {
+  try {
+    const r = await fetch(SUPA_URL + "/auth/v1/token?grant_type=password", {
+      method: "POST",
+      headers: { "apikey": SUPA_KEY, "Content-Type": "application/json" },
+      body: JSON.stringify({ email: email, password: motDePasse })
+    });
+    if (!r.ok) return null;
+    const d = await r.json();
+    SUPA_TOKEN = d.access_token || null;
+    SUPA_REFRESH = d.refresh_token || null;
+    return SUPA_TOKEN ? (d.user || {}) : null;
+  } catch (e) { return null; }
+}
+
+async function securaRenouvelle() {
+  if (!SUPA_REFRESH) return false;
+  try {
+    const r = await fetch(SUPA_URL + "/auth/v1/token?grant_type=refresh_token", {
+      method: "POST",
+      headers: { "apikey": SUPA_KEY, "Content-Type": "application/json" },
+      body: JSON.stringify({ refresh_token: SUPA_REFRESH })
+    });
+    if (!r.ok) return false;
+    const d = await r.json();
+    if (!d.access_token) return false;
+    SUPA_TOKEN = d.access_token;
+    SUPA_REFRESH = d.refresh_token || SUPA_REFRESH;
+    return true;
+  } catch (e) { return false; }
+}
+
+function securaEntetes(extra) {
+  const h = {
+    "apikey": SUPA_KEY,
+    "Authorization": "Bearer " + (SUPA_TOKEN || SUPA_KEY)
+  };
+  if (extra) for (const k in extra) h[k] = extra[k];
+  return h;
+}
+
+/* Le jeton expire au bout d'une heure. Sur un refus d'autorisation, on le
+   renouvelle une fois et on rejoue la requête : une visite longue ne doit pas
+   se solder par une perte de saisie. */
+async function securaFetch(url, opts, extra) {
+  opts = opts || {};
+  opts.headers = securaEntetes(extra);
+  let r = await fetch(url, opts);
+  if ((r.status === 401 || r.status === 403) && SUPA_REFRESH) {
+    if (await securaRenouvelle()) {
+      opts.headers = securaEntetes(extra);
+      r = await fetch(url, opts);
+    }
+  }
+  return r;
+}
+
 const supa = {
   async get(table, opts) {
     let url = SUPA_URL + "/rest/v1/" + table + "?select=*";
     if (opts && opts.eq) url += "&" + opts.eq.col + "=eq." + opts.eq.val;
     if (opts && opts.order) url += "&order=" + opts.order;
     if (opts && opts.limit) url += "&limit=" + opts.limit;
-    const r = await fetch(url, {
-      headers: {
-        "apikey": SUPA_KEY,
-        "Authorization": "Bearer " + SUPA_KEY
-      }
-    });
+    const r = await securaFetch(url, { method: "GET" });
     if (!r.ok) {
       console.error("Supabase GET error:", table, r.status);
       return null;
@@ -93,43 +154,29 @@ const supa = {
     return r.json();
   },
   async upsert(table, data) {
-    const r = await fetch(SUPA_URL + "/rest/v1/" + table, {
+    const r = await securaFetch(SUPA_URL + "/rest/v1/" + table, {
       method: "POST",
-      headers: {
-        "apikey": SUPA_KEY,
-        "Authorization": "Bearer " + SUPA_KEY,
-        "Content-Type": "application/json",
-        "Prefer": "resolution=merge-duplicates,return=minimal"
-      },
       body: JSON.stringify(data)
+    }, {
+      "Content-Type": "application/json",
+      "Prefer": "resolution=merge-duplicates,return=minimal"
     });
     return r.ok;
   },
   async del(table, id) {
-    const r = await fetch(SUPA_URL + "/rest/v1/" + table + "?id=eq." + String(id), {
-      method: "DELETE",
-      headers: {
-        "apikey": SUPA_KEY,
-        "Authorization": "Bearer " + SUPA_KEY,
-        "Content-Type": "application/json"
-      }
-    });
+    const r = await securaFetch(SUPA_URL + "/rest/v1/" + table + "?id=eq." + String(id), {
+      method: "DELETE"
+    }, { "Content-Type": "application/json" });
     if (!r.ok) {
       console.error("DEL failed", table, id, r.status);
     }
     return r.ok;
   },
   async patch(table, id, data) {
-    const r = await fetch(SUPA_URL + "/rest/v1/" + table + "?id=eq." + id, {
+    const r = await securaFetch(SUPA_URL + "/rest/v1/" + table + "?id=eq." + id, {
       method: "PATCH",
-      headers: {
-        "apikey": SUPA_KEY,
-        "Authorization": "Bearer " + SUPA_KEY,
-        "Content-Type": "application/json",
-        "Prefer": "return=minimal"
-      },
       body: JSON.stringify(data)
-    });
+    }, { "Content-Type": "application/json", "Prefer": "return=minimal" });
     return r.ok;
   }
 };
@@ -3631,11 +3678,34 @@ const CAT_META = {
 // ═══════════════════════════════════════════════════════════════════════
 // USERS & SITES
 // ═══════════════════════════════════════════════════════════════════════
-// Comptes de démonstration retirés : la connexion s'appuie uniquement sur la liste des responsables enregistrée en base.
-const USERS = [];
+/* Les quatre comptes de démonstration, mots de passe « 1234 » inscrits dans
+   le code, ont été supprimés le 4 novembre 2026. L'application n'a que deux
+   utilisateurs, qui s'authentifient auprès de Supabase ; cette table ne sert
+   plus qu'à l'affichage du nom et des initiales. Aucun mot de passe n'y
+   figure. */
+const SECURA_PROFILS = {
+  "giancarlo.cecera@villedefontaine.be": { id: 1, nom: "Giancarlo Cecera", role: "Admin", avatar: "GC" },
+  "francis.gilot@villedefontaine.be": { id: 2, nom: "Francis Gilot", role: "Admin", avatar: "FG" }
+};
 const SITES_DEFAULT = ["Hôpital central", "Usine Delta", "Résidence Les Tilleuls", "Bureaux sud", "Atelier nord", "Siège logistique"];
 let SITES = [...SITES_DEFAULT];
-const RESPONSABLES_DEFAULT = [];
+const RESPONSABLES_DEFAULT = [{
+  nom: "Marc Dubois",
+  email: "m.dubois@corp.be",
+  role: "Admin"
+}, {
+  nom: "Sophie Martin",
+  email: "s.martin@corp.be",
+  role: "Inspecteur"
+}, {
+  nom: "Louis Bernard",
+  email: "l.bernard@corp.be",
+  role: "Inspecteur"
+}, {
+  nom: "Alice Leroy",
+  email: "a.leroy@corp.be",
+  role: "Responsable"
+}];
 let RESPONSABLES = [...RESPONSABLES_DEFAULT];
 
 // ═══════════════════════════════════════════════════════════════════════
@@ -3816,25 +3886,25 @@ function LoginScreen({
   const [pass, setPass] = useState("");
   const [err, setErr] = useState("");
   const [load, setLoad] = useState(false);
-  // Merge static USERS with dynamic respsState users
-  const allUsers = (users && users.length && typeof users[0] === "object" && users[0].email ? users : []).filter(function (u) {
-    return u && u.nom && u.email;
-  });
   const handle = () => {
     setLoad(true);
     setErr("");
-    setTimeout(() => {
-      var em = email.trim().toLowerCase();
-      var pw = pass.trim();
-      const u = allUsers.find(function (u) {
-        var upw = (u.pass || u.password || u.mdp || "").trim();
-        return u.email && u.email.trim().toLowerCase() === em && upw && upw === pw;
-      });
-      if (u) onLogin(u);else {
+    (async function () {
+      const em = email.trim().toLowerCase();
+      const compte = await securaConnexion(em, pass.trim());
+      if (!compte) {
         setErr("Identifiants incorrects.");
         setLoad(false);
+        return;
       }
-    }, 700);
+      const p = SECURA_PROFILS[em] || {
+        id: 0,
+        nom: em,
+        role: "Admin",
+        avatar: em.slice(0, 2).toUpperCase()
+      };
+      onLogin({ id: p.id, nom: p.nom, role: p.role, avatar: p.avatar, email: em });
+    })();
   };
   return /*#__PURE__*/React.createElement("div", {
     style: {
@@ -11764,11 +11834,9 @@ function SettingsScreen({
     const nom = (newRespRef.current ? newRespRef.current.value : newResp).trim();
     if (!nom) return;
     const email = (newRespEmailRef.current ? newRespEmailRef.current.value : newRespEmail).trim() || nom.toLowerCase().replace(/ /g, ".") + "." + Date.now() + "@secura.be";
-    const pass = (newRespPassRef.current ? newRespPassRef.current.value : newRespPass).trim();
     const newUser = {
       nom,
       email,
-      pass,
       role: newRespRole,
       avatar: nom.split(" ").map(function (n) {
         return n[0];
@@ -11823,7 +11891,6 @@ function SettingsScreen({
       return {
         nom: editForm.nom.trim(),
         email: editForm.email.trim(),
-        password: editForm.password.trim(),
         role: editForm.role
       };
     });
@@ -12289,7 +12356,7 @@ function SettingsScreen({
     ref: newRespEmailRef,
     defaultValue: "",
     onChange: e => setNewRespEmail(e.target.value),
-    placeholder: "Email (ex: prenom.nom@villedefontaine.be)",
+    placeholder: "Email (ex: nom@corp.be)",
     style: {
       ...S.input,
       marginBottom: 8,
@@ -15320,8 +15387,8 @@ function App() {
         // ── Garde-fou multi-audits : détecter une modification concurrente ──
         if (ins.updated_at) {
           try {
-            var chk = await fetch(SUPA_URL + "/rest/v1/inspections?id=eq." + String(ins.id) + "&select=updated_at", {
-              headers: { "apikey": SUPA_KEY, "Authorization": "Bearer " + SUPA_KEY }
+            var chk = await securaFetch(SUPA_URL + "/rest/v1/inspections?id=eq." + String(ins.id) + "&select=updated_at", {
+              method: "GET"
             });
             if (chk.ok) {
               var chkArr = await chk.json();
@@ -15347,16 +15414,10 @@ function App() {
         if (ins.sigInspecteur) patchBody["sig_inspecteur"] = ins.sigInspecteur;
         if (ins.sigResponsable) patchBody["sig_responsable"] = ins.sigResponsable;
         if (ins.items) patchBody["items"] = ins.items;
-        var r = await fetch(SUPA_URL + "/rest/v1/inspections?id=eq." + String(ins.id), {
+        var r = await securaFetch(SUPA_URL + "/rest/v1/inspections?id=eq." + String(ins.id), {
           method: "PATCH",
-          headers: {
-            "apikey": SUPA_KEY,
-            "Authorization": "Bearer " + SUPA_KEY,
-            "Content-Type": "application/json",
-            "Prefer": "return=minimal"
-          },
           body: JSON.stringify(patchBody)
-        });
+        }, { "Content-Type": "application/json", "Prefer": "return=minimal" });
         if (!r.ok) {
           var errText = await r.text();
           console.error("PATCH failed:", r.status, errText);
@@ -15440,18 +15501,12 @@ function App() {
       } : i;
     }));
     try {
-      const r = await fetch(SUPA_URL + "/rest/v1/inspections?id=eq." + id, {
+      const r = await securaFetch(SUPA_URL + "/rest/v1/inspections?id=eq." + id, {
         method: "PATCH",
-        headers: {
-          "apikey": SUPA_KEY,
-          "Authorization": "Bearer " + SUPA_KEY,
-          "Content-Type": "application/json",
-          "Prefer": "return=minimal"
-        },
         body: JSON.stringify({
           archived: archived
         })
-      });
+      }, { "Content-Type": "application/json", "Prefer": "return=minimal" });
       if (!r.ok) console.error("Archive error:", r.status, await r.text());else console.log("Archive OK:", id, archived);
     } catch (e) {
       console.error("Archive exception:", e);
@@ -15469,20 +15524,14 @@ function App() {
       } : i;
     }));
     try {
-      const r = await fetch(SUPA_URL + "/rest/v1/inspections?id=eq." + id, {
+      const r = await securaFetch(SUPA_URL + "/rest/v1/inspections?id=eq." + id, {
         method: "PATCH",
-        headers: {
-          "apikey": SUPA_KEY,
-          "Authorization": "Bearer " + SUPA_KEY,
-          "Content-Type": "application/json",
-          "Prefer": "return=minimal"
-        },
         body: JSON.stringify({
           statut: "En cours",
           sig_inspecteur: null,
           sig_responsable: null
         })
-      });
+      }, { "Content-Type": "application/json", "Prefer": "return=minimal" });
       if (!r.ok) console.error("Unvalidate error:", r.status, await r.text());else console.log("Unvalidate OK:", id);
     } catch (e) {
       console.error("Unvalidate exception:", e);

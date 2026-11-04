@@ -234,7 +234,7 @@ async function loadRapport() {
   document.title = 'SECURA — ' + decodeURIComponent(site) + (refEch ? ' — ' + decodeURIComponent(refEch) : '');
 
   try {
-    var url = SUPA_URL + '/rest/v1/inspections?site=eq.' + encodeURIComponent(site) + '&order=date.desc&limit=20&select=*';
+    var url = SUPA_URL + '/rest/v1/inspections?site=eq.' + encodeURIComponent(site) + '&order=date.desc&limit=20&select=id,titre,site,categorie,inspecteur,date,statut,score,items,sig_inspecteur,sig_responsable,sitePhoto,refEchelle';
     var r = await fetch(url, {
       headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY }
     });
