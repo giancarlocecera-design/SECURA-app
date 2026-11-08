@@ -83,6 +83,41 @@ function mapInspection(ins) {
 let SUPA_TOKEN = null;
 let SUPA_REFRESH = null;
 
+/* La session est conservée sur l'appareil, comme le fait EKIPRO. Sans cela,
+   il faudrait se reconnecter à chaque rechargement de page, et l'application
+   ne démarrerait pas hors connexion — or les visites se font souvent dans des
+   bâtiments mal couverts. */
+const SECURA_SESSION = "secura_session";
+
+function securaMemoriseSession(profil) {
+  try {
+    let p = profil;
+    if (p === undefined) {
+      const b = localStorage.getItem(SECURA_SESSION);
+      p = b ? (JSON.parse(b).p || null) : null;
+    }
+    localStorage.setItem(SECURA_SESSION, JSON.stringify({ t: SUPA_TOKEN, r: SUPA_REFRESH, p: p }));
+  } catch (e) {}
+}
+
+function securaLitSession() {
+  try {
+    const b = localStorage.getItem(SECURA_SESSION);
+    if (!b) return null;
+    const d = JSON.parse(b);
+    if (!d || !d.r || !d.p) return null;
+    SUPA_TOKEN = d.t || null;
+    SUPA_REFRESH = d.r || null;
+    return d.p;
+  } catch (e) { return null; }
+}
+
+function securaOublieSession() {
+  SUPA_TOKEN = null;
+  SUPA_REFRESH = null;
+  try { localStorage.removeItem(SECURA_SESSION); } catch (e) {}
+}
+
 async function securaConnexion(email, motDePasse) {
   try {
     const r = await fetch(SUPA_URL + "/auth/v1/token?grant_type=password", {
@@ -106,11 +141,16 @@ async function securaRenouvelle() {
       headers: { "apikey": SUPA_KEY, "Content-Type": "application/json" },
       body: JSON.stringify({ refresh_token: SUPA_REFRESH })
     });
-    if (!r.ok) return false;
+    /* Un refus du serveur signifie que la session n'est plus valable : on
+       l'efface, l'écran de connexion reviendra au prochain démarrage. Une
+       erreur réseau, elle, ne prouve rien — on garde la session pour que
+       l'application reste utilisable hors connexion. */
+    if (!r.ok) { securaOublieSession(); return false; }
     const d = await r.json();
-    if (!d.access_token) return false;
+    if (!d.access_token) { securaOublieSession(); return false; }
     SUPA_TOKEN = d.access_token;
     SUPA_REFRESH = d.refresh_token || SUPA_REFRESH;
+    securaMemoriseSession();
     return true;
   } catch (e) { return false; }
 }
@@ -3907,7 +3947,9 @@ function LoginScreen({
         role: "Admin",
         avatar: em.slice(0, 2).toUpperCase()
       };
-      onLogin({ id: p.id, nom: p.nom, role: p.role, avatar: p.avatar, email: em });
+      const profil = { id: p.id, nom: p.nom, role: p.role, avatar: p.avatar, email: em };
+      securaMemoriseSession(profil);
+      onLogin(profil);
     })();
   };
   return /*#__PURE__*/React.createElement("div", {
@@ -14660,7 +14702,9 @@ function BottomNav({
 // APP ROOT
 // ═══════════════════════════════════════════════════════════════════════
 function App() {
-  const [user, setUser] = useState(null);
+  // La session est relue une seule fois, avant le premier affichage : si elle
+  // existe, l'application s'ouvre directement, sans repasser par la connexion.
+  const [user, setUser] = useState(function () { return securaLitSession(); });
   const [screen, setScreen] = useState("dashboard");
   const [sub, setSub] = useState(null);
   const [openIns, setOpenIns] = useState(null);
@@ -15562,6 +15606,7 @@ function App() {
   }), screen === "settings" && /*#__PURE__*/React.createElement(SettingsScreen, {
     user: user,
     onLogout: () => {
+      securaOublieSession();
       setUser(null);
       setScreen("dashboard");
     },
