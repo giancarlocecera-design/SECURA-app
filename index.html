@@ -14723,8 +14723,14 @@ function App() {
     };
   }, []);
 
-  // ── Supabase: load on mount ──────────────────────────────────
+  // ── Supabase: chargement après ouverture de session ──────────
+  // Ce chargement s'exécutait au montage du composant, donc avant la
+  // connexion : les requêtes partaient sans jeton et la base les refusait.
+  // Tant qu'il n'y a pas de session, on ne demande rien.
   React.useEffect(function () {
+    // Sans session, il n'y a rien à charger : on déverrouille l'affichage pour
+    // que l'écran de connexion apparaisse, et on attend la connexion.
+    if (!user) { setDbReady(true); return; }
     async function loadFromDB() {
       try {
         // Load inspections with limit to avoid 500 errors (photos are heavy)
@@ -14877,7 +14883,7 @@ function App() {
       }
     }
     loadFromDB().then(function () { flushPending(); });
-  }, []);
+  }, [user]);
   const [config, setConfig] = useState({
     appName: "SECURA",
     accentColor: "#00E5FF",
